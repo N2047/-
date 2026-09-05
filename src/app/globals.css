@@ -109,6 +109,90 @@ html[data-card-zoom="true"] [data-a11y-card="true"]:focus-within {
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
 }
 
+/* DARK MODE COMPONENT OVERRIDES */
+html[data-dark-mode="true"] .bg-white,
+html[data-theme="dark"] .bg-white {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+}
+
+html[data-dark-mode="true"] .bg-slate-50,
+html[data-theme="dark"] .bg-slate-50 {
+  background-color: #090d16 !important;
+  color: #f1f5f9 !important;
+}
+
+html[data-dark-mode="true"] .bg-slate-100,
+html[data-theme="dark"] .bg-slate-100 {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+}
+
+html[data-dark-mode="true"] .text-slate-900,
+html[data-dark-mode="true"] .text-slate-800,
+html[data-theme="dark"] .text-slate-900,
+html[data-theme="dark"] .text-slate-800 {
+  color: #f8fafc !important;
+}
+
+html[data-dark-mode="true"] .text-slate-700,
+html[data-dark-mode="true"] .text-slate-600,
+html[data-theme="dark"] .text-slate-700,
+html[data-theme="dark"] .text-slate-600 {
+  color: #cbd5e1 !important;
+}
+
+html[data-dark-mode="true"] .border-slate-200,
+html[data-dark-mode="true"] .border-slate-300,
+html[data-theme="dark"] .border-slate-200,
+html[data-theme="dark"] .border-slate-300 {
+  border-color: #334155 !important;
+}
+
+html[data-dark-mode="true"] input,
+html[data-dark-mode="true"] select,
+html[data-dark-mode="true"] textarea,
+html[data-theme="dark"] input,
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea {
+  background-color: #1e293b !important;
+  color: #ffffff !important;
+  border-color: #475569 !important;
+}
+
+html[data-dark-mode="true"] table,
+html[data-theme="dark"] table {
+  color: #f8fafc !important;
+}
+
+html[data-dark-mode="true"] tr:hover,
+html[data-theme="dark"] tr:hover {
+  background-color: #1e293b !important;
+}
+
+/* HIGH CONTRAST OVERRIDES */
+html[data-color-mode="high-contrast"] body {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+html[data-color-mode="high-contrast"] .bg-white,
+html[data-color-mode="high-contrast"] .bg-slate-50,
+html[data-color-mode="high-contrast"] .bg-slate-100 {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border-color: #ffffff !important;
+}
+
+html[data-color-mode="high-contrast"] a {
+  color: #ffff00 !important;
+  text-decoration: underline !important;
+}
+
+html[data-color-mode="high-contrast"] button {
+  border: 2px solid #ffffff !important;
+}
+
 /* Accessible Skip Link */
 .skip-link {
   position: absolute;
