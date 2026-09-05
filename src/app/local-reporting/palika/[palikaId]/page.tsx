@@ -325,11 +325,64 @@ export default function AnnualReportFormPage({
       </section>
 
       {/* Main Layout: Left Stepper Sidebar + Right Active Section Content */}
-      <main id="main-content" tabIndex={-1} className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 focus:outline-hidden">
+      <main id="main-content" tabIndex={-1} className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 pb-28 lg:pb-8 focus:outline-hidden">
+        
+        {/* MOBILE SECTION SELECTOR & PROGRESS (block lg:hidden) */}
+        <div className="block lg:hidden bg-white rounded-xl p-3 border border-slate-200 shadow-xs mb-4">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs font-bold text-blue-900 truncate">
+              खण्ड {activeSection}/१३: {SECTIONS.find((s) => s.id === activeSection)?.title}
+            </span>
+            <span className="text-[11px] font-bold text-slate-500 shrink-0 ml-2">
+              {Math.round((activeSection / 13) * 100)}% पूरा
+            </span>
+          </div>
+          {/* Progress bar */}
+          <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden mb-2.5">
+            <div
+              className="bg-blue-600 h-full transition-all duration-300"
+              style={{ width: `${(activeSection / 13) * 100}%` }}
+            />
+          </div>
+          {/* Dropdown selector */}
+          <div className="flex items-center gap-2">
+            <select
+              aria-label="प्रतिवेदन खण्ड छान्नुहोस्"
+              value={activeSection}
+              onChange={(e) => setActiveSection(Number(e.target.value))}
+              className="flex-1 bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-blue-600 min-h-[42px]"
+            >
+              {SECTIONS.map((sec) => (
+                <option key={sec.id} value={sec.id}>
+                  {sec.title} ({sec.short})
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              disabled={activeSection === 1}
+              onClick={() => setActiveSection((s) => Math.max(1, s - 1))}
+              className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg disabled:opacity-40 min-h-[42px] flex items-center justify-center cursor-pointer"
+              title="अघिल्लो खण्ड"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              disabled={activeSection === 13}
+              onClick={() => setActiveSection((s) => Math.min(13, s + 1))}
+              className="px-3 py-2 bg-blue-900 hover:bg-blue-800 text-white rounded-lg disabled:opacity-40 min-h-[42px] flex items-center justify-center cursor-pointer"
+              title="अर्को खण्ड"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
           
-          {/* SECTION STEPPER SIDEBAR */}
-          <aside className="lg:col-span-1 bg-white rounded-2xl p-4 border border-slate-200 shadow-xs sticky top-24">
+          {/* DESKTOP SECTION STEPPER SIDEBAR (hidden lg:block) */}
+          <aside className="hidden lg:block lg:col-span-1 bg-white rounded-2xl p-4 border border-slate-200 shadow-xs sticky top-24">
             <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 px-2">
               प्रतिवेदन खण्डहरू (Sections)
             </h2>
@@ -339,7 +392,7 @@ export default function AnnualReportFormPage({
                   key={sec.id}
                   type="button"
                   onClick={() => setActiveSection(sec.id)}
-                  className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-bold flex items-center justify-between transition-all ${
+                  className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-bold flex items-center justify-between transition-all cursor-pointer ${
                     activeSection === sec.id
                       ? "bg-blue-900 text-white shadow-xs"
                       : "hover:bg-slate-100 text-slate-700"
@@ -364,7 +417,7 @@ export default function AnnualReportFormPage({
           </aside>
 
           {/* ACTIVE SECTION FORM CONTENT */}
-          <div className="lg:col-span-3 bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-xs">
+          <div className="lg:col-span-3 bg-white rounded-2xl p-3.5 sm:p-6 lg:p-8 border border-slate-200 shadow-xs">
             
             {/* SECTION 1: Demographics Q1 - Q9 */}
             {activeSection === 1 && (
@@ -2014,6 +2067,54 @@ export default function AnnualReportFormPage({
           </div>
         </div>
       </main>
+
+      {/* MOBILE STICKY BOTTOM BAR (block lg:hidden) */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-300 px-3 py-2.5 shadow-2xl flex items-center justify-between gap-2 lg:hidden">
+        <button
+          type="button"
+          disabled={activeSection === 1}
+          onClick={() => {
+            setActiveSection((s) => Math.max(1, s - 1));
+            window.scrollTo({ top: 120, behavior: 'smooth' });
+          }}
+          className="px-3 py-2 bg-slate-100 text-slate-700 rounded-lg text-xs font-bold disabled:opacity-30 flex items-center gap-1 min-h-[42px] cursor-pointer"
+        >
+          <ChevronLeft className="w-4 h-4" />
+          <span>अघिल्लो</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={handleSaveDraft}
+          className="px-3 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-xs min-h-[42px] cursor-pointer"
+        >
+          <Save className="w-4 h-4" />
+          <span>मस्यौदा सेभ</span>
+        </button>
+
+        {activeSection < 13 ? (
+          <button
+            type="button"
+            onClick={() => {
+              setActiveSection((s) => Math.min(13, s + 1));
+              window.scrollTo({ top: 120, behavior: 'smooth' });
+            }}
+            className="px-3.5 py-2 bg-blue-900 hover:bg-blue-800 text-white rounded-lg text-xs font-bold flex items-center gap-1 min-h-[42px] cursor-pointer shadow-xs"
+          >
+            <span>अर्को खण्ड</span>
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={handleSubmitFinal}
+            className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold flex items-center gap-1 shadow-md min-h-[42px] cursor-pointer"
+          >
+            <Send className="w-4 h-4" />
+            <span>सबमिट</span>
+          </button>
+        )}
+      </div>
 
       <Footer lang={lang} />
     </div>
