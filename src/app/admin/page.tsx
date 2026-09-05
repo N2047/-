@@ -27,10 +27,12 @@ import {
   Edit3,
   Plus,
   Settings,
-  Type
+  Type,
+  PhoneCall
 } from "lucide-react";
 import Link from "next/link";
 import FormConfigModal from "@/components/admin/FormConfigModal";
+import AdminContactManager from "@/components/admin/AdminContactManager";
 
 interface ReportReviewItem {
   palikaId: string;
@@ -53,6 +55,9 @@ export default function AdminPage() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [activeReviewItem, setActiveReviewItem] = useState<ReportReviewItem | null>(null);
   const [feedbackNote, setFeedbackNote] = useState<string>("");
+
+  // Main Dashboard Tab: reports review or contact management
+  const [activeAdminTab, setActiveAdminTab] = useState<"reports" | "contacts">("reports");
 
   // Form Config Modal state for Super Admin
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
@@ -270,7 +275,7 @@ export default function AdminPage() {
       <main id="main-content" tabIndex={-1} className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 focus:outline-hidden">
         
         {/* Admin Header */}
-        <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-xs mb-8 flex flex-wrap items-center justify-between gap-4">
+        <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-xs mb-6 flex flex-wrap items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-2">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-100 text-amber-900 rounded-full text-xs font-bold uppercase tracking-wider border border-amber-300">
@@ -279,65 +284,107 @@ export default function AdminPage() {
               </span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black text-slate-900">
-              कोशी प्रदेश १३७ स्थानीय तह प्रतिवेदन व्यवस्थापन ड्यासबोर्ड
+              कोशी प्रदेश अपाङ्गता सूचना केन्द्र - प्रशासकीय ड्यासबोर्ड
             </h1>
             <p className="text-xs sm:text-sm text-slate-600 mt-1">
-              सबै स्थानीय तहहरूको स्थिति अनुगमन, पेश भएका प्रतिवेदनहरूको समीक्षा, स्वीकृति तथा संशोधन व्यवस्थापन।
+              स्थानीय तहहरूको प्रतिवेदन अनुगमन, फारम सम्पादन, तथा प्रदेश र स्थानीय तहको सम्पर्क व्यवस्थापन।
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                setConfigModalTab("title");
-                setIsConfigModalOpen(true);
-              }}
-              className="px-3 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
-              title="फारमको मुख्य नाम सम्पादन गर्नुहोस्"
-            >
-              <Type className="w-3.5 h-3.5 text-amber-300" />
-              <span>फारमको नाम सम्पादन</span>
-            </button>
+          {activeAdminTab === "reports" && (
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setConfigModalTab("title");
+                  setIsConfigModalOpen(true);
+                }}
+                className="px-3 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
+                title="फारमको मुख्य नाम सम्पादन गर्नुहोस्"
+              >
+                <Type className="w-3.5 h-3.5 text-amber-300" />
+                <span>फारमको नाम सम्पादन</span>
+              </button>
 
-            <button
-              type="button"
-              onClick={() => {
-                setConfigModalTab("add");
-                setIsConfigModalOpen(true);
-              }}
-              className="px-3 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
-              title="नयाँ फारम वा खण्ड थप गर्नुहोस्"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>फारम थप (Add Form)</span>
-            </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setConfigModalTab("add");
+                  setIsConfigModalOpen(true);
+                }}
+                className="px-3 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
+                title="नयाँ फारम वा खण्ड थप गर्नुहोस्"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>फारम थप (Add Form)</span>
+              </button>
 
-            <button
-              type="button"
-              onClick={() => {
-                setConfigModalTab("sections");
-                setIsConfigModalOpen(true);
-              }}
-              className="px-3 py-2 rounded-xl bg-purple-800 hover:bg-purple-700 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
-              title="खण्डहरूको नाम सच्याउने वा हटाउने"
-            >
-              <Settings className="w-3.5 h-3.5" />
-              <span>खण्ड व्यवस्थापन</span>
-            </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setConfigModalTab("sections");
+                  setIsConfigModalOpen(true);
+                }}
+                className="px-3 py-2 rounded-xl bg-purple-800 hover:bg-purple-700 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
+                title="खण्डहरूको नाम सच्याउने वा हटाउने"
+              >
+                <Settings className="w-3.5 h-3.5" />
+                <span>खण्ड व्यवस्थापन</span>
+              </button>
 
-            <button
-              type="button"
-              onClick={() => alert("डाटाबेसको पूर्ण तथ्यांक सुरक्षित रूपमा ब्याकअप भयो।")}
-              className="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>Export</span>
-            </button>
-          </div>
+              <button
+                type="button"
+                onClick={() => alert("डाटाबेसको पूर्ण तथ्यांक सुरक्षित रूपमा ब्याकअप भयो।")}
+                className="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Export</span>
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* Status Metrics Bar */}
+        {/* Top-Level Admin Navigation Tabs */}
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-8 border-b border-slate-200 pb-3">
+          <button
+            type="button"
+            onClick={() => setActiveAdminTab("reports")}
+            className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 cursor-pointer transition-all ${
+              activeAdminTab === "reports"
+                ? "bg-blue-900 text-white shadow-md ring-2 ring-blue-700/50"
+                : "bg-white text-slate-700 hover:bg-slate-100 border border-slate-300"
+            }`}
+          >
+            <Building2 className="w-4 h-4" />
+            <span>१३७ स्थानीय तह प्रतिवेदन समीक्षा</span>
+            <span className={`text-[11px] px-2 py-0.5 rounded-full ${
+              activeAdminTab === "reports" ? "bg-blue-800 text-blue-100" : "bg-slate-100 text-slate-700"
+            }`}>
+              १३७
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveAdminTab("contacts")}
+            className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 cursor-pointer transition-all ${
+              activeAdminTab === "contacts"
+                ? "bg-blue-900 text-white shadow-md ring-2 ring-blue-700/50"
+                : "bg-white text-slate-700 hover:bg-slate-100 border border-slate-300"
+            }`}
+          >
+            <PhoneCall className={`w-4 h-4 ${activeAdminTab === "contacts" ? "text-emerald-300" : "text-emerald-600"}`} />
+            <span>सम्पर्क व्यवस्थापन (Contact Management)</span>
+            <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900 font-bold border border-emerald-300">
+              नयाँ
+            </span>
+          </button>
+        </div>
+
+        {/* Tab 1: Reports Dashboard */}
+        {activeAdminTab === "reports" && (
+          <>
+            {/* Status Metrics Bar */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
           <div className="bg-white rounded-2xl p-4 border border-blue-200 shadow-xs">
             <span className="text-xs font-bold text-slate-500 block">कुल स्थानीय तह</span>
@@ -496,6 +543,13 @@ export default function AdminPage() {
             </table>
           </div>
         </section>
+        </>
+      )}
+
+      {/* Tab 2: Contact Directory Management */}
+      {activeAdminTab === "contacts" && (
+        <AdminContactManager />
+      )}
 
       </main>
 
