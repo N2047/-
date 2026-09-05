@@ -19,7 +19,8 @@ import {
   Volume2,
   Moon,
   Sun,
-  Sliders
+  Sliders,
+  PhoneCall
 } from "lucide-react";
 import { translations, Language } from "@/lib/translations";
 import { useAuth } from "@/lib/authContext";
@@ -56,6 +57,7 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
     { label: t.nav_news, href: "/news", icon: Newspaper },
     { label: t.nav_search, href: "/search", icon: Search },
     { label: t.nav_about, href: "/about", icon: Info },
+    { label: t.nav_contact, href: "/contact", icon: PhoneCall },
     { label: t.nav_admin, href: "/admin", icon: Lock, isAction: true },
   ];
 

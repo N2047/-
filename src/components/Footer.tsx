@@ -67,6 +67,11 @@ export default function Footer({ lang }: FooterProps) {
                   हाम्रो बारेमा
                 </Link>
               </li>
+              <li>
+                <Link href="/contact" className="hover:text-amber-300 transition-colors font-semibold text-amber-300">
+                  सम्पर्क तथा सहायता कक्ष
+                </Link>
+              </li>
             </ul>
           </div>
 

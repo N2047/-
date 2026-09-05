@@ -22,6 +22,7 @@ export const translations = {
     nav_news: "सूचना/समाचार",
     nav_search: "खोजी",
     nav_about: "हाम्रो बारेमा",
+    nav_contact: "सम्पर्क",
     nav_admin: "Admin Login",
     
     // Hero
@@ -80,6 +81,7 @@ export const translations = {
     nav_news: "News & Notices",
     nav_search: "Search",
     nav_about: "About Us",
+    nav_contact: "Contact",
     nav_admin: "Admin Login",
     
     // Hero
