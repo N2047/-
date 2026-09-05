@@ -15,15 +15,23 @@ import {
   Clock, 
   Filter,
   ExternalLink,
-  Info
+  Info,
+  Edit3,
+  ShieldCheck,
+  Lock,
+  UserCheck
 } from "lucide-react";
 import Link from "next/link";
+import { useAuth } from "@/lib/authContext";
 
 export default function LocalReportingPage() {
   const [lang, setLang] = useState<Language>("ne");
   const [selectedDistrictId, setSelectedDistrictId] = useState<string>("taplejung");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
+
+  const { user, isAuthenticated } = useAuth();
+  const isSuperAdmin = user?.role === "provincial_admin";
 
   const t = translations[lang];
 
@@ -287,10 +295,35 @@ export default function LocalReportingPage() {
                   <div className="flex items-center gap-2 pt-3 border-t border-slate-200/80">
                     <Link
                       href={`/local-reporting/palika/${palika.id}`}
-                      className="flex-1 py-2 px-3 rounded-lg bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-colors shadow-xs"
+                      className={`flex-1 py-2 px-3 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition-colors shadow-xs ${
+                        isSuperAdmin
+                          ? "bg-amber-500 hover:bg-amber-400 text-slate-950"
+                          : user?.palikaId === palika.id
+                          ? "bg-emerald-700 hover:bg-emerald-600 text-white"
+                          : "bg-blue-900 hover:bg-blue-800 text-white"
+                      }`}
                     >
-                      <FileText className="w-3.5 h-3.5" />
-                      <span>प्रतिवेदन भर्नुहोस्</span>
+                      {isSuperAdmin ? (
+                        <>
+                          <Edit3 className="w-3.5 h-3.5" />
+                          <span>डाटा सच्याउनुहोस्</span>
+                        </>
+                      ) : user?.palikaId === palika.id ? (
+                        <>
+                          <FileText className="w-3.5 h-3.5" />
+                          <span>मेरो पालिका फारम</span>
+                        </>
+                      ) : !isAuthenticated ? (
+                        <>
+                          <Lock className="w-3.5 h-3.5" />
+                          <span>प्रतिवेदन फारम</span>
+                        </>
+                      ) : (
+                        <>
+                          <FileText className="w-3.5 h-3.5" />
+                          <span>फारम हेर्नुहोस्</span>
+                        </>
+                      )}
                     </Link>
                     <Link
                       href={`/local-reporting/palika/${palika.id}/profile`}

@@ -19,6 +19,7 @@ import {
 import { AnnualReportFormData, GenderRow, TrainingRow, EmploymentRow } from "@/types/form";
 import { 
   ArrowLeft, 
+  ArrowRight,
   Save, 
   Send, 
   CheckCircle2, 
@@ -32,24 +33,26 @@ import {
   Layers,
   HelpCircle,
   Plus,
-  Trash2
+  Trash2,
+  Lock,
+  ShieldCheck,
+  ShieldAlert,
+  UserCheck,
+  LogIn,
+  UserPlus,
+  LogOut,
+  Sparkles,
+  KeyRound,
+  Edit3,
+  Type,
+  Settings,
+  RotateCcw,
+  FilePlus
 } from "lucide-react";
-
-const SECTIONS = [
-  { id: 1, title: "१. सामान्य विवरण", short: "Q1-Q9", desc: "जनसांख्यिकी तथा प्रोफाइल स्थिति" },
-  { id: 2, title: "२. सेवा प्रवाह", short: "Q10-Q13", desc: "परामर्श, गृहभेट र सहायक सामग्री" },
-  { id: 3, title: "३. शिक्षा र बालबालिका", short: "Q14-Q20", desc: "भर्ना, छात्रवृत्ति र बाल क्लब" },
-  { id: 4, title: "४. तालिम र उद्यम", short: "Q21-Q23", desc: "व्यवसायिक तालिम र रोजगारी" },
-  { id: 5, title: "५. सामाजिक सुरक्षा", short: "Q24-Q27", desc: "भत्ता र परिचयपत्र सम्बन्धी" },
-  { id: 6, title: "६. समूह र बिउपुँजी", short: "Q28-Q29", desc: "मिलिजुली समूह, बचत र ऋण" },
-  { id: 7, title: "७. संस्थागत र बजेट", short: "Q30-Q33", desc: "OPD, बजेट तथा स्वास्थ्य बीमा" },
-  { id: 8, title: "८. १० प्रकारगत वर्गीकरण", short: "Q34", desc: "अपाङ्गताका प्रकार अनुसार" },
-  { id: 9, title: "९. कार्ड रंग/गाम्भीर्यता", short: "Q35", desc: "रातो, निलो, पहेलो, सेतो" },
-  { id: 10, title: "१०. नीति र प्रबन्ध", short: "Q36-Q44", desc: "कानुनी सहायता, परिपत्र र कार्यकक्ष" },
-  { id: 11, title: "अनुसूची १.१ (गृहभेट)", short: "गृहभेट", desc: "गृहभेट गरिएको विवरण तालिका" },
-  { id: 12, title: "अनुसूची १.२ (सामग्री)", short: "सामग्री", desc: "सहायक सामग्री वितरण तालिका" },
-  { id: 13, title: "१३. समीक्षा र पेश", short: "समीक्षा", desc: "समग्र फारम जाँच तथा सबमिट" },
-];
+import { useAuth } from "@/lib/authContext";
+import AuthModal from "@/components/auth/AuthModal";
+import { getFormConfig, FormConfig, FormSection, deleteSection } from "@/lib/formConfig";
+import FormConfigModal from "@/components/admin/FormConfigModal";
 
 export default function AnnualReportFormPage({
   params,
@@ -60,11 +63,35 @@ export default function AnnualReportFormPage({
   const palikaId = resolvedParams.palikaId;
 
   const [lang, setLang] = useState<Language>("ne");
+  const [formConfig, setFormConfig] = useState<FormConfig>(() => getFormConfig());
   const [activeSection, setActiveSection] = useState<number>(1);
   const [formData, setFormData] = useState<AnnualReportFormData>(() => createInitialFormData(palikaId));
   const [saveMessage, setSaveMessage] = useState<string>("");
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const [reportSubmissionId, setReportSubmissionId] = useState<string>("");
+
+  const { user, isAuthenticated, canEditPalika, login, register } = useAuth();
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState<"login" | "signup">("login");
+
+  // Super Admin Form Management Modal State
+  const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
+  const [configModalTab, setConfigModalTab] = useState<"title" | "sections" | "add">("title");
+  const [adminCorrectionNotes, setAdminCorrectionNotes] = useState("");
+
+  const hasEditAccess = isAuthenticated ? canEditPalika(palikaId) : false;
+  const isSuperAdmin = user?.role === "provincial_admin";
+
+  const SECTIONS = formConfig.sections;
+
+  // Listen to form config updates
+  useEffect(() => {
+    const handleConfigUpdate = () => {
+      setFormConfig(getFormConfig());
+    };
+    window.addEventListener("dic_form_config_updated", handleConfigUpdate);
+    return () => window.removeEventListener("dic_form_config_updated", handleConfigUpdate);
+  }, []);
 
   // Find palika info
   let palikaInfo: any = null;
@@ -90,8 +117,29 @@ export default function AnnualReportFormPage({
     }
   }, [palikaId]);
 
+  // Auto-populate submitter info from authenticated user
+  useEffect(() => {
+    if (user && user.name) {
+      setFormData((prev) => ({
+        ...prev,
+        submitted_by_name: prev.submitted_by_name || user.name,
+        submitted_by_phone: prev.submitted_by_phone || user.phone || "",
+      }));
+    }
+  }, [user]);
+
   // Save Draft handler
   const handleSaveDraft = () => {
+    if (!isAuthenticated) {
+      setAuthModalMode("login");
+      setIsAuthModalOpen(true);
+      return;
+    }
+    if (!hasEditAccess) {
+      setSaveMessage("सुरक्षा प्रतिबन्ध: तपाईंलाई यो पालिकाको प्रतिवेदन सम्पादन गर्ने अधिकार छैन (Read-Only Mode)।");
+      setTimeout(() => setSaveMessage(""), 5000);
+      return;
+    }
     try {
       localStorage.setItem(`dic_report_${palikaId}_2082_083`, JSON.stringify(formData));
       setSaveMessage("प्रतिवेदनको मस्यौदा सुरक्षित भयो!");
@@ -105,6 +153,15 @@ export default function AnnualReportFormPage({
   // Submit Final handler
   const handleSubmitFinal = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAuthenticated) {
+      setAuthModalMode("login");
+      setIsAuthModalOpen(true);
+      return;
+    }
+    if (!hasEditAccess) {
+      alert("सुरक्षा प्रतिबन्ध: तपाईंलाई यो पालिकाको प्रतिवेदन पेश गर्ने अधिकार छैन। केवल आफ्नै पालिकाको फारम पेश गर्न सक्नुहुन्छ।");
+      return;
+    }
     const submissionId = "DIC-KP-" + Math.floor(100000 + Math.random() * 900000);
     const updated = {
       ...formData,
@@ -114,6 +171,26 @@ export default function AnnualReportFormPage({
     setReportSubmissionId(submissionId);
     setIsSubmitted(true);
     localStorage.setItem(`dic_report_${palikaId}_2082_083`, JSON.stringify(updated));
+  };
+
+  // Super Admin Data Correction Handler (गलत डाटा सच्याउने सुविधा)
+  const handleSaveAdminCorrection = (newStatus?: AnnualReportFormData["status"]) => {
+    const updated: AnnualReportFormData = {
+      ...formData,
+      status: newStatus || formData.status,
+      admin_corrected_at: new Date().toLocaleDateString("ne-NP") + " " + new Date().toLocaleTimeString("ne-NP", { hour: "2-digit", minute: "2-digit" }),
+      admin_corrected_by: user?.name || "कोशी प्रदेश मुख्य प्रशासक",
+      admin_notes: adminCorrectionNotes || formData.admin_notes,
+    };
+    setFormData(updated);
+    try {
+      localStorage.setItem(`dic_report_${palikaId}_2082_083`, JSON.stringify(updated));
+      setSaveMessage("मुख्य प्रशासकद्वारा डाटा सफलतापूर्वक संशोधन तथा सुरक्षित भयो!");
+      setTimeout(() => setSaveMessage(""), 5000);
+    } catch (e) {
+      console.error(e);
+      setSaveMessage("डाटा सुरक्षित गर्न सकिएन।");
+    }
   };
 
   // Mathematical Auto-calculation for Q9: Active = Q2 - (Q7 + Q8)
@@ -182,6 +259,197 @@ export default function AnnualReportFormPage({
           </Link>
         </main>
         <Footer lang={lang} />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex flex-col bg-slate-900 text-slate-100">
+        <Header lang={lang} onLanguageChange={setLang} />
+
+        <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-8 sm:py-12 flex flex-col justify-center">
+          <div className="bg-slate-950/95 border-2 border-amber-500/60 rounded-3xl p-6 sm:p-10 text-white shadow-2xl backdrop-blur-xl relative overflow-hidden">
+            {/* Top decorative glow */}
+            <div className="absolute top-0 right-0 -mt-10 -mr-10 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+
+            {/* Header: Title and Palika Details */}
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-6 border-b border-slate-800 pb-5 relative z-10">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-2xl bg-amber-500/20 border border-amber-400/40 text-amber-400">
+                  <Lock className="w-6 h-6" />
+                </div>
+                <div>
+                  <span className="text-[11px] font-bold uppercase tracking-widest text-amber-400 block">
+                    डाटा सुरक्षा प्रमाणीकरण (Security Gate)
+                  </span>
+                  <h1 className="text-xl sm:text-2xl font-black text-white">
+                    {palikaInfo.name_ne} ({palikaInfo.type})
+                  </h1>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold px-3 py-1 rounded-full bg-blue-900/60 border border-blue-500/40 text-blue-200">
+                  {districtInfo.name_ne} जिल्ला, कोशी प्रदेश
+                </span>
+                <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-amber-400 text-slate-950">
+                  आ.व. २०८२/०८३
+                </span>
+              </div>
+            </div>
+
+            {/* Explanation why security is required */}
+            <div className="bg-blue-950/70 border border-blue-800/60 rounded-2xl p-5 sm:p-6 mb-6 space-y-3 relative z-10">
+              <div className="flex items-start gap-3.5">
+                <ShieldCheck className="w-6 h-6 text-emerald-400 shrink-0 mt-0.5" />
+                <div className="text-xs sm:text-sm text-slate-200 space-y-2.5">
+                  <h2 className="font-bold text-white text-base sm:text-lg">
+                    अपाङ्गता वार्षिक प्रतिवेदन फारम भर्न आधिकारिक लगइन आवश्यक
+                  </h2>
+                  <p className="leading-relaxed text-slate-300">
+                    स्थानीय तहका अपाङ्गता भएका नागरिकहरूको तथ्याङ्क, परिचयपत्र वितरण तथा बजेट विवरण संवेदनशील, व्यक्तिगत तथा कानुनी रूपमा आधिकारिक दस्तावेज भएकाले अनाधिकृत प्रविष्टि रोक्न सेक्युरिटी प्रणाली लागू गरिएको छ।
+                  </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-xs">
+                    <div className="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800">
+                      <span className="font-bold text-amber-300 block mb-1">
+                        👤 पालिका कर्मचारी (Staff):
+                      </span>
+                      <p className="text-slate-300 leading-relaxed">
+                        प्रत्येक पालिकाको छुट्टाछुट्टै User ID (Gmail) र पासवर्ड हुनेछ। सम्बन्धित पालिकाको कर्मचारीले मात्र उक्त पालिकाको फारम भर्न, सम्पादन गर्न र पेश गर्न सक्नुहुनेछ।
+                      </p>
+                    </div>
+
+                    <div className="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800">
+                      <span className="font-bold text-sky-300 block mb-1">
+                        🛡️ कोशी प्रदेश मुख्य प्रशासक:
+                      </span>
+                      <p className="text-slate-300 leading-relaxed">
+                        सामाजिक विकास मन्त्रालय / मुख्य प्रशासक (Super Admin) लाई प्रदेशका सबै १३७ वटै स्थानीय तहको विवरण निरीक्षण, समीक्षा र स्वीकृत गर्ने पूर्ण अधिकार रहनेछ।
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Main Action Buttons */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 relative z-10">
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthModalMode("login");
+                  setIsAuthModalOpen(true);
+                }}
+                className="py-3.5 px-6 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-xl shadow-amber-400/20 transition-all cursor-pointer transform hover:-translate-y-0.5"
+              >
+                <LogIn className="w-5 h-5" />
+                <span>कर्मचारी / प्रशासक लगइन (Sign In)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthModalMode("signup");
+                  setIsAuthModalOpen(true);
+                }}
+                className="py-3.5 px-6 rounded-2xl bg-blue-900 hover:bg-blue-800 text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 border border-blue-600/50 transition-all cursor-pointer transform hover:-translate-y-0.5"
+              >
+                <UserPlus className="w-5 h-5 text-amber-300" />
+                <span>नयाँ कर्मचारी खाता दर्ता (Sign Up)</span>
+              </button>
+            </div>
+
+            {/* One-Click Quick Evaluation Access for testing */}
+            <div className="bg-slate-900/90 rounded-2xl p-4 sm:p-5 border border-slate-800 mb-6 relative z-10">
+              <div className="flex items-center gap-2 mb-3">
+                <Sparkles className="w-4 h-4 text-amber-400" />
+                <span className="text-xs font-bold text-amber-300 uppercase tracking-wider">
+                  द्रुत परीक्षण लगइन (Quick Evaluation Login):
+                </span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => login("admin@dic.gov.np", "admin123")}
+                  className="p-3 rounded-xl bg-blue-950/80 hover:bg-blue-900/80 border border-blue-700/60 text-left transition-colors cursor-pointer group"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-white group-hover:text-amber-300">
+                      🛡️ कोशी प्रदेश मुख्य प्रशासक
+                    </span>
+                    <span className="text-[10px] bg-blue-800 text-blue-200 px-2 py-0.5 rounded font-mono">
+                      Super Admin
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-1">
+                    सबै १३७ पालिकाको पूर्ण पहुँच (Universal Access)
+                  </p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    register({
+                      name: `${palikaInfo.name_ne} कर्मचारी`,
+                      email: `${palikaId}.staff@gmail.com`,
+                      phone: "९८४२००००००",
+                      password: "staff123",
+                      palikaId: palikaId,
+                      palikaName: palikaInfo.name_ne,
+                      districtId: districtInfo.id,
+                      role: "palika_staff",
+                    });
+                  }}
+                  className="p-3 rounded-xl bg-emerald-950/60 hover:bg-emerald-900/80 border border-emerald-700/60 text-left transition-colors cursor-pointer group"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-white group-hover:text-emerald-300">
+                      👤 {palikaInfo.name_ne} कर्मचारी लगइन
+                    </span>
+                    <span className="text-[10px] bg-emerald-900 text-emerald-200 px-2 py-0.5 rounded font-mono">
+                      This Palika Staff
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-1">
+                    यस पालिकाको फारम भर्ने अधिकृत पहुँच
+                  </p>
+                </button>
+              </div>
+            </div>
+
+            {/* Public profile and back buttons */}
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-800 text-xs relative z-10">
+              <Link
+                href="/local-reporting"
+                className="inline-flex items-center gap-1.5 text-slate-400 hover:text-white transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>स्थानीय तह सूचीमा फर्कनुहोस्</span>
+              </Link>
+
+              <Link
+                href={`/local-reporting/palika/${palikaId}/profile`}
+                className="inline-flex items-center gap-1.5 text-sky-400 hover:text-sky-300 underline font-semibold"
+              >
+                <Building2 className="w-4 h-4" />
+                <span>लगइन नगरी सार्वजनिक पालिका प्रोफाइल मात्र हेर्नुहोस्</span>
+              </Link>
+            </div>
+          </div>
+        </main>
+
+        <Footer lang={lang} />
+
+        <AuthModal
+          isOpen={isAuthModalOpen}
+          onClose={() => setIsAuthModalOpen(false)}
+          initialMode={authModalMode}
+          initialPalikaId={palikaId}
+          initialDistrictId={districtInfo?.id}
+        />
       </div>
     );
   }
@@ -269,11 +537,26 @@ export default function AnnualReportFormPage({
                     {districtInfo.name_ne} जिल्ला, कोशी प्रदेश
                   </span>
                 </div>
-                <h1 className="text-xl sm:text-2xl font-black mt-0.5">
-                  {palikaInfo.name_ne} — अपाङ्गता सहायता सहजकर्ता वार्षिक प्रतिवेदन
-                </h1>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <h1 className="text-xl sm:text-2xl font-black">
+                    {palikaInfo.name_ne} — {formConfig.mainTitle}
+                  </h1>
+                  {isSuperAdmin && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setConfigModalTab("title");
+                        setIsConfigModalOpen(true);
+                      }}
+                      className="p-1.5 rounded-lg bg-amber-400/20 hover:bg-amber-400 text-amber-300 hover:text-slate-950 text-xs font-bold transition-colors cursor-pointer"
+                      title="फारमको मुख्य नाम / शीर्षक सम्पादन गर्नुहोस्"
+                    >
+                      <Edit3 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
                 <p className="text-xs text-blue-200">
-                  आर्थिक वर्ष: <strong>२०८२/०८३</strong> | ढाँचा: राष्ट्रिय अपाङ्गता सहायता कक्ष मापदण्ड
+                  {formConfig.subtitle} | आर्थिक वर्ष: <strong>{formConfig.fiscalYear}</strong>
                 </p>
               </div>
             </div>
@@ -286,6 +569,37 @@ export default function AnnualReportFormPage({
                 <Building2 className="w-4 h-4 text-sky-300" />
                 <span>पालिका प्रोफाइल</span>
               </Link>
+
+              {isSuperAdmin && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setConfigModalTab("add");
+                      setIsConfigModalOpen(true);
+                    }}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-purple-700 hover:bg-purple-600 text-white text-xs font-bold border border-purple-500/50 transition-all shadow-xs cursor-pointer"
+                    title="नयाँ फारम वा खण्ड थप गर्नुहोस्"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>फारम थप</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setConfigModalTab("title");
+                      setIsConfigModalOpen(true);
+                    }}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-blue-800 hover:bg-blue-700 text-amber-300 text-xs font-bold border border-amber-400/40 transition-all shadow-xs cursor-pointer"
+                    title="फारमको नाम सम्पादन गर्नुहोस्"
+                  >
+                    <Type className="w-4 h-4" />
+                    <span>नाम सम्पादन</span>
+                  </button>
+                </>
+              )}
+
               <button
                 type="button"
                 onClick={() => exportReportToExcel(formData, palikaInfo.name_ne, districtInfo.name_ne)}
@@ -295,6 +609,7 @@ export default function AnnualReportFormPage({
                 <FileSpreadsheet className="w-4 h-4 text-emerald-200" />
                 <span>एक्सेल निर्यात (.xlsx)</span>
               </button>
+
               <button
                 type="button"
                 onClick={() => window.print()}
@@ -304,6 +619,7 @@ export default function AnnualReportFormPage({
                 <Printer className="w-4 h-4 text-amber-300" />
                 <span>प्रिन्ट / PDF</span>
               </button>
+
               <button
                 type="button"
                 onClick={handleSaveDraft}
@@ -323,6 +639,145 @@ export default function AnnualReportFormPage({
           )}
         </div>
       </section>
+
+      {/* AUTHENTICATED USER SECURITY STATUS RIBBON */}
+      {user && (
+        <div className={`border-b text-xs py-2.5 px-4 sm:px-6 lg:px-8 shadow-xs ${
+          isSuperAdmin 
+            ? "bg-blue-950 text-blue-100 border-blue-800" 
+            : hasEditAccess 
+            ? "bg-emerald-950 text-emerald-100 border-emerald-800" 
+            : "bg-amber-950 text-amber-100 border-amber-800"
+        }`}>
+          <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              {isSuperAdmin ? (
+                <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0" />
+              ) : hasEditAccess ? (
+                <UserCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+              ) : (
+                <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0" />
+              )}
+
+              <div>
+                {isSuperAdmin ? (
+                  <span>
+                    <strong>🛡️ कोशी प्रदेश मुख्य प्रशासक (Super Admin):</strong> {user.name} ({user.email}) | तपाईंलाई प्रदेशका सबै १३७ स्थानीय तहको प्रतिवेदन निरीक्षण, परिमार्जन तथा प्रमाणिकरण गर्ने अधिकार छ।
+                  </span>
+                ) : hasEditAccess ? (
+                  <span>
+                    <strong>✅ अधिकृत पालिका कर्मचारी:</strong> {user.name} ({palikaInfo.name_ne}) | प्रतिवेदन प्रविष्टि तथा मस्यौदा सुरक्षित गर्ने प्रमाणीकरण सक्रिय छ।
+                  </span>
+                ) : (
+                  <span>
+                    <strong>⚠️ पहुँच प्रतिबन्ध (हेर्न मात्र मिल्ने - Read Only):</strong> तपाईं <strong>{user.palikaName || user.palikaId}</strong> को कर्मचारी हुनुहुन्छ। सुरक्षा नीति अनुसार तपाईंले अर्को पालिका (<strong>{palikaInfo.name_ne}</strong>) को विवरण सम्पादन वा पेश गर्न पाउनुहुन्न।
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {!hasEditAccess && user.palikaId && (
+                <Link
+                  href={`/local-reporting/palika/${user.palikaId}`}
+                  className="px-2.5 py-1 bg-amber-400 hover:bg-amber-300 text-slate-950 rounded-md font-bold text-[11px] flex items-center gap-1 shadow-xs"
+                >
+                  <span>मेरो पालिकाको फारममा जानुहोस्</span>
+                  <ArrowRight className="w-3 h-3" />
+                </Link>
+              )}
+              <span className={`px-2 py-0.5 rounded-full font-bold text-[10px] ${
+                isSuperAdmin 
+                  ? "bg-amber-400 text-slate-950" 
+                  : hasEditAccess 
+                  ? "bg-emerald-400 text-slate-950" 
+                  : "bg-amber-500/30 text-amber-200 border border-amber-500/40"
+              }`}>
+                {isSuperAdmin ? "सुपर प्रशासक" : hasEditAccess ? "अधिकृत युजर" : "पहुँच सीमित"}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SUPER ADMIN DATA CORRECTION CONTROL BAR (कर्मचारीले गलत भरेको खण्डमा डाटा सच्याउने) */}
+      {isSuperAdmin && (
+        <div className="bg-linear-to-r from-amber-500/15 via-blue-500/10 to-indigo-500/15 border-b-2 border-amber-500 px-4 sm:px-6 lg:px-8 py-3 shadow-xs">
+          <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-amber-400 text-slate-950 rounded-xl font-bold">
+                <Edit3 className="w-4 h-4" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-black text-amber-900 bg-amber-200/80 border border-amber-400/80 px-2 py-0.5 rounded-md uppercase tracking-wider">
+                    सुपर प्रशासक डाटा सच्याउने मोड (Data Correction Mode)
+                  </span>
+                  {formData.admin_corrected_at && (
+                    <span className="text-[11px] text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded font-bold border border-emerald-300">
+                      अन्तिम संशोधन: {formData.admin_corrected_at}
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-slate-700 mt-0.5">
+                  कर्मचारीले कुनै तथ्याङ्क गलत भरेको खण्डमा तपाईंले सोझै फिल्डहरूमा सच्याएर <strong>&lsquo;सच्याइएको डाटा सेभ&rsquo;</strong> गर्न सक्नुहुन्छ।
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setConfigModalTab("title");
+                  setIsConfigModalOpen(true);
+                }}
+                className="px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs cursor-pointer"
+                title="फारमको मुख्य नाम वा शीर्षक परिवर्तन गर्नुहोस्"
+              >
+                <Type className="w-3.5 h-3.5 text-blue-700" />
+                <span>फारमको नाम सम्पादन</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setConfigModalTab("add");
+                  setIsConfigModalOpen(true);
+                }}
+                className="px-3 py-1.5 bg-white hover:bg-slate-50 text-emerald-800 border border-emerald-300 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs cursor-pointer"
+                title="नयाँ फारम वा खण्ड थप गर्नुहोस्"
+              >
+                <Plus className="w-3.5 h-3.5 text-emerald-600" />
+                <span>फारम थप</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setConfigModalTab("sections");
+                  setIsConfigModalOpen(true);
+                }}
+                className="px-3 py-1.5 bg-white hover:bg-slate-50 text-purple-800 border border-purple-300 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs cursor-pointer"
+                title="खण्डहरू हटाउने वा नाम सच्याउने"
+              >
+                <Layers className="w-3.5 h-3.5 text-purple-600" />
+                <span>खण्ड व्यवस्थापन</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleSaveAdminCorrection()}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black flex items-center gap-2 shadow-md cursor-pointer transition-all transform hover:-translate-y-0.5"
+                title="सच्याइएको सम्पूर्ण डाटा सुरक्षित गर्नुहोस्"
+              >
+                <Save className="w-4 h-4" />
+                <span>सच्याइएको डाटा सेभ गर्नुहोस्</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Layout: Left Stepper Sidebar + Right Active Section Content */}
       <main id="main-content" tabIndex={-1} className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 pb-28 lg:pb-8 focus:outline-hidden">
@@ -383,37 +838,103 @@ export default function AnnualReportFormPage({
           
           {/* DESKTOP SECTION STEPPER SIDEBAR (hidden lg:block) */}
           <aside className="hidden lg:block lg:col-span-1 bg-white rounded-2xl p-4 border border-slate-200 shadow-xs sticky top-24">
-            <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 px-2">
-              प्रतिवेदन खण्डहरू (Sections)
-            </h2>
+            <div className="flex items-center justify-between mb-3 px-2">
+              <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                प्रतिवेदन खण्डहरू ({SECTIONS.length})
+              </h2>
+              {isSuperAdmin && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setConfigModalTab("add");
+                    setIsConfigModalOpen(true);
+                  }}
+                  className="p-1 text-emerald-700 hover:text-emerald-900 rounded-md hover:bg-emerald-50 cursor-pointer"
+                  title="नयाँ खण्ड थप्नुहोस्"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+
             <nav aria-label="फारम खण्ड नेभिगेसन" className="space-y-1">
               {SECTIONS.map((sec) => (
-                <button
-                  key={sec.id}
-                  type="button"
-                  onClick={() => setActiveSection(sec.id)}
-                  className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-bold flex items-center justify-between transition-all cursor-pointer ${
-                    activeSection === sec.id
-                      ? "bg-blue-900 text-white shadow-xs"
-                      : "hover:bg-slate-100 text-slate-700"
-                  }`}
-                >
-                  <div className="truncate mr-2">
-                    <span className="block truncate">{sec.title}</span>
-                    <span className={`text-[10px] font-normal block truncate ${
-                      activeSection === sec.id ? "text-blue-200" : "text-slate-400"
+                <div key={sec.id} className="relative group/sec">
+                  <button
+                    type="button"
+                    onClick={() => setActiveSection(sec.id)}
+                    className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-bold flex items-center justify-between transition-all cursor-pointer ${
+                      activeSection === sec.id
+                        ? "bg-blue-900 text-white shadow-xs"
+                        : "hover:bg-slate-100 text-slate-700"
+                    }`}
+                  >
+                    <div className="truncate mr-2">
+                      <span className="block truncate">{sec.title}</span>
+                      <span className={`text-[10px] font-normal block truncate ${
+                        activeSection === sec.id ? "text-blue-200" : "text-slate-400"
+                      }`}>
+                        {sec.desc}
+                      </span>
+                    </div>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono shrink-0 ${
+                      activeSection === sec.id ? "bg-blue-800 text-amber-300" : "bg-slate-100 text-slate-500"
                     }`}>
-                      {sec.desc}
+                      {sec.short}
                     </span>
-                  </div>
-                  <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono shrink-0 ${
-                    activeSection === sec.id ? "bg-blue-800 text-amber-300" : "bg-slate-100 text-slate-500"
-                  }`}>
-                    {sec.short}
-                  </span>
-                </button>
+                  </button>
+
+                  {/* Super Admin quick edit hover shortcut */}
+                  {isSuperAdmin && (
+                    <div className="absolute right-1 top-1 hidden group-hover/sec:flex items-center gap-0.5 bg-slate-900/90 rounded-md p-0.5 text-white shadow-sm z-20">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setConfigModalTab("sections");
+                          setIsConfigModalOpen(true);
+                        }}
+                        className="p-1 hover:text-amber-400 cursor-pointer"
+                        title="यस खण्डको नाम सम्पादन गर्नुहोस्"
+                      >
+                        <Edit3 className="w-3 h-3" />
+                      </button>
+                    </div>
+                  )}
+                </div>
               ))}
             </nav>
+
+            {/* Super Admin Side Tools */}
+            {isSuperAdmin && (
+              <div className="mt-4 pt-4 border-t border-slate-200 space-y-2">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block px-1">
+                  प्रशासक फारम औजार:
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setConfigModalTab("add");
+                    setIsConfigModalOpen(true);
+                  }}
+                  className="w-full py-2 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>नयाँ फारम खण्ड थप्नुहोस्</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setConfigModalTab("sections");
+                    setIsConfigModalOpen(true);
+                  }}
+                  className="w-full py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <Settings className="w-3.5 h-3.5" />
+                  <span>खण्डहरूको नाम सम्पादन / हटाउने</span>
+                </button>
+              </div>
+            )}
           </aside>
 
           {/* ACTIVE SECTION FORM CONTENT */}
@@ -1997,6 +2518,23 @@ export default function AnnualReportFormPage({
                         className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm font-medium"
                       />
                     </div>
+                    {user && (
+                      <div className="col-span-1 sm:col-span-2 pt-3 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs">
+                        <span className="text-slate-600 flex items-center gap-1.5 font-medium">
+                          <UserCheck className="w-4 h-4 text-emerald-600" />
+                          <span>प्रमाणीकरण युजर: <strong>{user.name}</strong> ({user.email})</span>
+                        </span>
+                        <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                          isSuperAdmin 
+                            ? "bg-amber-100 text-amber-900 border border-amber-300"
+                            : hasEditAccess 
+                            ? "bg-emerald-100 text-emerald-900 border border-emerald-300"
+                            : "bg-red-100 text-red-900 border border-red-300"
+                        }`}>
+                          {isSuperAdmin ? "सुपर प्रशासक प्रमाणिकरण" : hasEditAccess ? "अधिकृत पालिका कर्मचारी" : "पहुँच सीमित (सम्पादन नमिल्ने)"}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -2023,11 +2561,25 @@ export default function AnnualReportFormPage({
                   </div>
                 </div>
 
+                {!hasEditAccess && (
+                  <div className="p-3.5 bg-amber-50 border border-amber-300 rounded-xl text-xs text-amber-900 flex items-center gap-2">
+                    <ShieldAlert className="w-5 h-5 text-amber-600 shrink-0" />
+                    <span>
+                      <strong>सुरक्षा प्रतिबन्ध:</strong> तपाईं {user?.palikaName || "अन्य पालिका"} को कर्मचारी हुनुभएकाले यो पालिकाको प्रतिवेदन मस्यौदा सेभ वा पेश गर्न पाउनुहुन्न (हेर्न मात्र मिल्ने मोड)।
+                    </span>
+                  </div>
+                )}
+
                 <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4">
                   <button
                     type="button"
                     onClick={handleSaveDraft}
-                    className="w-full sm:w-auto px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                    disabled={!hasEditAccess}
+                    className={`w-full sm:w-auto px-6 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-colors ${
+                      hasEditAccess 
+                        ? "bg-slate-100 hover:bg-slate-200 text-slate-800 cursor-pointer" 
+                        : "bg-slate-100 text-slate-400 cursor-not-allowed opacity-60"
+                    }`}
                   >
                     <Save className="w-4 h-4 text-slate-600" />
                     <span>मस्यौदा सुरक्षित राख्नुहोस्</span>
@@ -2036,7 +2588,12 @@ export default function AnnualReportFormPage({
                   <button
                     type="button"
                     onClick={handleSubmitFinal}
-                    className="w-full sm:w-auto px-8 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 transition-all cursor-pointer transform hover:-translate-y-0.5"
+                    disabled={!hasEditAccess}
+                    className={`w-full sm:w-auto px-8 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${
+                      hasEditAccess 
+                        ? "bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/30 cursor-pointer transform hover:-translate-y-0.5" 
+                        : "bg-slate-200 text-slate-400 cursor-not-allowed opacity-60"
+                    }`}
                   >
                     <Send className="w-4 h-4" />
                     <span>वार्षिक प्रतिवेदन पेश गर्नुहोस् (Final Submit)</span>
@@ -2045,14 +2602,158 @@ export default function AnnualReportFormPage({
               </section>
             )}
 
+            {/* DYNAMIC CUSTOM SECTIONS (मुख्य प्रशासकद्वारा थप गरिएको फारम खण्ड) */}
+            {SECTIONS.find((s) => s.id === activeSection)?.isCustom && (
+              <section aria-labelledby={`sec-custom-${activeSection}`} className="space-y-6">
+                {(() => {
+                  const currentCustomSec = SECTIONS.find((s) => s.id === activeSection);
+                  if (!currentCustomSec) return null;
+                  return (
+                    <>
+                      <div className="border-b border-slate-200 pb-4 flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                          <span className="text-xs font-bold text-purple-900 bg-purple-100 px-2.5 py-0.5 rounded-full">
+                            सुपर प्रशासकद्वारा थप गरिएको फारम खण्ड
+                          </span>
+                          <h2 id={`sec-custom-${activeSection}`} className="text-xl font-bold text-slate-900 mt-1">
+                            {currentCustomSec.title}
+                          </h2>
+                          <p className="text-xs text-slate-500 mt-0.5">
+                            {currentCustomSec.desc}
+                          </p>
+                        </div>
+
+                        {isSuperAdmin && (
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setConfigModalTab("sections");
+                                setIsConfigModalOpen(true);
+                              }}
+                              className="px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-800 rounded-lg text-xs font-bold border border-blue-200 flex items-center gap-1 cursor-pointer"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                              <span>खण्डको नाम सच्याउनुहोस्</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (confirm(`के तपाईं निश्चित हुनुहुन्छ? "${currentCustomSec.title}" खण्ड हटाइनेछ।`)) {
+                                  deleteSection(currentCustomSec.id);
+                                  setActiveSection(1);
+                                }
+                              }}
+                              className="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg text-xs font-bold border border-red-200 flex items-center gap-1 cursor-pointer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              <span>यो खण्ड हटाउनुहोस्</span>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Custom Section Form Content */}
+                      <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">
+                            १. मुख्य विवरण वा प्रगति प्रतिवेदन
+                          </label>
+                          <textarea
+                            rows={4}
+                            value={formData.custom_sections_data?.[`sec_${activeSection}_text`] || ""}
+                            onChange={(e) => {
+                              setFormData({
+                                ...formData,
+                                custom_sections_data: {
+                                  ...(formData.custom_sections_data || {}),
+                                  [`sec_${activeSection}_text`]: e.target.value,
+                                },
+                              });
+                            }}
+                            placeholder="यस खण्डको विस्तृत विवरण, प्रगति वा तथ्याङ्क यहाँ प्रविष्टि गर्नुहोस्..."
+                            className="w-full bg-white border border-slate-300 rounded-xl p-3 text-xs focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-bold text-slate-700 mb-1">
+                              २. संख्यात्मक नतिजा / लाभान्वित संख्या
+                            </label>
+                            <input
+                              type="number"
+                              value={formData.custom_sections_data?.[`sec_${activeSection}_number`] || ""}
+                              onChange={(e) => {
+                                setFormData({
+                                  ...formData,
+                                  custom_sections_data: {
+                                    ...(formData.custom_sections_data || {}),
+                                    [`sec_${activeSection}_number`]: e.target.value,
+                                  },
+                                });
+                              }}
+                              placeholder="०"
+                              className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-bold text-slate-700 mb-1">
+                              ३. कैफियत वा विशेष टिप्पणी
+                            </label>
+                            <input
+                              type="text"
+                              value={formData.custom_sections_data?.[`sec_${activeSection}_remarks`] || ""}
+                              onChange={(e) => {
+                                setFormData({
+                                  ...formData,
+                                  custom_sections_data: {
+                                    ...(formData.custom_sections_data || {}),
+                                    [`sec_${activeSection}_remarks`]: e.target.value,
+                                  },
+                                });
+                              }}
+                              placeholder="कैफियत..."
+                              className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-800 focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="pt-3 flex flex-wrap items-center justify-between gap-3">
+                        <span className="text-[11px] text-slate-500">
+                          * यो खण्ड मुख्य प्रशासकद्वारा थप गरिएको नयाँ फारम हो।
+                        </span>
+                        <button
+                          type="button"
+                          onClick={handleSaveDraft}
+                          className="px-5 py-2.5 bg-blue-900 hover:bg-blue-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs cursor-pointer"
+                        >
+                          <Save className="w-4 h-4" />
+                          <span>यस खण्डको डाटा सेभ गर्नुहोस्</span>
+                        </button>
+                      </div>
+                    </>
+                  );
+                })()}
+              </section>
+            )}
+
             {/* Stepper Navigation Footer */}
             <div className="mt-8 pt-6 border-t border-slate-200 flex items-center justify-between">
               <button
                 type="button"
-                disabled={activeSection === 1}
-                onClick={() => setActiveSection((s) => Math.max(1, s - 1))}
+                disabled={activeSection === SECTIONS[0]?.id}
+                onClick={() => {
+                  const currentIdx = SECTIONS.findIndex((s) => s.id === activeSection);
+                  if (currentIdx > 0) {
+                    setActiveSection(SECTIONS[currentIdx - 1].id);
+                  }
+                }}
                 className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-colors ${
-                  activeSection === 1
+                  activeSection === SECTIONS[0]?.id
                     ? "text-slate-300 cursor-not-allowed"
                     : "bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer"
                 }`}
@@ -2062,15 +2763,20 @@ export default function AnnualReportFormPage({
               </button>
 
               <span className="text-xs font-semibold text-slate-500">
-                खण्ड {activeSection} / १३
+                खण्ड {SECTIONS.findIndex((s) => s.id === activeSection) + 1} / {SECTIONS.length}
               </span>
 
               <button
                 type="button"
-                disabled={activeSection === 13}
-                onClick={() => setActiveSection((s) => Math.min(13, s + 1))}
+                disabled={activeSection === SECTIONS[SECTIONS.length - 1]?.id}
+                onClick={() => {
+                  const currentIdx = SECTIONS.findIndex((s) => s.id === activeSection);
+                  if (currentIdx !== -1 && currentIdx < SECTIONS.length - 1) {
+                    setActiveSection(SECTIONS[currentIdx + 1].id);
+                  }
+                }}
                 className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-colors ${
-                  activeSection === 13
+                  activeSection === SECTIONS[SECTIONS.length - 1]?.id
                     ? "text-slate-300 cursor-not-allowed"
                     : "bg-blue-900 hover:bg-blue-800 text-white shadow-xs cursor-pointer"
                 }`}
@@ -2088,10 +2794,13 @@ export default function AnnualReportFormPage({
       <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-300 px-3 py-2.5 shadow-2xl flex items-center justify-between gap-2 lg:hidden">
         <button
           type="button"
-          disabled={activeSection === 1}
+          disabled={activeSection === SECTIONS[0]?.id}
           onClick={() => {
-            setActiveSection((s) => Math.max(1, s - 1));
-            window.scrollTo({ top: 120, behavior: 'smooth' });
+            const currentIdx = SECTIONS.findIndex((s) => s.id === activeSection);
+            if (currentIdx > 0) {
+              setActiveSection(SECTIONS[currentIdx - 1].id);
+              window.scrollTo({ top: 120, behavior: 'smooth' });
+            }
           }}
           className="px-3 py-2 bg-slate-100 text-slate-700 rounded-lg text-xs font-bold disabled:opacity-30 flex items-center gap-1 min-h-[42px] cursor-pointer"
         >
@@ -2108,12 +2817,15 @@ export default function AnnualReportFormPage({
           <span>मस्यौदा सेभ</span>
         </button>
 
-        {activeSection < 13 ? (
+        {activeSection !== SECTIONS[SECTIONS.length - 1]?.id ? (
           <button
             type="button"
             onClick={() => {
-              setActiveSection((s) => Math.min(13, s + 1));
-              window.scrollTo({ top: 120, behavior: 'smooth' });
+              const currentIdx = SECTIONS.findIndex((s) => s.id === activeSection);
+              if (currentIdx !== -1 && currentIdx < SECTIONS.length - 1) {
+                setActiveSection(SECTIONS[currentIdx + 1].id);
+                window.scrollTo({ top: 120, behavior: 'smooth' });
+              }
             }}
             className="px-3.5 py-2 bg-blue-900 hover:bg-blue-800 text-white rounded-lg text-xs font-bold flex items-center gap-1 min-h-[42px] cursor-pointer shadow-xs"
           >
@@ -2131,6 +2843,14 @@ export default function AnnualReportFormPage({
           </button>
         )}
       </div>
+
+      {/* SUPER ADMIN FORM MANAGEMENT MODAL */}
+      <FormConfigModal
+        isOpen={isConfigModalOpen}
+        onClose={() => setIsConfigModalOpen(false)}
+        adminName={user?.name || "कोशी प्रदेश मुख्य प्रशासक"}
+        initialTab={configModalTab}
+      />
 
       <Footer lang={lang} />
     </div>

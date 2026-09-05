@@ -64,6 +64,10 @@ export interface AnnualReportFormData {
   submitted_by_name: string;
   submitted_by_phone: string;
   status: 'draft' | 'submitted' | 'under_review' | 'approved' | 'returned_for_correction';
+  admin_notes?: string;
+  admin_corrected_at?: string;
+  admin_corrected_by?: string;
+  custom_sections_data?: Record<string, any>;
 
   // Section 1: Demographics (Q1 to Q9)
   q1_census: GenderRow;

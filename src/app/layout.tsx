@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { AuthProvider } from "@/lib/authContext";
 
 export const metadata: Metadata = {
   title: "अपाङ्गता सूचना केन्द्र (DIC) | Disability Information Center",
@@ -16,7 +17,9 @@ export default function RootLayout({
   return (
     <html lang="ne">
       <body className="antialiased min-h-screen flex flex-col">
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

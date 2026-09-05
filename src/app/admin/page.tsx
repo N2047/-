@@ -23,9 +23,14 @@ import {
   UserCheck,
   History,
   FileCheck2,
-  X
+  X,
+  Edit3,
+  Plus,
+  Settings,
+  Type
 } from "lucide-react";
 import Link from "next/link";
+import FormConfigModal from "@/components/admin/FormConfigModal";
 
 interface ReportReviewItem {
   palikaId: string;
@@ -48,6 +53,10 @@ export default function AdminPage() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [activeReviewItem, setActiveReviewItem] = useState<ReportReviewItem | null>(null);
   const [feedbackNote, setFeedbackNote] = useState<string>("");
+
+  // Form Config Modal state for Super Admin
+  const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
+  const [configModalTab, setConfigModalTab] = useState<"title" | "sections" | "add">("title");
 
   // Seed sample statuses across 137 palikas
   const [reportsList, setReportsList] = useState<ReportReviewItem[]>(() => {
@@ -214,11 +223,20 @@ export default function AdminPage() {
                 />
               </div>
 
-              <div className="flex items-center gap-2 pt-2">
+              <div className="flex flex-wrap items-center gap-2 pt-2">
                 <Link
                   href={`/local-reporting/palika/${activeReviewItem.palikaId}`}
                   target="_blank"
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg font-bold flex items-center gap-1.5"
+                  className="px-4 py-2 bg-amber-400 hover:bg-amber-300 text-slate-950 rounded-xl font-bold flex items-center gap-1.5 shadow-xs text-xs"
+                >
+                  <Edit3 className="w-3.5 h-3.5" />
+                  <span>फारमको डाटा सच्याउनुहोस् (Edit & Correct Data)</span>
+                </Link>
+
+                <Link
+                  href={`/local-reporting/palika/${activeReviewItem.palikaId}`}
+                  target="_blank"
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl font-bold flex items-center gap-1.5 text-xs"
                 >
                   <Eye className="w-3.5 h-3.5" />
                   <span>फारमको पूर्ण विवरण हेर्नुहोस्</span>
@@ -268,14 +286,53 @@ export default function AdminPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setConfigModalTab("title");
+                setIsConfigModalOpen(true);
+              }}
+              className="px-3 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
+              title="फारमको मुख्य नाम सम्पादन गर्नुहोस्"
+            >
+              <Type className="w-3.5 h-3.5 text-amber-300" />
+              <span>फारमको नाम सम्पादन</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setConfigModalTab("add");
+                setIsConfigModalOpen(true);
+              }}
+              className="px-3 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
+              title="नयाँ फारम वा खण्ड थप गर्नुहोस्"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>फारम थप (Add Form)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setConfigModalTab("sections");
+                setIsConfigModalOpen(true);
+              }}
+              className="px-3 py-2 rounded-xl bg-purple-800 hover:bg-purple-700 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
+              title="खण्डहरूको नाम सच्याउने वा हटाउने"
+            >
+              <Settings className="w-3.5 h-3.5" />
+              <span>खण्ड व्यवस्थापन</span>
+            </button>
+
             <button
               type="button"
               onClick={() => alert("डाटाबेसको पूर्ण तथ्यांक सुरक्षित रूपमा ब्याकअप भयो।")}
-              className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center gap-2 cursor-pointer shadow-xs"
+              className="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
             >
-              <Download className="w-4 h-4" />
-              <span>समग्र तथ्यांक Export</span>
+              <Download className="w-3.5 h-3.5" />
+              <span>Export</span>
             </button>
           </div>
         </div>
@@ -412,7 +469,16 @@ export default function AdminPage() {
                     {/* Actions */}
                     <td className="p-3 text-center">
                       <div className="flex items-center justify-center gap-1.5">
-                        {row.status !== "pending" ? (
+                        <Link
+                          href={`/local-reporting/palika/${row.palikaId}`}
+                          className="px-2.5 py-1 bg-amber-400 hover:bg-amber-300 text-slate-950 rounded text-[11px] font-bold flex items-center gap-1 shadow-xs"
+                          title="डाटा सच्याउनुहोस् वा सम्पादन गर्नुहोस्"
+                        >
+                          <Edit3 className="w-3 h-3" />
+                          <span>सच्याउनुहोस्</span>
+                        </Link>
+
+                        {row.status !== "pending" && (
                           <button
                             type="button"
                             onClick={() => setActiveReviewItem(row)}
@@ -421,13 +487,6 @@ export default function AdminPage() {
                             <Eye className="w-3 h-3" />
                             <span>समीक्षा</span>
                           </button>
-                        ) : (
-                          <Link
-                            href={`/local-reporting/palika/${row.palikaId}`}
-                            className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-[11px] font-semibold"
-                          >
-                            फारम खोल्नुहोस्
-                          </Link>
                         )}
                       </div>
                     </td>
@@ -439,6 +498,13 @@ export default function AdminPage() {
         </section>
 
       </main>
+
+      <FormConfigModal
+        isOpen={isConfigModalOpen}
+        onClose={() => setIsConfigModalOpen(false)}
+        adminName="कोशी प्रदेश मुख्य प्रशासक"
+        initialTab={configModalTab}
+      />
 
       <Footer lang={lang} />
     </div>
