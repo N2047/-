@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/lib/authContext";
+import { AccessibilityProvider } from "@/lib/accessibilityContext";
 
 export const metadata: Metadata = {
   title: "अपाङ्गता सूचना केन्द्र (DIC) | Disability Information Center",
@@ -15,10 +16,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ne">
-      <body className="antialiased min-h-screen flex flex-col">
+    <html lang="ne" suppressHydrationWarning>
+      <body className="antialiased min-h-screen flex flex-col" suppressHydrationWarning>
         <AuthProvider>
-          {children}
+          <AccessibilityProvider>
+            {children}
+          </AccessibilityProvider>
         </AuthProvider>
       </body>
     </html>

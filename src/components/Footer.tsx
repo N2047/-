@@ -32,7 +32,7 @@ export default function Footer({ lang }: FooterProps) {
             </p>
             <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-800 rounded-lg text-xs font-semibold text-amber-300 border border-slate-700">
               <ShieldCheck className="w-4 h-4 text-emerald-400" aria-hidden="true" />
-              <span>WCAG 2.2 AA पहुँचयुक्त प्रणाली प्रमाणित</span>
+              <span>WCAG 2.2 AA मापदण्डअनुसार पहुँचयुक्त बनाउन विकास भइरहेको प्रणाली</span>
             </div>
           </div>
 

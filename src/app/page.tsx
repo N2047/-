@@ -95,18 +95,18 @@ export default function HomePage() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {/* Pillar 1: Law Repository */}
-              <div className="rounded-2xl border border-slate-200 p-7 bg-slate-50/50 hover:bg-white hover:shadow-xl transition-all flex flex-col justify-between group">
+              <div className="a11y-card rounded-2xl border border-slate-200 dark:border-slate-800 p-7 bg-slate-50/50 dark:bg-slate-800/40 hover:bg-white dark:hover:bg-slate-800 hover:shadow-xl transition-all flex flex-col justify-between group">
                 <div>
                   <div className="w-14 h-14 rounded-2xl bg-blue-100 text-blue-800 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
                     <Scale className="w-7 h-7" aria-hidden="true" />
                   </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-3">
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">
                     {t.pillar_laws_title}
                   </h3>
-                  <p className="text-sm text-slate-600 leading-relaxed mb-4">
+                  <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
                     {t.pillar_laws_desc}
                   </p>
-                  <ul className="space-y-2 text-xs text-slate-700 mb-6 font-medium">
+                  <ul className="space-y-2 text-xs text-slate-700 dark:text-slate-300 mb-6 font-medium">
                     <li className="flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                       <span>संघीय ऐन, नियमावली, कार्यविधि र निर्देशिका</span>
@@ -131,7 +131,7 @@ export default function HomePage() {
               </div>
 
               {/* Pillar 2: Local Reporting System */}
-              <div className="rounded-2xl border-2 border-blue-600/30 p-7 bg-blue-50/30 hover:bg-white hover:shadow-xl transition-all flex flex-col justify-between group relative overflow-hidden">
+              <div className="a11y-card rounded-2xl border-2 border-blue-600/30 dark:border-blue-500/40 p-7 bg-blue-50/30 dark:bg-blue-950/20 hover:bg-white dark:hover:bg-slate-800 hover:shadow-xl transition-all flex flex-col justify-between group relative overflow-hidden">
                 <div className="absolute top-3 right-3 bg-blue-600 text-white text-[11px] font-bold px-2 py-0.5 rounded-full">
                   मुख्य प्रणाली
                 </div>
@@ -139,13 +139,13 @@ export default function HomePage() {
                   <div className="w-14 h-14 rounded-2xl bg-blue-600 text-white flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shadow-md">
                     <FileCheck2 className="w-7 h-7" aria-hidden="true" />
                   </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-3">
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">
                     {t.pillar_reporting_title}
                   </h3>
-                  <p className="text-sm text-slate-600 leading-relaxed mb-4">
+                  <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
                     {t.pillar_reporting_desc}
                   </p>
-                  <ul className="space-y-2 text-xs text-slate-700 mb-6 font-medium">
+                  <ul className="space-y-2 text-xs text-slate-700 dark:text-slate-300 mb-6 font-medium">
                     <li className="flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                       <span>आर्थिक वर्ष २०८२/०८३ वार्षिक प्रतिवेदन (४४ प्रश्न)</span>
@@ -170,7 +170,7 @@ export default function HomePage() {
               </div>
 
               {/* Pillar 3: Subject-Wise Reports & Analytics */}
-              <div className="rounded-2xl border border-slate-200 p-7 bg-slate-50/50 hover:bg-white hover:shadow-xl transition-all flex flex-col justify-between group">
+              <div className="a11y-card rounded-2xl border border-slate-200 dark:border-slate-800 p-7 bg-slate-50/50 dark:bg-slate-800/40 hover:bg-white dark:hover:bg-slate-800 hover:shadow-xl transition-all flex flex-col justify-between group">
                 <div>
                   <div className="w-14 h-14 rounded-2xl bg-purple-100 text-purple-800 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
                     <BarChart3 className="w-7 h-7" aria-hidden="true" />

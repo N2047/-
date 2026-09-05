@@ -14,55 +14,143 @@
   --border-color: #cbd5e1;
 }
 
-[data-high-contrast="true"] {
+/* DARK MODE */
+html[data-theme="dark"],
+html[data-dark-mode="true"] {
+  --bg-primary: #090d16;
+  --bg-surface: #111827;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --color-gov-blue: #3b82f6;
+  --color-gov-blue-dark: #1e3a8a;
+  --color-gov-red: #ef4444;
+  --color-gov-gold: #f59e0b;
+  --focus-ring: #fbbf24;
+  --border-color: #334155;
+  color-scheme: dark;
+}
+
+/* HIGH CONTRAST MODE */
+html[data-color-mode="high-contrast"] {
   --bg-primary: #000000;
-  --bg-surface: #121212;
+  --bg-surface: #0a0a0a;
   --text-primary: #ffffff;
-  --text-secondary: #facc15;
-  --color-gov-blue: #60a5fa;
-  --color-gov-blue-dark: #93c5fd;
-  --color-gov-red: #f87171;
+  --text-secondary: #ffff00;
+  --color-gov-blue: #93c5fd;
+  --color-gov-blue-dark: #bfdbfe;
+  --color-gov-red: #fca5a5;
   --color-gov-gold: #fde047;
   --focus-ring: #ffff00;
   --border-color: #ffffff;
 }
 
+/* SOFT / SEPIA CONTRAST MODE */
+html[data-color-mode="soft"] {
+  --bg-primary: #fbf7ee;
+  --bg-surface: #f4ece1;
+  --text-primary: #2d261e;
+  --text-secondary: #4a3e31;
+  --color-gov-blue: #234e70;
+  --color-gov-blue-dark: #1b3d57;
+  --color-gov-red: #9e2a2b;
+  --color-gov-gold: #b07d1a;
+  --focus-ring: #b07d1a;
+  --border-color: #d8c7b5;
+}
+
 html {
   font-size: var(--font-scale);
+  scroll-behavior: smooth;
 }
 
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Noto Sans Devanagari";
-  line-height: 1.6;
+  line-height: 1.65;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Accessible focus ring */
+/* High Visibility Focus Ring */
 *:focus-visible {
-  outline: 3px solid var(--focus-ring) !important;
+  outline: 3.5px solid var(--focus-ring) !important;
   outline-offset: 3px !important;
 }
 
-/* Skip link styling */
+/* Highlight Focus when enabled */
+html[data-focus-highlight="true"] *:focus-visible {
+  outline: 4px solid #f59e0b !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.35) !important;
+}
+
+/* Focused Text Zoom (~105%) */
+html[data-focus-zoom="true"] button:focus-visible,
+html[data-focus-zoom="true"] a:focus-visible,
+html[data-focus-zoom="true"] input:focus-visible,
+html[data-focus-zoom="true"] select:focus-visible,
+html[data-focus-zoom="true"] textarea:focus-visible {
+  transform: scale(1.04);
+  transition: transform 0.15s ease;
+  z-index: 20;
+}
+
+/* Interactive Card Zoom (scale 1.02) */
+html[data-card-zoom="true"] .a11y-card,
+html[data-card-zoom="true"] [data-a11y-card="true"] {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+html[data-card-zoom="true"] .a11y-card:hover,
+html[data-card-zoom="true"] .a11y-card:focus-within,
+html[data-card-zoom="true"] [data-a11y-card="true"]:hover,
+html[data-card-zoom="true"] [data-a11y-card="true"]:focus-within {
+  transform: scale(1.02);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+/* Accessible Skip Link */
 .skip-link {
   position: absolute;
-  top: -100px;
+  top: -120px;
   left: 1rem;
-  background: #1e3a8a;
-  color: #ffffff;
-  padding: 0.75rem 1.25rem;
-  z-index: 9999;
-  font-weight: 700;
-  border-radius: 0.375rem;
+  background: #f59e0b;
+  color: #020617;
+  padding: 0.85rem 1.5rem;
+  z-index: 10000;
+  font-weight: 800;
+  border-radius: 0.5rem;
+  border: 2px solid #000000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   transition: top 0.2s ease;
 }
 
 .skip-link:focus {
   top: 1rem;
+  outline: 4px solid #1e3a8a !important;
+  outline-offset: 3px !important;
 }
 
-/* Reduced motion */
+/* Motion and Animation Control */
+html[data-motion="reduced"] *,
+html[data-motion="reduced"] *::before,
+html[data-motion="reduced"] *::after {
+  animation-duration: 0.05ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.05ms !important;
+  scroll-behavior: auto !important;
+  transform: none !important;
+}
+
+html[data-motion="off"] *,
+html[data-motion="off"] *::before,
+html[data-motion="off"] *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+  transform: none !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -72,4 +160,14 @@ body {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Simple fade-in utility */
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-out forwards;
 }

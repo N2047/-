@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/lib/authContext";
+import { useAccessibility } from "@/lib/accessibilityContext";
 import AuthModal from "@/components/auth/AuthModal";
 
 interface QuickPalikaFinderProps {
@@ -33,6 +34,7 @@ export default function QuickPalikaFinder({ lang }: QuickPalikaFinderProps) {
   const [authModalMode, setAuthModalMode] = useState<"login" | "signup">("login");
 
   const { user, isAuthenticated, logout } = useAuth();
+  const { announceLive, speakText } = useAccessibility();
   const t = translations[lang];
 
   const currentDistrict = KOSHI_DISTRICTS.find((d) => d.id === selectedDistrictId);
@@ -130,8 +132,17 @@ export default function QuickPalikaFinder({ lang }: QuickPalikaFinderProps) {
                 id="district-select"
                 value={selectedDistrictId}
                 onChange={(e) => {
-                  setSelectedDistrictId(e.target.value);
+                  const val = e.target.value;
+                  setSelectedDistrictId(val);
                   setSelectedPalikaId("");
+                  if (val) {
+                    const dist = KOSHI_DISTRICTS.find((d) => d.id === val);
+                    if (dist) {
+                      const msg = `${dist.name_ne} जिल्लाका ${dist.local_governments.length} स्थानीय तह उपलब्ध छन्।`;
+                      announceLive(msg);
+                      speakText(msg);
+                    }
+                  }
                 }}
                 className="w-full bg-slate-900 text-white text-sm rounded-xl px-3.5 py-2.5 border border-slate-700 focus:ring-2 focus:ring-amber-400 focus:outline-hidden"
               >
@@ -153,7 +164,18 @@ export default function QuickPalikaFinder({ lang }: QuickPalikaFinderProps) {
                 id="palika-select"
                 disabled={!selectedDistrictId}
                 value={selectedPalikaId}
-                onChange={(e) => setSelectedPalikaId(e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setSelectedPalikaId(val);
+                  if (val) {
+                    const p = palikas.find((item) => item.id === val);
+                    if (p) {
+                      const msg = `${p.name_ne} स्थानीय तह छानियो।`;
+                      announceLive(msg);
+                      speakText(msg);
+                    }
+                  }
+                }}
                 className={`w-full text-sm rounded-xl px-3.5 py-2.5 border focus:ring-2 focus:ring-amber-400 focus:outline-hidden ${
                   selectedDistrictId 
                     ? "bg-slate-900 text-white border-slate-700" 

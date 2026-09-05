@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { 
   FormConfig, 
   FormSection, 
+  DEFAULT_FORM_CONFIG,
   getFormConfig, 
   updateMainTitle, 
   renameSection, 
@@ -39,7 +40,7 @@ export default function FormConfigModal({
   adminName = "कोशी प्रदेश मुख्य प्रशासक",
   initialTab = "title",
 }: FormConfigModalProps) {
-  const [config, setConfig] = useState<FormConfig>(getFormConfig());
+  const [config, setConfig] = useState<FormConfig>(DEFAULT_FORM_CONFIG);
   const [activeTab, setActiveTab] = useState<"title" | "sections" | "add">(initialTab);
   const [message, setMessage] = useState<string>("");
 

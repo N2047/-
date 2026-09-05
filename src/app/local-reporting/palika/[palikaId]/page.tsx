@@ -51,7 +51,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/lib/authContext";
 import AuthModal from "@/components/auth/AuthModal";
-import { getFormConfig, FormConfig, FormSection, deleteSection } from "@/lib/formConfig";
+import { getFormConfig, DEFAULT_FORM_CONFIG, FormConfig, FormSection, deleteSection } from "@/lib/formConfig";
 import FormConfigModal from "@/components/admin/FormConfigModal";
 
 export default function AnnualReportFormPage({
@@ -63,7 +63,7 @@ export default function AnnualReportFormPage({
   const palikaId = resolvedParams.palikaId;
 
   const [lang, setLang] = useState<Language>("ne");
-  const [formConfig, setFormConfig] = useState<FormConfig>(() => getFormConfig());
+  const [formConfig, setFormConfig] = useState<FormConfig>(DEFAULT_FORM_CONFIG);
   const [activeSection, setActiveSection] = useState<number>(1);
   const [formData, setFormData] = useState<AnnualReportFormData>(() => createInitialFormData(palikaId));
   const [saveMessage, setSaveMessage] = useState<string>("");
@@ -86,6 +86,7 @@ export default function AnnualReportFormPage({
 
   // Listen to form config updates
   useEffect(() => {
+    setFormConfig(getFormConfig());
     const handleConfigUpdate = () => {
       setFormConfig(getFormConfig());
     };
