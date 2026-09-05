@@ -96,11 +96,25 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
               <button
                 type="button"
                 onClick={toggleDarkMode}
-                className="p-1 text-slate-300 hover:text-amber-300 rounded cursor-pointer"
-                aria-label={darkMode ? "लाइट मोडमा जानुहोस्" : "डार्क मोडमा जानुहोस्"}
-                title={darkMode ? "लाइट मोड" : "डार्क मोड"}
+                className={`px-2 py-0.5 rounded-lg cursor-pointer transition-all flex items-center gap-1 text-[11px] font-bold ${
+                  darkMode
+                    ? "bg-amber-400 text-slate-950 hover:bg-amber-300 shadow-xs"
+                    : "bg-slate-800 text-slate-200 hover:text-amber-300 hover:bg-slate-700 border border-slate-700"
+                }`}
+                aria-label={darkMode ? "डार्क मोड सक्रिय छ, लाइट मोडमा जान क्लिक गर्नुहोस्" : "लाइट मोड सक्रिय छ, डार्क मोडमा जान क्लिक गर्नुहोस्"}
+                title={darkMode ? "डार्क मोड: अन" : "डार्क मोड: अफ"}
               >
-                {darkMode ? <Sun className="w-3.5 h-3.5 text-amber-400" /> : <Moon className="w-3.5 h-3.5" />}
+                {darkMode ? (
+                  <>
+                    <Sun className="w-3.5 h-3.5 text-slate-950 fill-amber-500" />
+                    <span className="hidden sm:inline">डार्क: अन</span>
+                  </>
+                ) : (
+                  <>
+                    <Moon className="w-3.5 h-3.5 text-slate-300" />
+                    <span className="hidden sm:inline">डार्क मोड</span>
+                  </>
+                )}
               </button>
 
               {/* User Authentication Status */}
@@ -271,18 +285,32 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
         {/* Mobile Drawer Navigation */}
         {mobileMenuOpen && (
           <nav aria-label="मोबाइल मुख्य नेभिगेसन" className="lg:hidden bg-blue-950 dark:bg-slate-950 text-white border-t border-blue-900 dark:border-slate-800 px-4 py-3 shadow-xl space-y-3">
-            {/* Mobile Accessibility Button */}
-            <button
-              type="button"
-              onClick={() => {
-                setMobileMenuOpen(false);
-                setIsPanelOpen(true);
-              }}
-              className="w-full py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-950 rounded-xl text-xs font-black flex items-center justify-center gap-2 shadow-md"
-            >
-              <span className="text-base" aria-hidden="true">♿</span>
-              <span>पहुँचयुक्तता सेटिङ्स (Accessibility Panel)</span>
-            </button>
+            {/* Mobile Accessibility & Dark Mode Buttons */}
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  setIsPanelOpen(true);
+                }}
+                className="py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-950 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 shadow-md cursor-pointer"
+              >
+                <span className="text-base" aria-hidden="true">♿</span>
+                <span>पहुँचयुक्तता</span>
+              </button>
+              <button
+                type="button"
+                onClick={toggleDarkMode}
+                className={`py-2.5 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 shadow-md cursor-pointer transition-all ${
+                  darkMode
+                    ? "bg-amber-400 text-slate-950 font-black shadow-xs"
+                    : "bg-slate-800 text-white hover:bg-slate-700 border border-slate-700"
+                }`}
+              >
+                {darkMode ? <Sun className="w-4 h-4 text-slate-950 fill-amber-500" /> : <Moon className="w-4 h-4 text-slate-300" />}
+                <span>{darkMode ? "डार्क: अन" : "डार्क: अफ"}</span>
+              </button>
+            </div>
 
             {/* Mobile Auth Status */}
             <div className="p-3 rounded-xl bg-blue-900/70 dark:bg-slate-900 border border-blue-800 dark:border-slate-800 flex items-center justify-between">

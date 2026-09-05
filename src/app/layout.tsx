@@ -17,6 +17,33 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ne" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                var s = localStorage.getItem("dic_accessibility_settings");
+                if (s) {
+                  var p = JSON.parse(s);
+                  if (p.darkMode) {
+                    document.documentElement.classList.add("dark");
+                    document.documentElement.setAttribute("data-theme", "dark");
+                    document.documentElement.setAttribute("data-dark-mode", "true");
+                  }
+                  if (p.colorMode) {
+                    document.documentElement.setAttribute("data-color-mode", p.colorMode);
+                  }
+                  if (p.fontSize) {
+                    document.documentElement.setAttribute("data-font-size", p.fontSize);
+                    var scale = p.fontSize === 180 ? '1.45rem' : p.fontSize === 150 ? '1.25rem' : '1rem';
+                    document.documentElement.style.setProperty('--font-scale', scale);
+                  }
+                }
+              } catch (e) {}
+            `,
+          }}
+        />
+      </head>
       <body className="antialiased min-h-screen flex flex-col" suppressHydrationWarning>
         <AuthProvider>
           <AccessibilityProvider>

@@ -74,6 +74,11 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
       if (saved) {
         const parsed = JSON.parse(saved);
         setSettings((prev) => ({ ...prev, ...parsed }));
+        if (parsed.darkMode) {
+          document.documentElement.classList.add("dark");
+          document.documentElement.setAttribute("data-theme", "dark");
+          document.documentElement.setAttribute("data-dark-mode", "true");
+        }
       }
     } catch (e) {
       console.error("Failed to load accessibility settings", e);
@@ -87,8 +92,16 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
     } catch {}
 
     const html = document.documentElement;
-    html.setAttribute("data-theme", settings.darkMode ? "dark" : "light");
-    html.setAttribute("data-dark-mode", settings.darkMode ? "true" : "false");
+    if (settings.darkMode) {
+      html.classList.add("dark");
+      html.setAttribute("data-theme", "dark");
+      html.setAttribute("data-dark-mode", "true");
+    } else {
+      html.classList.remove("dark");
+      html.setAttribute("data-theme", "light");
+      html.setAttribute("data-dark-mode", "false");
+    }
+
     html.setAttribute("data-color-mode", settings.colorMode);
     html.setAttribute("data-font-size", settings.fontSize.toString());
     html.setAttribute("data-focus-highlight", settings.focusHighlight ? "true" : "false");
