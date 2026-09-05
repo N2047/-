@@ -1,0 +1,245 @@
+"use client";
+
+import React from "react";
+import { HomeVisitRecord } from "@/types/form";
+import { Plus, Trash2, Home, Users } from "lucide-react";
+
+interface HomeVisitTableProps {
+  records: HomeVisitRecord[];
+  onChange: (records: HomeVisitRecord[]) => void;
+}
+
+const DISABILITY_TYPES = [
+  "शारीरिक",
+  "दृष्टि सम्बन्धी (न्यून दृष्टि)",
+  "दृष्टि सम्बन्धी (दृष्टिबिहीनता)",
+  "सुनाइ सम्बन्धी (सुस्तश्रवण)",
+  "सुनाइ सम्बन्धी (बहिरा)",
+  "श्रवण दृष्टिबिहीन",
+  "स्वर र बोलाइ सम्बन्धी",
+  "मानसिक तथा मनोसामाजिक",
+  "बौद्धिक अपाङ्गता",
+  "हेमोफिलिया",
+  "अटिज्म",
+  "बहु-अपाङ्गता",
+  "अन्य",
+];
+
+const SEVERITY_LEVELS = [
+  "रातो (पूर्ण अशक्त)",
+  "निलो (अति अशक्त)",
+  "पहेलो (मध्यम)",
+  "सेतो (सामान्य)",
+  "परिचयपत्र नभएको",
+];
+
+export default function HomeVisitTable({ records, onChange }: HomeVisitTableProps) {
+  const handleAddRow = () => {
+    const newRecord: HomeVisitRecord = {
+      id: "hv-" + Date.now() + "-" + Math.random().toString(36).substr(2, 4),
+      row_order: records.length + 1,
+      id_card_number: "",
+      beneficiary_name: "",
+      gender: "महिला",
+      ward_number: 1,
+      contact_number: "",
+      disability_type: "शारीरिक",
+      disability_severity: "रातो (पूर्ण अशक्त)",
+      service_provided: "",
+      remarks: "",
+    };
+    onChange([...records, newRecord]);
+  };
+
+  const handleRemoveRow = (index: number) => {
+    const updated = records.filter((_, i) => i !== index).map((r, i) => ({
+      ...r,
+      row_order: i + 1,
+    }));
+    onChange(updated);
+  };
+
+  const handleFieldChange = (index: number, field: keyof HomeVisitRecord, value: any) => {
+    const updated = [...records];
+    updated[index] = {
+      ...updated[index],
+      [field]: value,
+    };
+    onChange(updated);
+  };
+
+  return (
+    <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-200">
+        <div>
+          <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+            <Home className="w-5 h-5 text-blue-700" aria-hidden="true" />
+            <span>अनुसूची १.१ — गृहभेट गरिएको विवरण</span>
+          </h3>
+          <p className="text-xs text-slate-500 mt-0.5">
+            सहजकर्ताले घरमै पुगेर सेवा, परामर्श वा जानकारी दिएका अपाङ्गता भएका व्यक्तिहरूको पंक्तिगत प्रविष्टि
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-bold text-blue-900 bg-blue-100 px-3 py-1 rounded-full">
+            जम्मा गृहभेट: {records.length} जना
+          </span>
+          <button
+            type="button"
+            onClick={handleAddRow}
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-blue-900 hover:bg-blue-800 text-white text-xs font-bold shadow-xs transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            <span>+ नयाँ गृहभेट थप्नुहोस्</span>
+          </button>
+        </div>
+      </div>
+
+      {records.length === 0 ? (
+        <div className="text-center py-10 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+          <Users className="w-8 h-8 mx-auto text-slate-400 mb-2" />
+          <p className="text-sm font-semibold text-slate-700">अहिलेसम्म कुनै गृहभेट विवरण थपिएको छैन।</p>
+          <p className="text-xs text-slate-500 mb-3">गृहभेट गरिएको विवरण भर्न माथिको &lsquo;+ नयाँ गृहभेट थप्नुहोस्&rsquo; बटनमा क्लिक गर्नुहोस्।</p>
+          <button
+            type="button"
+            onClick={handleAddRow}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-900 hover:bg-blue-800 text-white text-xs font-bold"
+          >
+            <Plus className="w-4 h-4" />
+            <span>पहिलो गृहभेट विवरण थप्नुहोस्</span>
+          </button>
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-slate-200 text-xs border border-slate-200 rounded-lg">
+            <thead className="bg-slate-100 text-slate-800 font-bold">
+              <tr>
+                <th scope="col" className="px-2.5 py-2.5 text-center w-12">क्र.सं.</th>
+                <th scope="col" className="px-3 py-2.5 text-left">परिचय पत्र नं.</th>
+                <th scope="col" className="px-3 py-2.5 text-left">नाम / थर *</th>
+                <th scope="col" className="px-2 py-2.5 text-left">लिङ्ग *</th>
+                <th scope="col" className="px-2 py-2.5 text-left w-16">वडा नं. *</th>
+                <th scope="col" className="px-3 py-2.5 text-left">सम्पर्क नं.</th>
+                <th scope="col" className="px-3 py-2.5 text-left">अपाङ्गताको प्रकार *</th>
+                <th scope="col" className="px-3 py-2.5 text-left">गम्भीरता</th>
+                <th scope="col" className="px-3 py-2.5 text-left">के सेवा वा परामर्श दिएको *</th>
+                <th scope="col" className="px-3 py-2.5 text-left">कैफियत</th>
+                <th scope="col" className="px-2 py-2.5 text-center w-12">हटाउनुहोस्</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-200 bg-white">
+              {records.map((r, idx) => (
+                <tr key={r.id || idx} className="hover:bg-slate-50/80">
+                  <td className="px-2.5 py-2 text-center font-bold text-slate-500 bg-slate-50">
+                    {idx + 1}
+                  </td>
+                  <td className="px-2 py-1.5">
+                    <input
+                      type="text"
+                      placeholder="परिचय पत्र नं."
+                      value={r.id_card_number}
+                      onChange={(e) => handleFieldChange(idx, "id_card_number", e.target.value)}
+                      className="w-24 bg-white border border-slate-300 rounded px-2 py-1 text-xs"
+                    />
+                  </td>
+                  <td className="px-2 py-1.5">
+                    <input
+                      type="text"
+                      placeholder="व्यक्तिको नाम"
+                      required
+                      value={r.beneficiary_name}
+                      onChange={(e) => handleFieldChange(idx, "beneficiary_name", e.target.value)}
+                      className="w-32 bg-white border border-slate-300 rounded px-2 py-1 text-xs font-medium"
+                    />
+                  </td>
+                  <td className="px-2 py-1.5">
+                    <select
+                      value={r.gender}
+                      onChange={(e) => handleFieldChange(idx, "gender", e.target.value)}
+                      className="w-20 bg-white border border-slate-300 rounded px-1.5 py-1 text-xs"
+                    >
+                      <option value="महिला">महिला</option>
+                      <option value="पुरुष">पुरुष</option>
+                      <option value="अन्य">अन्य</option>
+                    </select>
+                  </td>
+                  <td className="px-2 py-1.5">
+                    <input
+                      type="number"
+                      min="1"
+                      placeholder="वडा"
+                      value={r.ward_number}
+                      onChange={(e) => handleFieldChange(idx, "ward_number", parseInt(e.target.value, 10) || "")}
+                      className="w-14 bg-white border border-slate-300 rounded px-2 py-1 text-xs"
+                    />
+                  </td>
+                  <td className="px-2 py-1.5">
+                    <input
+                      type="text"
+                      placeholder="९८xxxxxxxx"
+                      value={r.contact_number}
+                      onChange={(e) => handleFieldChange(idx, "contact_number", e.target.value)}
+                      className="w-28 bg-white border border-slate-300 rounded px-2 py-1 text-xs"
+                    />
+                  </td>
+                  <td className="px-2 py-1.5">
+                    <select
+                      value={r.disability_type}
+                      onChange={(e) => handleFieldChange(idx, "disability_type", e.target.value)}
+                      className="w-36 bg-white border border-slate-300 rounded px-2 py-1 text-xs"
+                    >
+                      {DISABILITY_TYPES.map((dt) => (
+                        <option key={dt} value={dt}>{dt}</option>
+                      ))}
+                    </select>
+                  </td>
+                  <td className="px-2 py-1.5">
+                    <select
+                      value={r.disability_severity}
+                      onChange={(e) => handleFieldChange(idx, "disability_severity", e.target.value)}
+                      className="w-32 bg-white border border-slate-300 rounded px-2 py-1 text-xs"
+                    >
+                      {SEVERITY_LEVELS.map((sl) => (
+                        <option key={sl} value={sl}>{sl}</option>
+                      ))}
+                    </select>
+                  </td>
+                  <td className="px-2 py-1.5">
+                    <input
+                      type="text"
+                      placeholder="के सेवा/परामर्श दिइयो..."
+                      required
+                      value={r.service_provided}
+                      onChange={(e) => handleFieldChange(idx, "service_provided", e.target.value)}
+                      className="w-48 bg-white border border-slate-300 rounded px-2 py-1 text-xs"
+                    />
+                  </td>
+                  <td className="px-2 py-1.5">
+                    <input
+                      type="text"
+                      placeholder="कैफियत..."
+                      value={r.remarks}
+                      onChange={(e) => handleFieldChange(idx, "remarks", e.target.value)}
+                      className="w-28 bg-white border border-slate-300 rounded px-2 py-1 text-xs"
+                    />
+                  </td>
+                  <td className="px-2 py-1.5 text-center">
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveRow(idx)}
+                      className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
+                      title="हटाउनुहोस्"
+                      aria-label={`${r.beneficiary_name || idx + 1} को विवरण हटाउनुहोस्`}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
