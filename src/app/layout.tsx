@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/lib/authContext";
 import { AccessibilityProvider } from "@/lib/accessibilityContext";
+import DicChatbot from "@/components/chat/DicChatbot";
 
 export const metadata: Metadata = {
   title: "अपाङ्गता सूचना केन्द्र (DIC) | Disability Information Center",
@@ -48,6 +49,7 @@ export default function RootLayout({
         <AuthProvider>
           <AccessibilityProvider>
             {children}
+            <DicChatbot />
           </AccessibilityProvider>
         </AuthProvider>
       </body>

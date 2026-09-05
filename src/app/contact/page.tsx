@@ -32,6 +32,7 @@ import {
   Lock,
   EyeOff
 } from "lucide-react";
+import GovernmentGrievanceForm from "@/components/grievance/GovernmentGrievanceForm";
 
 export default function ContactPage() {
   const [lang, setLang] = useState<Language>("ne");
@@ -47,16 +48,6 @@ export default function ContactPage() {
 
   // Search State
   const [searchQuery, setSearchQuery] = useState<string>("");
-
-  // Online Inquiry Form State
-  const [fullName, setFullName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [inquiryDistrict, setInquiryDistrict] = useState("");
-  const [category, setCategory] = useState("service_inquiry");
-  const [message, setMessage] = useState("");
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Load Contacts and listen for updates
   useEffect(() => {
@@ -170,20 +161,7 @@ export default function ContactPage() {
     announceLive(`${contact.local_government_name_ne}, ${contact.district_name_ne} को सम्पर्क विवरण लोड गरियो।`);
   };
 
-  // Inquiry Form Submit
-  const handleInquirySubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSubmitted(true);
-      setFullName("");
-      setPhone("");
-      setEmail("");
-      setMessage("");
-      announceLive("तपाईंको सन्देश सफलतापूर्वक पठाइयो।");
-    }, 700);
-  };
+
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors">
@@ -799,137 +777,9 @@ export default function ContactPage() {
         </section>
 
         {/* ============================================================= */}
-        {/* ONLINE INQUIRY & GRIEVANCE FORM */}
+        {/* GOVERNMENT GRIEVANCE & COMPLAINT SUBMISSION SYSTEM */}
         {/* ============================================================= */}
-        <section aria-labelledby="inquiry-heading" className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm mb-12">
-          <div className="mb-6 pb-4 border-b border-slate-200 dark:border-slate-800">
-            <h2 id="inquiry-heading" className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
-              <Mail className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-              <span>अनलाइन सोधपुछ तथा गुनासो दर्ता फारम (Direct Inquiry)</span>
-            </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              अपाङ्गता सेवासुविधा, परिचयपत्र, स्थानीय प्रतिवेदन वा कानुनी परामर्शका लागि सिधै सन्देश पठाउनुहोस्।
-            </p>
-          </div>
-
-          {isSubmitted ? (
-            <div className="p-6 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 text-center space-y-3">
-              <div className="w-12 h-12 rounded-full bg-emerald-600 text-white flex items-center justify-center mx-auto text-xl shadow-md">
-                ✓
-              </div>
-              <h3 className="text-base font-black text-emerald-900 dark:text-emerald-200">
-                तपाईंको सन्देश सफलतापूर्वक प्राप्त भयो!
-              </h3>
-              <p className="text-xs text-emerald-800 dark:text-emerald-300 max-w-md mx-auto">
-                हाम्रो सहायता डेस्कले तपाईंलाई सम्पर्क नम्बर वा इमेलमार्फत शीघ्र प्रतिक्रिया दिनेछ। धन्यवाद।
-              </p>
-              <button
-                type="button"
-                onClick={() => setIsSubmitted(false)}
-                className="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold transition-all cursor-pointer mt-2"
-              >
-                अर्को सन्देश पठाउनुहोस्
-              </button>
-            </div>
-          ) : (
-            <form onSubmit={handleInquirySubmit} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="inq-name" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    पूरा नाम <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    id="inq-name"
-                    type="text"
-                    required
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    placeholder="उदा. रमेश श्रेष्ठ"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-medium focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="inq-phone" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    सम्पर्क फोन नम्बर <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    id="inq-phone"
-                    type="tel"
-                    required
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="उदा. ९८XXXXXXXX"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-medium focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="inq-district" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    सम्बन्धित जिल्ला <span className="text-rose-500">*</span>
-                  </label>
-                  <select
-                    id="inq-district"
-                    required
-                    value={inquiryDistrict}
-                    onChange={(e) => setInquiryDistrict(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-medium focus:ring-2 focus:ring-blue-600 focus:outline-hidden cursor-pointer"
-                  >
-                    <option value="">-- जिल्ला छनौट गर्नुहोस् --</option>
-                    {KOSHI_DISTRICTS.map((d) => (
-                      <option key={d.id} value={d.name_ne}>
-                        {d.name_ne} जिल्ला
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label htmlFor="inq-category" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    सोधपुछको विषय <span className="text-rose-500">*</span>
-                  </label>
-                  <select
-                    id="inq-category"
-                    required
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-medium focus:ring-2 focus:ring-blue-600 focus:outline-hidden cursor-pointer"
-                  >
-                    <option value="service_inquiry">अपाङ्गता सेवासुविधा तथा सहायक सामग्री</option>
-                    <option value="id_card">अपाङ्गता परिचयपत्र तथा सामाजिक सुरक्षा भत्ता</option>
-                    <option value="facilitator_contact">स्थानीय तह सहजकर्ता सम्पर्क समन्वय</option>
-                    <option value="policy_law">नीति, कानुन तथा अधिकार सम्बन्धी</option>
-                    <option value="grievance">गुनासो वा सुझाव</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="inq-msg" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  सन्देश / विवरण <span className="text-rose-500">*</span>
-                </label>
-                <textarea
-                  id="inq-msg"
-                  required
-                  rows={4}
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="तपाईंको जिज्ञासा वा सन्देश यहाँ लेख्नुहोस्..."
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-medium focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full py-3 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <Send className="w-4 h-4" />
-                <span>{isSubmitting ? "सन्देश पठाउँदै..." : "सन्देश पठाउनुहोस् (Submit)"}</span>
-              </button>
-            </form>
-          )}
-        </section>
+        <GovernmentGrievanceForm />
 
       </main>
 

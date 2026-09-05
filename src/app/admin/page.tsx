@@ -33,6 +33,10 @@ import {
 import Link from "next/link";
 import FormConfigModal from "@/components/admin/FormConfigModal";
 import AdminContactManager from "@/components/admin/AdminContactManager";
+import AdminGrievanceManager from "@/components/admin/AdminGrievanceManager";
+import AdminGovernmentContacts from "@/components/admin/AdminGovernmentContacts";
+import AdminGrievanceSettings from "@/components/admin/AdminGrievanceSettings";
+import { Inbox } from "lucide-react";
 
 interface ReportReviewItem {
   palikaId: string;
@@ -56,8 +60,10 @@ export default function AdminPage() {
   const [activeReviewItem, setActiveReviewItem] = useState<ReportReviewItem | null>(null);
   const [feedbackNote, setFeedbackNote] = useState<string>("");
 
-  // Main Dashboard Tab: reports review or contact management
-  const [activeAdminTab, setActiveAdminTab] = useState<"reports" | "contacts">("reports");
+  // Main Dashboard Tab: reports review, contacts, grievances, government contacts, or grievance settings
+  const [activeAdminTab, setActiveAdminTab] = useState<
+    "reports" | "grievances" | "gov_contacts" | "grievance_settings" | "contacts"
+  >("reports");
 
   // Form Config Modal state for Super Admin
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
@@ -366,6 +372,48 @@ export default function AdminPage() {
 
           <button
             type="button"
+            onClick={() => setActiveAdminTab("grievances")}
+            className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 cursor-pointer transition-all ${
+              activeAdminTab === "grievances"
+                ? "bg-blue-900 text-white shadow-md ring-2 ring-blue-700/50"
+                : "bg-white text-slate-700 hover:bg-slate-100 border border-slate-300"
+            }`}
+          >
+            <Inbox className={`w-4 h-4 ${activeAdminTab === "grievances" ? "text-amber-300" : "text-amber-600"}`} />
+            <span>गुनासो व्यवस्थापन (Grievance Dashboard)</span>
+            <span className="text-[11px] px-2 py-0.5 rounded-full bg-blue-100 text-blue-900 font-bold border border-blue-300">
+              नयाँ
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveAdminTab("gov_contacts")}
+            className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 cursor-pointer transition-all ${
+              activeAdminTab === "gov_contacts"
+                ? "bg-blue-900 text-white shadow-md ring-2 ring-blue-700/50"
+                : "bg-white text-slate-700 hover:bg-slate-100 border border-slate-300"
+            }`}
+          >
+            <Building2 className={`w-4 h-4 ${activeAdminTab === "gov_contacts" ? "text-emerald-300" : "text-emerald-600"}`} />
+            <span>सरकारी निकाय सम्पर्क (Gov Contacts)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveAdminTab("grievance_settings")}
+            className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 cursor-pointer transition-all ${
+              activeAdminTab === "grievance_settings"
+                ? "bg-blue-900 text-white shadow-md ring-2 ring-blue-700/50"
+                : "bg-white text-slate-700 hover:bg-slate-100 border border-slate-300"
+            }`}
+          >
+            <Settings className="w-4 h-4" />
+            <span>गुनासो सेटिङ्स (Grievance Settings)</span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => setActiveAdminTab("contacts")}
             className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 cursor-pointer transition-all ${
               activeAdminTab === "contacts"
@@ -374,10 +422,7 @@ export default function AdminPage() {
             }`}
           >
             <PhoneCall className={`w-4 h-4 ${activeAdminTab === "contacts" ? "text-emerald-300" : "text-emerald-600"}`} />
-            <span>सम्पर्क व्यवस्थापन (Contact Management)</span>
-            <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900 font-bold border border-emerald-300">
-              नयाँ
-            </span>
+            <span>सम्पर्क व्यवस्थापन (Contact Directory)</span>
           </button>
         </div>
 
@@ -546,7 +591,22 @@ export default function AdminPage() {
         </>
       )}
 
-      {/* Tab 2: Contact Directory Management */}
+      {/* Tab 2: Grievance Dashboard */}
+      {activeAdminTab === "grievances" && (
+        <AdminGrievanceManager />
+      )}
+
+      {/* Tab 3: Government Master Contacts */}
+      {activeAdminTab === "gov_contacts" && (
+        <AdminGovernmentContacts />
+      )}
+
+      {/* Tab 4: Grievance Settings */}
+      {activeAdminTab === "grievance_settings" && (
+        <AdminGrievanceSettings />
+      )}
+
+      {/* Tab 5: Contact Directory Management */}
       {activeAdminTab === "contacts" && (
         <AdminContactManager />
       )}
