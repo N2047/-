@@ -693,8 +693,12 @@ export default function AnnualReportFormPage({
                     </button>
                   </div>
 
+                  <div className="block lg:hidden text-[11px] text-blue-700 bg-blue-50 px-2.5 py-1 rounded-md mb-2">
+                    👉 मोबाइलमा तालिका दायाँ-बायाँ सारेर (Swipe) भर्नुहोस्
+                  </div>
+
                   <div className="overflow-x-auto">
-                    <table className="min-w-full text-xs border border-slate-200 bg-white rounded-lg">
+                    <table className="min-w-[640px] w-full text-xs border border-slate-200 bg-white rounded-lg">
                       <thead className="bg-slate-100 text-slate-800 font-bold">
                         <tr>
                           <th className="p-2 text-left">तालिमको नाम</th>
@@ -838,8 +842,12 @@ export default function AnnualReportFormPage({
                     </button>
                   </div>
 
+                  <div className="block lg:hidden text-[11px] text-blue-700 bg-blue-50 px-2.5 py-1 rounded-md mb-2">
+                    👉 मोबाइलमा तालिका दायाँ-बायाँ सारेर (Swipe) भर्नुहोस्
+                  </div>
+
                   <div className="overflow-x-auto">
-                    <table className="min-w-full text-xs border border-slate-200 bg-white rounded-lg">
+                    <table className="min-w-[640px] w-full text-xs border border-slate-200 bg-white rounded-lg">
                       <thead className="bg-slate-100 text-slate-800 font-bold">
                         <tr>
                           <th className="p-2 text-left">काम/व्यवसायको प्रकार</th>
@@ -1290,8 +1298,12 @@ export default function AnnualReportFormPage({
                   </p>
                 </div>
 
+                <div className="block lg:hidden text-[11px] text-blue-700 bg-blue-50 px-2.5 py-1 rounded-md mb-2">
+                  👉 मोबाइलमा तालिका दायाँ-बायाँ सारेर (Swipe) भर्नुहोस्
+                </div>
+
                 <div className="overflow-x-auto">
-                  <table className="min-w-full text-xs border border-slate-200 rounded-lg">
+                  <table className="min-w-[680px] w-full text-xs border border-slate-200 rounded-lg">
                     <thead className="bg-slate-100 text-slate-800 font-bold">
                       <tr>
                         <th className="p-2.5 text-left">अपाङ्गताको प्रकार</th>
@@ -1418,8 +1430,12 @@ export default function AnnualReportFormPage({
                   </p>
                 </div>
 
+                <div className="block lg:hidden text-[11px] text-blue-700 bg-blue-50 px-2.5 py-1 rounded-md mb-2">
+                  👉 मोबाइलमा तालिका दायाँ-बायाँ सारेर (Swipe) भर्नुहोस्
+                </div>
+
                 <div className="overflow-x-auto">
-                  <table className="min-w-full text-xs border border-slate-200 rounded-lg">
+                  <table className="min-w-[680px] w-full text-xs border border-slate-200 rounded-lg">
                     <thead className="bg-slate-100 text-slate-800 font-bold">
                       <tr>
                         <th className="p-2.5 text-left">परिचयपत्रको रंग तथा गाम्भीर्यता</th>
