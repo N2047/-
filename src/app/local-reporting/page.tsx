@@ -33,6 +33,7 @@ export default function LocalReportingPage() {
   const { user, isAuthenticated } = useAuth();
   const isSuperAdmin = user?.role === "super_admin" || user?.role === "provincial_admin";
   const isEmployee = user?.role === "employee" || user?.role === "palika_staff";
+  const isNormalUser = user?.role === "normal_user";
   const assignedPalikaId = user?.palika_id || user?.palikaId;
   const assignedPalikaName = user?.palika_name || user?.palikaName;
 
@@ -320,44 +321,41 @@ export default function LocalReportingPage() {
                   </div>
 
                   <div className="flex items-center gap-2 pt-3 border-t border-slate-200/80">
-                    <Link
-                      href={`/local-reporting/palika/${palika.id}`}
-                      className={`flex-1 py-2 px-3 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition-colors shadow-xs ${
-                        isSuperAdmin
-                          ? "bg-amber-500 hover:bg-amber-400 text-slate-950"
-                          : user?.palikaId === palika.id
-                          ? "bg-emerald-700 hover:bg-emerald-600 text-white"
-                          : "bg-blue-900 hover:bg-blue-800 text-white"
-                      }`}
-                    >
-                      {isSuperAdmin ? (
-                        <>
-                          <Edit3 className="w-3.5 h-3.5" />
-                          <span>डाटा सच्याउनुहोस्</span>
-                        </>
-                      ) : user?.palikaId === palika.id ? (
-                        <>
-                          <FileText className="w-3.5 h-3.5" />
-                          <span>मेरो पालिका फारम</span>
-                        </>
-                      ) : !isAuthenticated ? (
-                        <>
-                          <Lock className="w-3.5 h-3.5" />
-                          <span>प्रतिवेदन फारम</span>
-                        </>
-                      ) : (
-                        <>
-                          <FileText className="w-3.5 h-3.5" />
-                          <span>फारम हेर्नुहोस्</span>
-                        </>
-                      )}
-                    </Link>
+                    {/* Show form edit button ONLY for Super Admin OR assigned Employee */}
+                    {!isNormalUser && (isSuperAdmin || (isEmployee && (assignedPalikaId === palika.id))) && (
+                      <Link
+                        href={`/local-reporting/palika/${palika.id}`}
+                        className={`flex-1 py-2 px-3 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition-colors shadow-xs ${
+                          isSuperAdmin
+                            ? "bg-amber-500 hover:bg-amber-400 text-slate-950"
+                            : "bg-emerald-700 hover:bg-emerald-600 text-white"
+                        }`}
+                      >
+                        {isSuperAdmin ? (
+                          <>
+                            <Edit3 className="w-3.5 h-3.5" />
+                            <span>डाटा सच्याउनुहोस्</span>
+                          </>
+                        ) : (
+                          <>
+                            <FileText className="w-3.5 h-3.5" />
+                            <span>मेरो पालिका फारम</span>
+                          </>
+                        )}
+                      </Link>
+                    )}
+
                     <Link
                       href={`/local-reporting/palika/${palika.id}/profile`}
-                      className="py-2 px-2.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold text-xs transition-colors"
-                      title="पालिका प्रोफाइल"
+                      className={`py-2 px-3 rounded-lg font-bold text-xs transition-colors flex items-center justify-center gap-1.5 ${
+                        isNormalUser || (!isSuperAdmin && (!isEmployee || assignedPalikaId !== palika.id))
+                          ? "flex-1 bg-blue-900 hover:bg-blue-800 text-white shadow-xs"
+                          : "py-2 px-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold"
+                      }`}
+                      title="पालिका प्रोफाइल तथा सार्वजनिक रिपोर्ट"
                     >
                       <Building2 className="w-3.5 h-3.5" />
+                      <span>{isNormalUser || (!isSuperAdmin && (!isEmployee || assignedPalikaId !== palika.id)) ? "पालिका प्रोफाइल तथा रिपोर्ट हेर्नुहोस्" : "प्रोफाइल"}</span>
                     </Link>
                   </div>
                 </div>

@@ -51,8 +51,16 @@ export default function QuickPalikaFinder({ lang }: QuickPalikaFinderProps) {
 
   const isEmployee = user?.role === "employee" || user?.role === "palika_staff";
   const isSuperAdmin = user?.role === "super_admin" || user?.role === "provincial_admin";
+  const isNormalUser = user?.role === "normal_user";
   const assignedPalikaId = user?.palika_id || user?.palikaId;
   const assignedPalikaName = user?.palika_name || user?.palikaName;
+
+  // Strict Rule: Normal users MUST NEVER see or access the yellow "प्रतिवेदन फारम" button.
+  // Only Super Admin OR an approved Employee assigned to this selected palika can access it.
+  const canAccessForm = !isNormalUser && (
+    isSuperAdmin || 
+    (isEmployee && user?.account_status === "approved" && selectedPalikaId === assignedPalikaId)
+  );
 
   return (
     <section aria-labelledby="quick-finder-heading" className="py-8 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 transition-colors">
@@ -220,32 +228,40 @@ export default function QuickPalikaFinder({ lang }: QuickPalikaFinderProps) {
 
             {/* 3. Action Buttons: Form Fill (Secure) + Profile */}
             <div className="flex flex-col sm:flex-row gap-2 items-end">
-              <Link
-                href={selectedPalikaId ? `/local-reporting/palika/${selectedPalikaId}` : "#"}
-                aria-disabled={!selectedPalikaId}
-                className={`flex-1 py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all text-center min-h-[44px] ${
-                  selectedPalikaId 
-                    ? "bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-lg shadow-amber-400/20 cursor-pointer" 
-                    : "bg-slate-700/60 text-slate-400 cursor-not-allowed pointer-events-none"
-                }`}
-              >
-                <Lock className="w-3.5 h-3.5 shrink-0" />
-                <span>प्रतिवेदन फारम</span>
-                <ArrowRight className="w-4 h-4 shrink-0" aria-hidden="true" />
-              </Link>
+              {/* Show yellow "प्रतिवेदन फारम" ONLY for Super Admin OR Employee of this assigned palika */}
+              {/* STRICTLY HIDDEN for Normal Users (सामान्य युजर्स) to prevent unauthorized editing */}
+              {canAccessForm && (
+                <Link
+                  href={selectedPalikaId ? `/local-reporting/palika/${selectedPalikaId}` : "#"}
+                  aria-disabled={!selectedPalikaId}
+                  className={`flex-1 py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all text-center min-h-[44px] ${
+                    selectedPalikaId 
+                      ? "bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-lg shadow-amber-400/20 cursor-pointer" 
+                      : "bg-slate-700/60 text-slate-400 cursor-not-allowed pointer-events-none"
+                  }`}
+                >
+                  <Lock className="w-3.5 h-3.5 shrink-0" />
+                  <span>प्रतिवेदन फारम</span>
+                  <ArrowRight className="w-4 h-4 shrink-0" aria-hidden="true" />
+                </Link>
+              )}
 
+              {/* Public Profile & Report Button: Always visible for normal users and visitors */}
               <Link
                 href={selectedPalikaId ? `/local-reporting/palika/${selectedPalikaId}/profile` : "#"}
                 aria-disabled={!selectedPalikaId}
-                className={`py-2.5 px-3 rounded-xl font-semibold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all border min-h-[44px] ${
+                className={`py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all border min-h-[44px] ${
+                  !canAccessForm ? "w-full flex-1" : ""
+                } ${
                   selectedPalikaId
-                    ? "bg-white/10 hover:bg-white/20 text-white border-white/20 cursor-pointer"
+                    ? "bg-blue-600/30 hover:bg-blue-600/50 text-white border-blue-400/40 hover:border-blue-300 shadow-md cursor-pointer"
                     : "bg-white/5 text-slate-500 border-white/5 cursor-not-allowed pointer-events-none"
                 }`}
-                title="पालिका प्रोफाइल मात्र हेर्नुहोस् (खुल्ला विवरण)"
+                title="पालिका प्रोफाइल तथा सार्वजनिक रिपोर्ट हेर्नुहोस् (खुल्ला विवरण)"
               >
-                <Building className="w-3.5 h-3.5 shrink-0" />
-                <span>प्रोफाइल</span>
+                <Building className="w-4 h-4 shrink-0 text-amber-300" />
+                <span>{canAccessForm ? "प्रोफाइल" : "📰 पालिका प्रोफाइल तथा रिपोर्ट हेर्नुहोस्"}</span>
+                {!canAccessForm && <ArrowRight className="w-4 h-4 shrink-0 text-amber-300 ml-1" />}
               </Link>
             </div>
           </form>

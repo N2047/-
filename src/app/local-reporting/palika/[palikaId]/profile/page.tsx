@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { KOSHI_DISTRICTS, findPalikaById } from "@/lib/koshiGeography";
 import { translations, Language } from "@/lib/translations";
+import { useAuth } from "@/lib/authContext";
 import { createInitialFormData, DISABILITY_TEN_TYPES, CARD_COLORS } from "@/lib/defaultFormData";
 import { AnnualReportFormData } from "@/types/form";
 import { exportReportToExcel } from "@/lib/excelExport";
@@ -44,6 +45,9 @@ export default function PalikaProfilePage({
   const [lang, setLang] = useState<Language>("ne");
   const [formData, setFormData] = useState<AnnualReportFormData>(() => createInitialFormData(palikaId));
   const [hasSavedData, setHasSavedData] = useState<boolean>(false);
+
+  const { user, canEditPalika } = useAuth();
+  const canEdit = canEditPalika ? canEditPalika(palikaId) : false;
 
   // Palika & District metadata lookup
   const palikaData = findPalikaById(palikaId);
@@ -178,12 +182,14 @@ export default function PalikaProfilePage({
                 </p>
               </div>
             </div>
-            <Link
-              href={`/local-reporting/palika/${palikaId}`}
-              className="text-xs font-bold text-emerald-900 underline hover:no-underline shrink-0"
-            >
-              फारम हेर्नुहोस् &rarr;
-            </Link>
+            {canEdit && (
+              <Link
+                href={`/local-reporting/palika/${palikaId}`}
+                className="text-xs font-bold text-emerald-900 underline hover:no-underline shrink-0"
+              >
+                फारम हेर्नुहोस् &rarr;
+              </Link>
+            )}
           </div>
         ) : (
           <div className="mb-8 p-4 bg-amber-50 border border-amber-300 rounded-2xl flex items-center justify-between gap-4">
@@ -194,16 +200,18 @@ export default function PalikaProfilePage({
                   आर्थिक वर्ष २०८२/०८३ को प्रतिवेदन दाखिला प्रक्रियामा छ
                 </h2>
                 <p className="text-xs text-amber-800 mt-0.5">
-                  तपाईं तलका पूर्वनिर्धारित तथ्याङ्क अवलोकन गर्न वा वार्षिक प्रतिवेदन फारम सुरु गर्न सक्नुहुन्छ।
+                  तपाईं तलका स्थानीय सरकारको आधिकारिक तथ्याङ्क तथा सार्वजनिक प्रगति विवरण अवलोकन गर्न सक्नुहुन्छ।
                 </p>
               </div>
             </div>
-            <Link
-              href={`/local-reporting/palika/${palikaId}`}
-              className="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg text-xs font-bold shrink-0"
-            >
-              प्रतिवेदन भर्न सुरु गर्नुहोस्
-            </Link>
+            {canEdit && (
+              <Link
+                href={`/local-reporting/palika/${palikaId}`}
+                className="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg text-xs font-bold shrink-0"
+              >
+                प्रतिवेदन भर्न सुरु गर्नुहोस्
+              </Link>
+            )}
           </div>
         )}
 

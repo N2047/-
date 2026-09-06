@@ -581,6 +581,68 @@ export default function AnnualReportFormPage({
     );
   }
 
+  // Strict Rule: Normal Users and unauthorized personnel CANNOT access or edit the annual report form!
+  // Show clear security notice and direct them to view the public profile & reports instead.
+  if (!hasEditAccess) {
+    return (
+      <div className="min-h-screen flex flex-col bg-slate-900 text-slate-100">
+        <Header lang={lang} onLanguageChange={setLang} />
+
+        <main className="flex-1 max-w-3xl w-full mx-auto px-4 py-12 flex flex-col justify-center">
+          <div className="bg-slate-950/95 border-2 border-amber-500/60 rounded-3xl p-6 sm:p-10 text-white shadow-2xl backdrop-blur-xl text-center">
+            <div className="w-16 h-16 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-400 mx-auto flex items-center justify-center mb-5">
+              <ShieldCheck className="w-8 h-8" />
+            </div>
+
+            <span className="text-xs font-bold uppercase tracking-widest bg-amber-500/20 text-amber-300 px-3 py-1 rounded-full border border-amber-500/30 inline-block mb-3">
+              पहुँच प्रतिबन्ध (Access Restricted)
+            </span>
+
+            <h1 className="text-2xl sm:text-3xl font-black text-white mb-3">
+              {palikaInfo.name_ne} — वार्षिक प्रतिवेदन फारम
+            </h1>
+
+            <p className="text-sm sm:text-base text-slate-300 leading-relaxed max-w-xl mx-auto mb-6">
+              {isNormalUser
+                ? "तपाईं 'सामान्य नागरिक / प्रयोगकर्ता' खाताबाट लगइन हुनुहुन्छ। स्थानीय सरकारको वार्षिक कार्यसम्पादन प्रतिवेदन फारम भर्ने वा सम्पादन गर्ने अधिकार केवल सम्बन्धित स्थानीय तहका आधिकारिक कर्मचारी र सुपर एडमिनलाई मात्र रहेको छ।"
+                : "तपाईंलाई यस स्थानीय तहको प्रतिवेदन फारम सम्पादन गर्ने अधिकार छैन। कर्मचारीले आफ्नै तोकिएको पालिकाको प्रतिवेदन मात्र सम्पादन गर्न पाउने व्यवस्था छ।"}
+            </p>
+
+            <div className="bg-blue-950/60 border border-blue-800/60 rounded-2xl p-5 mb-8 text-left max-w-xl mx-auto">
+              <h3 className="text-sm font-bold text-sky-300 mb-1 flex items-center gap-2">
+                <Building2 className="w-4 h-4" />
+                सार्वजनिक रिपोर्ट तथा तथ्याङ्क अवलोकन गर्नुहोस्:
+              </h3>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                यस स्थानीय तहको परिचयपत्र वितरण, बजेट खर्च, पहुँचयुक्त पूर्वाधार तथा अन्य सार्वजनिक तथ्याङ्कहरू अवलोकन गर्न कृपया तलको बटनबाट आधिकारिक प्रोफाइल खोल्नुहोस्।
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Link
+                href={`/local-reporting/palika/${palikaId}/profile`}
+                className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-400/20 transition-all cursor-pointer"
+              >
+                <Building2 className="w-4 h-4" />
+                <span>पालिका प्रोफाइल तथा सार्वजनिक रिपोर्ट हेर्नुहोस्</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+
+              <Link
+                href="/local-reporting"
+                className="w-full sm:w-auto px-5 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-sm border border-white/20 transition-colors"
+              >
+                स्थानीय तह सूचीमा फर्कनुहोस्
+              </Link>
+            </div>
+          </div>
+        </main>
+
+        <Footer lang={lang} />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-slate-100">
       <Header lang={lang} onLanguageChange={setLang} />
