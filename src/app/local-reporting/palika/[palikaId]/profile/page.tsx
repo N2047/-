@@ -376,56 +376,58 @@ export default function PalikaProfilePage({
               </div>
             </div>
 
-            {/* Circulars Compliance Check */}
-            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs">
-              <h2 className="text-sm font-bold text-slate-900 border-b border-slate-200 pb-3 mb-4 flex items-center gap-2">
-                <FileText className="w-4 h-4 text-blue-900" />
-                <span>स्थानीय तह परिपत्र स्थिति (Q40)</span>
-              </h2>
+            {/* Circulars Compliance Check (Only for authorized Employee / Admin) */}
+            {canEdit && (
+              <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs">
+                <h2 className="text-sm font-bold text-slate-900 border-b border-slate-200 pb-3 mb-4 flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-blue-900" />
+                  <span>स्थानीय तह परिपत्र स्थिति (Q40)</span>
+                </h2>
 
-              <ul className="space-y-2.5 text-xs">
-                <li className="flex items-center justify-between p-2 rounded-lg bg-slate-50">
-                  <span>१. शिक्षा सम्बन्धी परिपत्र</span>
-                  {formData.q40_circulars?.education?.status ? (
-                    <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[11px] flex items-center gap-1"><Check className="w-3 h-3" /> जारी</span>
-                  ) : (
-                    <span className="px-2 py-0.5 rounded bg-slate-200 text-slate-600 font-bold text-[11px]">बाँकी</span>
-                  )}
-                </li>
-                <li className="flex items-center justify-between p-2 rounded-lg bg-slate-50">
-                  <span>२. स्वास्थ्य बिमा परिपत्र</span>
-                  {formData.q40_circulars?.health_insurance?.status ? (
-                    <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[11px] flex items-center gap-1"><Check className="w-3 h-3" /> जारी</span>
-                  ) : (
-                    <span className="px-2 py-0.5 rounded bg-slate-200 text-slate-600 font-bold text-[11px]">बाँकी</span>
-                  )}
-                </li>
-                <li className="flex items-center justify-between p-2 rounded-lg bg-slate-50">
-                  <span>३. बाल क्लब सहभागिता परिपत्र</span>
-                  {formData.q40_circulars?.child_club?.status ? (
-                    <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[11px] flex items-center gap-1"><Check className="w-3 h-3" /> जारी</span>
-                  ) : (
-                    <span className="px-2 py-0.5 rounded bg-slate-200 text-slate-600 font-bold text-[11px]">बाँकी</span>
-                  )}
-                </li>
-                <li className="flex items-center justify-between p-2 rounded-lg bg-slate-50">
-                  <span>४. सार्वजनिक यातायात छुट परिपत्र</span>
-                  {formData.q40_circulars?.transport?.status ? (
-                    <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[11px] flex items-center gap-1"><Check className="w-3 h-3" /> जारी</span>
-                  ) : (
-                    <span className="px-2 py-0.5 rounded bg-slate-200 text-slate-600 font-bold text-[11px]">बाँकी</span>
-                  )}
-                </li>
-                <li className="flex items-center justify-between p-2 rounded-lg bg-slate-50">
-                  <span>५. पहुँचयुक्त संरचना मापदण्ड</span>
-                  {formData.q40_circulars?.accessible_infrastructure?.status ? (
-                    <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[11px] flex items-center gap-1"><Check className="w-3 h-3" /> जारी</span>
-                  ) : (
-                    <span className="px-2 py-0.5 rounded bg-slate-200 text-slate-600 font-bold text-[11px]">बाँकी</span>
-                  )}
-                </li>
-              </ul>
-            </div>
+                <ul className="space-y-2.5 text-xs">
+                  <li className="flex items-center justify-between p-2 rounded-lg bg-slate-50">
+                    <span>१. शिक्षा सम्बन्धी परिपत्र</span>
+                    {formData.q40_circulars?.education?.status ? (
+                      <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[11px] flex items-center gap-1"><Check className="w-3 h-3" /> जारी</span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded bg-slate-200 text-slate-600 font-bold text-[11px]">बाँकी</span>
+                    )}
+                  </li>
+                  <li className="flex items-center justify-between p-2 rounded-lg bg-slate-50">
+                    <span>२. स्वास्थ्य बिमा परिपत्र</span>
+                    {formData.q40_circulars?.health_insurance?.status ? (
+                      <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[11px] flex items-center gap-1"><Check className="w-3 h-3" /> जारी</span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded bg-slate-200 text-slate-600 font-bold text-[11px]">बाँकी</span>
+                    )}
+                  </li>
+                  <li className="flex items-center justify-between p-2 rounded-lg bg-slate-50">
+                    <span>३. बाल क्लब सहभागिता परिपत्र</span>
+                    {formData.q40_circulars?.child_club?.status ? (
+                      <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[11px] flex items-center gap-1"><Check className="w-3 h-3" /> जारी</span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded bg-slate-200 text-slate-600 font-bold text-[11px]">बाँकी</span>
+                    )}
+                  </li>
+                  <li className="flex items-center justify-between p-2 rounded-lg bg-slate-50">
+                    <span>४. सार्वजनिक यातायात छुट परिपत्र</span>
+                    {formData.q40_circulars?.transport?.status ? (
+                      <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[11px] flex items-center gap-1"><Check className="w-3 h-3" /> जारी</span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded bg-slate-200 text-slate-600 font-bold text-[11px]">बाँकी</span>
+                    )}
+                  </li>
+                  <li className="flex items-center justify-between p-2 rounded-lg bg-slate-50">
+                    <span>५. पहुँचयुक्त संरचना मापदण्ड</span>
+                    {formData.q40_circulars?.accessible_infrastructure?.status ? (
+                      <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[11px] flex items-center gap-1"><Check className="w-3 h-3" /> जारी</span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded bg-slate-200 text-slate-600 font-bold text-[11px]">बाँकी</span>
+                    )}
+                  </li>
+                </ul>
+              </div>
+            )}
           </div>
 
           {/* Right Column (2 cols): 10 Types Matrix & Key Sectors */}
@@ -536,69 +538,71 @@ export default function PalikaProfilePage({
 
             </div>
 
-            {/* Annual Reporting History Table */}
-            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs">
-              <div className="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
-                <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-blue-900" />
-                  <span>वार्षिक प्रतिवेदन पेश अभिलेख (Submission History)</span>
-                </h2>
-                <span className="text-xs text-slate-500">विगत तथा वर्तमान आ.व.</span>
-              </div>
+            {/* Annual Reporting History Table (Admin / Authorized Employee only) */}
+            {canEdit && (
+              <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs">
+                <div className="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
+                  <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-blue-900" />
+                    <span>वार्षिक प्रतिवेदन पेश अभिलेख (Submission History)</span>
+                  </h2>
+                  <span className="text-xs text-slate-500">विगत तथा वर्तमान आ.व.</span>
+                </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-xs text-left border-collapse">
-                  <thead>
-                    <tr className="bg-slate-100 border-b border-slate-200 text-slate-700">
-                      <th className="p-2.5 font-bold">आर्थिक वर्ष</th>
-                      <th className="p-2.5 font-bold">स्थिति</th>
-                      <th className="p-2.5 font-bold">पेश गर्ने सहजकर्ता</th>
-                      <th className="p-2.5 font-bold">दाखिला मिति</th>
-                      <th className="p-2.5 font-bold text-right">कार्य</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    <tr className="bg-amber-50/40">
-                      <td className="p-2.5 font-bold text-blue-900">२०८२/०८३ (चालु)</td>
-                      <td className="p-2.5">
-                        <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
-                          formData.status === 'approved'
-                            ? 'bg-emerald-100 text-emerald-800'
-                            : formData.status === 'submitted'
-                            ? 'bg-blue-100 text-blue-800'
-                            : 'bg-amber-100 text-amber-900'
-                        }`}>
-                          {formData.status === 'approved' ? 'स्वीकृत' : formData.status === 'submitted' ? 'समीक्षामा' : 'मस्यौदा'}
-                        </span>
-                      </td>
-                      <td className="p-2.5 text-slate-700">{formData.submitted_by_name || 'अद्यावधिक हुँदै'}</td>
-                      <td className="p-2.5 text-slate-500">२०८२/०५/१५</td>
-                      <td className="p-2.5 text-right">
-                        <Link
-                          href={`/local-reporting/palika/${palikaId}`}
-                          className="px-3 py-1 bg-blue-900 hover:bg-blue-800 text-white rounded-md text-[11px] font-bold"
-                        >
-                          फारम खोल्नुहोस्
-                        </Link>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="p-2.5 font-bold text-slate-700">२०८१/०८२</td>
-                      <td className="p-2.5">
-                        <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-800">
-                          स्वीकृत (Approved)
-                        </span>
-                      </td>
-                      <td className="p-2.5 text-slate-700">राम बहादुर थापा</td>
-                      <td className="p-2.5 text-slate-500">२०८१/०४/१०</td>
-                      <td className="p-2.5 text-right">
-                        <span className="text-[11px] text-slate-400 font-semibold">अभिलेखीकृत</span>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs text-left border-collapse">
+                    <thead>
+                      <tr className="bg-slate-100 border-b border-slate-200 text-slate-700">
+                        <th className="p-2.5 font-bold">आर्थिक वर्ष</th>
+                        <th className="p-2.5 font-bold">स्थिति</th>
+                        <th className="p-2.5 font-bold">पेश गर्ने सहजकर्ता</th>
+                        <th className="p-2.5 font-bold">दाखिला मिति</th>
+                        <th className="p-2.5 font-bold text-right">कार्य</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      <tr className="bg-amber-50/40">
+                        <td className="p-2.5 font-bold text-blue-900">२०८२/०८३ (चालु)</td>
+                        <td className="p-2.5">
+                          <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
+                            formData.status === 'approved'
+                              ? 'bg-emerald-100 text-emerald-800'
+                              : formData.status === 'submitted'
+                              ? 'bg-blue-100 text-blue-800'
+                              : 'bg-amber-100 text-amber-900'
+                          }`}>
+                            {formData.status === 'approved' ? 'स्वीकृत' : formData.status === 'submitted' ? 'समीक्षामा' : 'मस्यौदा'}
+                          </span>
+                        </td>
+                        <td className="p-2.5 text-slate-700">{formData.submitted_by_name || 'अद्यावधिक हुँदै'}</td>
+                        <td className="p-2.5 text-slate-500">२०८२/०५/१५</td>
+                        <td className="p-2.5 text-right">
+                          <Link
+                            href={`/local-reporting/palika/${palikaId}`}
+                            className="px-3 py-1 bg-blue-900 hover:bg-blue-800 text-white rounded-md text-[11px] font-bold"
+                          >
+                            फारम खोल्नुहोस्
+                          </Link>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-2.5 font-bold text-slate-700">२०८१/०८२</td>
+                        <td className="p-2.5">
+                          <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-800">
+                            स्वीकृत (Approved)
+                          </span>
+                        </td>
+                        <td className="p-2.5 text-slate-700">राम बहादुर थापा</td>
+                        <td className="p-2.5 text-slate-500">२०८१/०४/१०</td>
+                        <td className="p-2.5 text-right">
+                          <span className="text-[11px] text-slate-400 font-semibold">अभिलेखीकृत</span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
+            )}
 
           </div>
         </div>
