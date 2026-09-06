@@ -2,7 +2,7 @@
   {
     "id": "admin-master-001",
     "user_id": "DIC-ADM-000001",
-    "name": "मुख्य प्रशासक (Super Admin)",
+    "name": "मुख्य प्रशासक",
     "email": "admin@dic.gov.np",
     "phone": "9842661754",
     "password_hash": "admin123",
@@ -63,7 +63,7 @@
   {
     "id": "usr-citizen-004",
     "user_id": "DIC-USR-000004",
-    "name": "राम बहादुर श्रेष्ठ (नागरिक)",
+    "name": "राम बहादुर श्रेष्ठ",
     "email": "citizen@example.com",
     "phone": "9800000001",
     "password_hash": "citizen123",
