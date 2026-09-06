@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, use } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { KOSHI_DISTRICTS, findPalikaById } from "@/lib/koshiGeography";
@@ -31,7 +32,8 @@ import {
   Layers,
   Check,
   X,
-  AlertCircle
+  AlertCircle,
+  BarChart3
 } from "lucide-react";
 
 export default function PalikaProfilePage({
@@ -41,6 +43,7 @@ export default function PalikaProfilePage({
 }) {
   const resolvedParams = use(params);
   const palikaId = resolvedParams.palikaId;
+  const router = useRouter();
 
   const [lang, setLang] = useState<Language>("ne");
   const [formData, setFormData] = useState<AnnualReportFormData>(() => createInitialFormData(palikaId));
@@ -103,6 +106,49 @@ export default function PalikaProfilePage({
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
       <Header lang={lang} onLanguageChange={setLang} />
 
+      {/* Quick Navigation Ribbon: Switch to any other Palika OR overall report */}
+      <div className="bg-slate-900 border-b border-blue-800/60 py-2.5 px-4 sm:px-6 lg:px-8 text-xs flex flex-wrap items-center justify-between gap-3 print:hidden">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="font-bold text-amber-300">🔄 अर्को पालिकाको प्रतिवेदन हेर्नुहोस्:</span>
+          <select
+            value={palikaId}
+            onChange={(e) => {
+              if (e.target.value) {
+                router.push(`/local-reporting/palika/${e.target.value}/profile`);
+              }
+            }}
+            className="bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-1.5 font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-hidden cursor-pointer text-xs"
+          >
+            {KOSHI_DISTRICTS.map((d) => (
+              <optgroup key={d.id} label={`📍 ${d.name_ne} जिल्ला`}>
+                {d.local_governments.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name_ne} ({p.type})
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Link
+            href="/local-reporting"
+            className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold border border-slate-700 flex items-center gap-1.5 transition-colors"
+          >
+            <Building2 className="w-3.5 h-3.5 text-blue-400" />
+            <span>१. पालिका प्रतिवेदन सूची</span>
+          </Link>
+          <Link
+            href="/reports"
+            className="px-3 py-1.5 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-white font-bold border border-emerald-600 flex items-center gap-1.5 transition-colors"
+          >
+            <BarChart3 className="w-3.5 h-3.5 text-amber-300" />
+            <span>२. समग्र प्रतिवेदन (कम्पाइल)</span>
+          </Link>
+        </div>
+      </div>
+
       {/* Hero / Header Banner (Screen Only - Hidden in Print) */}
       <section className="bg-blue-950 text-white border-b-2 border-amber-500 py-8 print:hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -128,10 +174,10 @@ export default function PalikaProfilePage({
                 </span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
-                {palikaInfo.name_ne} — अपाङ्गता वस्तुस्थिति प्रोफाइल
+                {palikaInfo.name_ne} — अपाङ्गता सम्बन्धी पालिका प्रतिवेदन (वस्तुस्थिति विवरण)
               </h1>
               <p className="text-sm text-blue-200 mt-1">
-                {palikaInfo.name_en} ({districtInfo.name_en} District) | वार्षिक प्रतिवेदन स्थिति तथा तथ्याङ्क
+                {palikaInfo.name_en} ({districtInfo.name_en} District) | वार्षिक प्रतिवेदन स्थिति तथा तथ्याङ्क (आ.व. २०८२/०८३)
               </p>
             </div>
 

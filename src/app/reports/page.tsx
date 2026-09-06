@@ -1,10 +1,17 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { KOSHI_DISTRICTS } from "@/lib/koshiGeography";
 import { translations, Language } from "@/lib/translations";
+import { 
+  getCompiledPalikaReports, 
+  calculateCompiledGrandTotals, 
+  exportCompiledPalikasToExcel, 
+  CompiledPalikaData 
+} from "@/lib/compiledPalikaReports";
 import * as XLSX from "xlsx";
 import { 
   BarChart3, 
@@ -14,21 +21,27 @@ import {
   GitCompare, 
   Printer, 
   Table as TableIcon,
-  CheckCircle2,
-  FileSpreadsheet,
-  Building2,
-  MapPin,
-  Briefcase,
-  ShieldCheck,
-  GraduationCap,
-  Coins,
-  HeartPulse,
-  Award,
-  ArrowRight,
-  TrendingUp,
-  Activity,
-  Layers,
-  Check
+  CheckCircle2, 
+  FileSpreadsheet, 
+  Building2, 
+  MapPin, 
+  Briefcase, 
+  ShieldCheck, 
+  GraduationCap, 
+  Coins, 
+  HeartPulse, 
+  Award, 
+  ArrowRight, 
+  TrendingUp, 
+  Activity, 
+  Layers, 
+  Check,
+  Search,
+  FileText,
+  Filter,
+  DownloadCloud,
+  Clock,
+  RotateCcw
 } from "lucide-react";
 
 export type ReportSubject = 
@@ -49,6 +62,31 @@ export default function ReportsPage() {
   const [selectedDistrictId, setSelectedDistrictId] = useState<string>("all");
   const [selectedFiscalYear, setSelectedFiscalYear] = useState<string>("2082_083");
   const [viewTableMode, setViewTableMode] = useState<boolean>(false);
+
+  // Primary Mode: 'compiled_palikas' (सबै १३७ स्थानीय तहको कम्पाइल प्रतिवेदन) vs 'analytics' (१० विषयगत समग्र विश्लेषण)
+  const [mainReportView, setMainReportView] = useState<"compiled_palikas" | "analytics">("compiled_palikas");
+  const [compiledPalikaSearch, setCompiledPalikaSearch] = useState<string>("");
+  const [compiledTypeFilter, setCompiledTypeFilter] = useState<string>("all");
+
+  // Compiled Data across all 137 Palikas of Koshi Province
+  const allCompiledPalikas = useMemo(() => getCompiledPalikaReports(), []);
+
+  const filteredCompiledPalikas = useMemo(() => {
+    return allCompiledPalikas.filter((p) => {
+      const matchesDistrict = selectedDistrictId === "all" || p.districtId === selectedDistrictId;
+      const matchesType = compiledTypeFilter === "all" || p.type === compiledTypeFilter;
+      const matchesSearch =
+        !compiledPalikaSearch.trim() ||
+        p.name_ne.toLowerCase().includes(compiledPalikaSearch.toLowerCase()) ||
+        p.name_en.toLowerCase().includes(compiledPalikaSearch.toLowerCase()) ||
+        p.districtName_ne.toLowerCase().includes(compiledPalikaSearch.toLowerCase());
+      return matchesDistrict && matchesType && matchesSearch;
+    });
+  }, [allCompiledPalikas, selectedDistrictId, compiledTypeFilter, compiledPalikaSearch]);
+
+  const compiledGrandTotals = useMemo(() => {
+    return calculateCompiledGrandTotals(filteredCompiledPalikas);
+  }, [filteredCompiledPalikas]);
 
   // Palika Comparison state
   const [comparisonPalikas, setComparisonPalikas] = useState<string[]>([
@@ -409,25 +447,44 @@ export default function ReportsPage() {
 
       <main id="main-content" tabIndex={-1} className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 focus:outline-hidden">
         
+        {/* DUAL REPORT NAVIGATION SWITCHER: १. पालिका प्रतिवेदन vs २. समग्र प्रतिवेदन */}
+        <div className="flex items-center justify-center p-1.5 bg-slate-200/90 dark:bg-slate-800 rounded-2xl max-w-2xl mx-auto mb-8 shadow-xs border border-slate-300 dark:border-slate-700">
+          <Link
+            href="/local-reporting"
+            className="flex-1 py-2.5 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-black flex items-center justify-center gap-2 text-slate-700 dark:text-slate-300 hover:text-blue-900 hover:bg-white/60 dark:hover:bg-slate-700 transition-all"
+          >
+            <Building2 className="w-4 h-4 text-blue-600 shrink-0" />
+            <span>१. पालिका प्रतिवेदन (स्थानीय तहगत)</span>
+          </Link>
+          <Link
+            href="/reports"
+            className="flex-1 py-2.5 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-black flex items-center justify-center gap-2 bg-emerald-700 text-white shadow-sm transition-all"
+            aria-current="page"
+          >
+            <BarChart3 className="w-4 h-4 text-amber-300 shrink-0" />
+            <span>२. समग्र प्रतिवेदन (सबै १३७ पालिका कम्पाइल)</span>
+          </Link>
+        </div>
+
         {/* Page Hero Header with Export Options */}
         <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm mb-8 transition-colors">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-2">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-purple-100 dark:bg-purple-950/80 text-purple-900 dark:text-purple-300 rounded-full text-xs font-black uppercase tracking-wider border border-purple-200 dark:border-purple-800">
-                  <BarChart3 className="w-3.5 h-3.5 text-purple-700 dark:text-purple-400" aria-hidden="true" />
-                  विषयगत तथ्यांक तथा विश्लेषण केन्द्र
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-100 dark:bg-emerald-950/80 text-emerald-900 dark:text-emerald-300 rounded-full text-xs font-black uppercase tracking-wider border border-emerald-200 dark:border-emerald-800">
+                  <BarChart3 className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400" aria-hidden="true" />
+                  कोशी प्रदेश एकीकृत डिजिटल केन्द्र
                 </span>
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-amber-100 dark:bg-amber-950/80 text-amber-900 dark:text-amber-300 rounded-full text-xs font-bold border border-amber-200 dark:border-amber-800">
                   <Activity className="w-3 h-3 text-amber-600 dark:text-amber-400" />
-                  १० वटै मूल विषयगत क्षेत्रहरू समावेश
+                  १४ जिल्लाका १३७ वटै स्थानीय तहको एकीकृत तथ्याङ्क
                 </span>
               </div>
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
-                अपाङ्गता सम्बन्धी विषयगत रिपोर्ट (Analytics & Reports)
+                अपाङ्गता सम्बन्धी समग्र प्रतिवेदन (कोशी प्रदेश)
               </h1>
               <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 mt-2 max-w-3xl leading-relaxed">
-                कोशी प्रदेशका १४ जिल्लाका १३७ स्थानीय तहबाट प्राप्त तथ्यांकको एकीकृत तथा विषयगत विश्लेषण। सेवासुविधा, सामाजिक सुरक्षा, रोजगार/उद्यम, शिक्षा, गृहभेट, सहायक सामग्री र बजेट सम्बन्धी विस्तृत सूचकहरू उपलब्ध छन्।
+                कोशी प्रदेशका १४ जिल्लाका १३७ वटै स्थानीय तहको एकीकृत कम्पाइल प्रतिवेदन, जिल्लागत विवरण र १० वटा मुख्य विषयगत परिसूचकहरूको विस्तृत विश्लेषण।
               </p>
             </div>
 
@@ -435,25 +492,454 @@ export default function ReportsPage() {
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
-                onClick={handleExportFullReportExcel}
-                className="px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold flex items-center gap-2 shadow-sm cursor-pointer transition-all hover:-translate-y-0.5"
-                title="सबै १० वटै विषयहरूको छुट्टाछुट्टै सिटसहित Excel डाउनलोड गर्नुहोस्"
+                onClick={() => exportCompiledPalikasToExcel(filteredCompiledPalikas, currentDistrictName)}
+                className="px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-black flex items-center gap-2 shadow-md cursor-pointer transition-all hover:-translate-y-0.5"
+                title="सबै १३७ स्थानीय तहको कम्पाइल डाटा Excel मा डाउनलोड गर्नुहोस्"
               >
                 <FileSpreadsheet className="w-4 h-4 text-emerald-200" />
-                <span>पूर्ण Excel रिपोर्ट डाउनलोड</span>
+                <span>📥 १३७ पालिका कम्पाइल Excel डाउनलोड</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleExportFullReportExcel}
+                className="px-3.5 py-2.5 rounded-xl bg-blue-900 hover:bg-blue-800 text-white text-xs font-bold flex items-center gap-2 shadow-sm cursor-pointer transition-all"
+                title="१० वटै विषयगत सिटसहित Excel डाउनलोड गर्नुहोस्"
+              >
+                <FileSpreadsheet className="w-4 h-4 text-blue-200" />
+                <span>१० विषयगत Excel</span>
               </button>
               <button
                 type="button"
                 onClick={() => window.print()}
-                className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white text-xs font-bold flex items-center gap-2 shadow-sm cursor-pointer transition-all"
+                className="px-3.5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white text-xs font-bold flex items-center gap-2 shadow-sm cursor-pointer transition-all"
                 title="प्रिन्ट गर्नुहोस् वा PDF मा सेभ गर्नुहोस्"
               >
                 <Printer className="w-4 h-4 text-slate-300" />
-                <span>PDF / प्रिन्ट</span>
+                <span>प्रिन्ट</span>
               </button>
             </div>
           </div>
         </div>
+
+        {/* PRIMARY VIEW SWITCHER: COMPILED 137 PALIKAS REPORT VS 10 SUBJECT-WISE ANALYTICS */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3.5 bg-white dark:bg-slate-900 rounded-2xl border-2 border-emerald-600/40 shadow-sm mb-6">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider bg-emerald-100 dark:bg-emerald-950 px-3 py-1 rounded-lg border border-emerald-300 dark:border-emerald-800">
+              📊 समग्र प्रतिवेदन दृश्य छनौट:
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <button
+              type="button"
+              onClick={() => setMainReportView("compiled_palikas")}
+              className={`flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs sm:text-sm font-black flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                mainReportView === "compiled_palikas"
+                  ? "bg-emerald-700 text-white shadow-md ring-2 ring-amber-400"
+                  : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+              }`}
+            >
+              <FileSpreadsheet className="w-4 h-4 text-amber-300" />
+              <span>सबै १३७ स्थानीय तहको कम्पाइल प्रतिवेदन</span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] bg-emerald-950 text-emerald-100">
+                तालिका दृश्य
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setMainReportView("analytics")}
+              className={`flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs sm:text-sm font-black flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                mainReportView === "analytics"
+                  ? "bg-blue-900 text-white shadow-md ring-2 ring-amber-400"
+                  : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+              }`}
+            >
+              <BarChart3 className="w-4 h-4 text-amber-300" />
+              <span>१० विषयगत समग्र विश्लेषण</span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] bg-blue-950 text-blue-200">
+                ग्राफिक्स दृश्य
+              </span>
+            </button>
+          </div>
+        </div>
+
+        {/* ============================================================= */}
+        {/* VIEW 1: ALL 137 LOCAL GOVERNMENTS MASTER COMPILED REPORT */}
+        {/* ============================================================= */}
+        {mainReportView === "compiled_palikas" && (
+          <section aria-labelledby="compiled-palikas-heading" className="space-y-6 animate-in fade-in">
+            
+            {/* Search & Filter Toolbar */}
+            <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
+                <div>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-100 dark:bg-emerald-950 text-emerald-900 dark:text-emerald-300 rounded-full text-xs font-black uppercase tracking-wider border border-emerald-300 dark:border-emerald-800 mb-1.5">
+                    <Building2 className="w-3.5 h-3.5" />
+                    कोशी प्रदेशका सबै १३७ स्थानीय तह
+                  </span>
+                  <h2 id="compiled-palikas-heading" className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
+                    स्थानीय तहहरूको एकीकृत कम्पाइल प्रतिवेदन तालिका
+                  </h2>
+                  <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                    १४ वटै जिल्लाका महानगर, उपमहानगर, नगर र गाउँपालिकाको वार्षिक तथ्याङ्क तथा कार्यसम्पादन
+                  </p>
+                </div>
+
+                {/* Action Buttons: Excel Download & Print */}
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => exportCompiledPalikasToExcel(filteredCompiledPalikas, currentDistrictName)}
+                    className="px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-black flex items-center gap-2 shadow-md cursor-pointer transition-all hover:-translate-y-0.5"
+                    title="सबै १३७ पालिकाको कम्पाइल डाटा Excel मा डाउनलोड गर्नुहोस्"
+                  >
+                    <FileSpreadsheet className="w-4 h-4 text-emerald-200" />
+                    <span>📥 १३७ पालिका कम्पाइल Excel (.xlsx) डाउनलोड</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => window.print()}
+                    className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold flex items-center gap-2 border border-slate-700 cursor-pointer"
+                  >
+                    <Printer className="w-4 h-4 text-slate-300" />
+                    <span>प्रिन्ट</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Filter Inputs Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-3 pt-4 items-end">
+                {/* District Filter */}
+                <div>
+                  <label htmlFor="compiled-district-filter" className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                    १. जिल्ला छनौट ({KOSHI_DISTRICTS.length} जिल्ला)
+                  </label>
+                  <select
+                    id="compiled-district-filter"
+                    value={selectedDistrictId}
+                    onChange={(e) => setSelectedDistrictId(e.target.value)}
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-emerald-600 cursor-pointer"
+                  >
+                    <option value="all">कोशी प्रदेश समग्र (१४ वटै जिल्ला - १३७ स्थानीय तह)</option>
+                    {KOSHI_DISTRICTS.map((d, i) => (
+                      <option key={d.id} value={d.id}>
+                        {i + 1}. {d.name_ne} जिल्ला ({d.local_governments.length} स्थानीय तह)
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Municipality Type Filter */}
+                <div>
+                  <label htmlFor="compiled-type-filter" className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                    २. स्थानीय तहको प्रकार
+                  </label>
+                  <select
+                    id="compiled-type-filter"
+                    value={compiledTypeFilter}
+                    onChange={(e) => setCompiledTypeFilter(e.target.value)}
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-emerald-600 cursor-pointer"
+                  >
+                    <option value="all">सबै प्रकार (महानगर, उपमहानगर, नगर, गाउँ)</option>
+                    <option value="महानगरपालिका">महानगरपालिका</option>
+                    <option value="उपमहानगरपालिका">उपमहानगरपालिका</option>
+                    <option value="नगरपालिका">नगरपालिका</option>
+                    <option value="गाउँपालिका">गाउँपालिका</option>
+                  </select>
+                </div>
+
+                {/* Search by Palika Name */}
+                <div>
+                  <label htmlFor="compiled-search-input" className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                    ३. पालिकाको नामबाट खोजी
+                  </label>
+                  <div className="relative">
+                    <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                    <input
+                      id="compiled-search-input"
+                      type="search"
+                      placeholder="पालिका वा जिल्लाको नाम..."
+                      value={compiledPalikaSearch}
+                      onChange={(e) => setCompiledPalikaSearch(e.target.value)}
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl pl-9 pr-3 py-2 text-xs font-semibold text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-emerald-600"
+                    />
+                  </div>
+                </div>
+
+                {/* Clear Filter */}
+                <div className="flex items-center gap-2">
+                  {(selectedDistrictId !== "all" || compiledTypeFilter !== "all" || compiledPalikaSearch) && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedDistrictId("all");
+                        setCompiledTypeFilter("all");
+                        setCompiledPalikaSearch("");
+                      }}
+                      className="w-full py-2 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold flex items-center justify-center gap-1.5 border border-slate-300 dark:border-slate-700 transition-colors cursor-pointer"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      <span>फिल्टर हटाउनुहोस्</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Aggregate KPI Summary Cards for Compiled View */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
+              <div className="bg-white dark:bg-slate-900 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+                <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 block">कुल स्थानीय तह</span>
+                <span className="text-lg font-black text-slate-900 dark:text-white mt-1 block">
+                  {filteredCompiledPalikas.length}
+                </span>
+                <span className="text-[10px] text-slate-400 block">१३७ मध्ये</span>
+              </div>
+
+              <div className="bg-white dark:bg-slate-900 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+                <span className="text-[11px] font-bold text-blue-700 dark:text-blue-400 block">कुल पहिचान</span>
+                <span className="text-lg font-black text-blue-900 dark:text-blue-300 mt-1 block">
+                  {compiledGrandTotals.identifiedTotal.toLocaleString("ne-NP")}
+                </span>
+                <span className="text-[10px] text-slate-400 block">म: {compiledGrandTotals.identifiedFemale.toLocaleString("ne-NP")} | पु: {compiledGrandTotals.identifiedMale.toLocaleString("ne-NP")}</span>
+              </div>
+
+              <div className="bg-white dark:bg-slate-900 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+                <span className="text-[11px] font-bold text-rose-700 dark:text-rose-400 block">रातो कार्ड ('क')</span>
+                <span className="text-lg font-black text-rose-900 dark:text-rose-300 mt-1 block">
+                  {compiledGrandTotals.cardRed.toLocaleString("ne-NP")}
+                </span>
+                <span className="text-[10px] text-rose-600 block">पूर्ण अशक्त</span>
+              </div>
+
+              <div className="bg-white dark:bg-slate-900 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+                <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400 block">निलो कार्ड ('ख')</span>
+                <span className="text-lg font-black text-blue-800 dark:text-blue-300 mt-1 block">
+                  {compiledGrandTotals.cardBlue.toLocaleString("ne-NP")}
+                </span>
+                <span className="text-[10px] text-blue-600 block">अति अशक्त</span>
+              </div>
+
+              <div className="bg-white dark:bg-slate-900 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+                <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 block">भत्ता पाउने (SSA)</span>
+                <span className="text-lg font-black text-emerald-900 dark:text-emerald-300 mt-1 block">
+                  {compiledGrandTotals.ssaBeneficiaries.toLocaleString("ne-NP")}
+                </span>
+                <span className="text-[10px] text-emerald-600 block">रु. {compiledGrandTotals.ssaBudgetLakh.toFixed(1)} लाख/म.</span>
+              </div>
+
+              <div className="bg-white dark:bg-slate-900 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+                <span className="text-[11px] font-bold text-purple-700 dark:text-purple-400 block">गृहभेट संख्या</span>
+                <span className="text-lg font-black text-purple-900 dark:text-purple-300 mt-1 block">
+                  {compiledGrandTotals.homeVisits.toLocaleString("ne-NP")}
+                </span>
+                <span className="text-[10px] text-purple-600 block">सहजकर्ता सेवा</span>
+              </div>
+
+              <div className="bg-white dark:bg-slate-900 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+                <span className="text-[11px] font-bold text-teal-700 dark:text-teal-400 block">सहायक सामग्री</span>
+                <span className="text-lg font-black text-teal-900 dark:text-teal-300 mt-1 block">
+                  {compiledGrandTotals.assistiveDevices.toLocaleString("ne-NP")}
+                </span>
+                <span className="text-[10px] text-teal-600 block">थान वितरण</span>
+              </div>
+
+              <div className="bg-white dark:bg-slate-900 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+                <span className="text-[11px] font-bold text-amber-700 dark:text-amber-400 block">विनियोजित बजेट</span>
+                <span className="text-sm font-black text-amber-900 dark:text-amber-300 mt-1 block truncate" title={`रु. ${compiledGrandTotals.allocatedBudgetNPR.toLocaleString("ne-NP")}`}>
+                  रु. {(compiledGrandTotals.allocatedBudgetNPR / 10000000).toFixed(1)} करोड
+                </span>
+                <span className="text-[10px] text-amber-600 block">स्थानीय बजेट</span>
+              </div>
+            </div>
+
+            {/* Master Compiled Table */}
+            <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
+              <div className="p-4 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2">
+                <div className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                  देखाउँदै: <strong>{filteredCompiledPalikas.length}</strong> स्थानीय तहहरू (कोशी प्रदेशका कुल १३७ मध्ये)
+                </div>
+                <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                  * कुनै पनि स्थानीय तहको विस्तृत विवरण हेर्न दायाँपट्टिको <strong>[ 📄 प्रतिवेदन ]</strong> बटन थिच्नुहोस्
+                </div>
+              </div>
+
+              <div className="overflow-x-auto max-h-[750px] overflow-y-auto">
+                <table className="min-w-full text-xs text-left border-collapse">
+                  <thead className="bg-blue-950 text-white font-bold sticky top-0 z-20 shadow-xs">
+                    <tr>
+                      <th scope="col" className="p-3 text-center w-12 border-b border-blue-900">सि.नं.</th>
+                      <th scope="col" className="p-3 min-w-[190px] border-b border-blue-900">स्थानीय तहको नाम</th>
+                      <th scope="col" className="p-3 border-b border-blue-900">जिल्ला</th>
+                      <th scope="col" className="p-3 text-center border-b border-blue-900">वडा</th>
+                      <th scope="col" className="p-3 text-right bg-blue-900/60 border-b border-blue-900">कुल पहिचान</th>
+                      <th scope="col" className="p-3 text-right border-b border-blue-900 text-rose-300">रातो ('क')</th>
+                      <th scope="col" className="p-3 text-right border-b border-blue-900 text-blue-300">निलो ('ख')</th>
+                      <th scope="col" className="p-3 text-right border-b border-blue-900 text-amber-300">पहेलो ('ग')</th>
+                      <th scope="col" className="p-3 text-right border-b border-blue-900 text-slate-200">सेतो ('घ')</th>
+                      <th scope="col" className="p-3 text-right bg-emerald-950/70 border-b border-blue-900 text-emerald-300">भत्ता पाउने (SSA)</th>
+                      <th scope="col" className="p-3 text-right border-b border-blue-900">सेवासुविधा</th>
+                      <th scope="col" className="p-3 text-right border-b border-blue-900">रोजगार/उद्यम</th>
+                      <th scope="col" className="p-3 text-right border-b border-blue-900">गृहभेट</th>
+                      <th scope="col" className="p-3 text-right border-b border-blue-900">सहायक सामग्री</th>
+                      <th scope="col" className="p-3 text-right border-b border-blue-900">बजेट (रु.)</th>
+                      <th scope="col" className="p-3 text-center border-b border-blue-900">स्थिति</th>
+                      <th scope="col" className="p-3 text-center min-w-[140px] sticky right-0 bg-blue-950 border-b border-blue-900 z-10">कार्य</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200 dark:divide-slate-800 bg-white dark:bg-slate-900">
+                    {filteredCompiledPalikas.length === 0 ? (
+                      <tr>
+                        <td colSpan={17} className="p-8 text-center text-slate-500">
+                          कुनै पनि स्थानीय तह फेला परेन। कृपया फिल्टर वा सर्च सच्याउनुहोस्।
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredCompiledPalikas.map((p, idx) => (
+                        <tr
+                          key={p.id}
+                          className="hover:bg-blue-50/70 dark:hover:bg-slate-800/60 transition-colors group"
+                        >
+                          <td className="p-3 text-center text-slate-400 font-bold">{idx + 1}</td>
+                          <td className="p-3 font-bold text-slate-900 dark:text-white">
+                            <div className="flex items-center gap-1.5">
+                              <span>{p.name_ne}</span>
+                              <span className={`text-[10px] font-semibold px-1.5 py-0.2 rounded-md ${
+                                p.type === "महानगरपालिका" 
+                                  ? "bg-purple-100 text-purple-900" 
+                                  : p.type === "उपमहानगरपालिका"
+                                  ? "bg-blue-100 text-blue-900"
+                                  : p.type === "नगरपालिका"
+                                  ? "bg-emerald-100 text-emerald-900"
+                                  : "bg-slate-100 text-slate-700"
+                              }`}>
+                                {p.type === "महानगरपालिका" ? "म.न.पा." : p.type === "उपमहानगरपालिका" ? "उप.म.न.पा." : p.type === "नगरपालिका" ? "न.पा." : "गा.पा."}
+                              </span>
+                            </div>
+                            <span className="text-[10px] text-slate-400 font-normal block">{p.name_en}</span>
+                          </td>
+                          <td className="p-3 text-slate-600 dark:text-slate-400 font-medium">
+                            {p.districtName_ne}
+                          </td>
+                          <td className="p-3 text-center font-mono text-slate-500">
+                            {p.total_wards}
+                          </td>
+                          <td className="p-3 text-right font-mono font-bold text-blue-950 dark:text-blue-200 bg-blue-50/40 dark:bg-blue-950/20">
+                            {p.identifiedTotal.toLocaleString("ne-NP")}
+                            <span className="block text-[9px] text-slate-400 font-normal">म:{p.identifiedFemale} पु:{p.identifiedMale}</span>
+                          </td>
+                          <td className="p-3 text-right font-mono font-bold text-rose-700 dark:text-rose-400">
+                            {p.cardRed}
+                          </td>
+                          <td className="p-3 text-right font-mono font-bold text-blue-700 dark:text-blue-400">
+                            {p.cardBlue}
+                          </td>
+                          <td className="p-3 text-right font-mono text-amber-700 dark:text-amber-400 font-medium">
+                            {p.cardYellow}
+                          </td>
+                          <td className="p-3 text-right font-mono text-slate-500 font-medium">
+                            {p.cardWhite}
+                          </td>
+                          <td className="p-3 text-right font-mono font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50/40 dark:bg-emerald-950/20">
+                            {p.ssaBeneficiaries}
+                          </td>
+                          <td className="p-3 text-right font-mono text-slate-700 dark:text-slate-300">
+                            {p.servicesCount}
+                          </td>
+                          <td className="p-3 text-right font-mono text-slate-700 dark:text-slate-300">
+                            {p.employedCount}
+                          </td>
+                          <td className="p-3 text-right font-mono text-purple-700 dark:text-purple-400 font-bold">
+                            {p.homeVisits}
+                          </td>
+                          <td className="p-3 text-right font-mono text-teal-700 dark:text-teal-400 font-bold">
+                            {p.assistiveDevices}
+                          </td>
+                          <td className="p-3 text-right font-mono font-semibold text-slate-700 dark:text-slate-300">
+                            {p.allocatedBudgetNPR.toLocaleString("ne-NP")}
+                          </td>
+                          <td className="p-3 text-center">
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                              p.submissionStatus === 'submitted'
+                                ? "bg-emerald-100 text-emerald-800"
+                                : "bg-amber-100 text-amber-800"
+                            }`}>
+                              {p.submissionStatus === 'submitted' ? 'पेश' : 'मस्यौदा'}
+                            </span>
+                          </td>
+                          <td className="p-3 text-center sticky right-0 bg-white dark:bg-slate-900 group-hover:bg-blue-50/90 dark:group-hover:bg-slate-800 transition-colors shadow-l">
+                            <Link
+                              href={`/local-reporting/palika/${p.id}/profile`}
+                              className="px-2.5 py-1.5 rounded-lg bg-blue-900 hover:bg-blue-800 text-white font-bold text-[11px] inline-flex items-center gap-1 shadow-xs transition-colors"
+                              title={`${p.name_ne} को व्यक्तिगत प्रतिवेदन हेर्नुहोस्`}
+                            >
+                              <FileText className="w-3 h-3 text-amber-400" />
+                              <span>प्रतिवेदन</span>
+                              <ArrowRight className="w-3 h-3 text-blue-200" />
+                            </Link>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                  <tfoot className="bg-slate-900 text-white font-black sticky bottom-0 z-20 shadow-md">
+                    <tr>
+                      <td colSpan={4} className="p-3 text-center font-bold uppercase tracking-wider text-amber-400">
+                        जम्मा कुल योगफल ({filteredCompiledPalikas.length} स्थानीय तह)
+                      </td>
+                      <td className="p-3 text-right font-mono text-amber-300">
+                        {compiledGrandTotals.identifiedTotal.toLocaleString("ne-NP")}
+                      </td>
+                      <td className="p-3 text-right font-mono text-rose-300">
+                        {compiledGrandTotals.cardRed.toLocaleString("ne-NP")}
+                      </td>
+                      <td className="p-3 text-right font-mono text-blue-300">
+                        {compiledGrandTotals.cardBlue.toLocaleString("ne-NP")}
+                      </td>
+                      <td className="p-3 text-right font-mono text-amber-200">
+                        {compiledGrandTotals.cardYellow.toLocaleString("ne-NP")}
+                      </td>
+                      <td className="p-3 text-right font-mono text-slate-300">
+                        {compiledGrandTotals.cardWhite.toLocaleString("ne-NP")}
+                      </td>
+                      <td className="p-3 text-right font-mono text-emerald-300">
+                        {compiledGrandTotals.ssaBeneficiaries.toLocaleString("ne-NP")}
+                      </td>
+                      <td className="p-3 text-right font-mono text-slate-200">
+                        {compiledGrandTotals.servicesCount.toLocaleString("ne-NP")}
+                      </td>
+                      <td className="p-3 text-right font-mono text-slate-200">
+                        {compiledGrandTotals.employedCount.toLocaleString("ne-NP")}
+                      </td>
+                      <td className="p-3 text-right font-mono text-purple-300">
+                        {compiledGrandTotals.homeVisits.toLocaleString("ne-NP")}
+                      </td>
+                      <td className="p-3 text-right font-mono text-teal-300">
+                        {compiledGrandTotals.assistiveDevices.toLocaleString("ne-NP")}
+                      </td>
+                      <td className="p-3 text-right font-mono text-amber-300">
+                        रु. {compiledGrandTotals.allocatedBudgetNPR.toLocaleString("ne-NP")}
+                      </td>
+                      <td className="p-3 text-center text-xs text-emerald-400 font-bold">
+                        {compiledGrandTotals.submittedCount} पेश
+                      </td>
+                      <td className="p-3 text-center sticky right-0 bg-slate-900 text-slate-400 text-[10px]">
+                        -
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* ============================================================= */}
+        {/* VIEW 2: 10 SUBJECT-WISE OVERALL PROVINCIAL ANALYTICS */}
+        {/* ============================================================= */}
+        {mainReportView === "analytics" && (
+          <div className="space-y-6">
 
         {/* Global Filter Bar */}
         <section aria-labelledby="report-filter-heading" className="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-xs mb-6">
@@ -1712,6 +2198,8 @@ export default function ReportsPage() {
 
             </div>
           </section>
+        )}
+        </div>
         )}
 
       </main>

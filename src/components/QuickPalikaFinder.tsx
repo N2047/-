@@ -223,10 +223,10 @@ export default function QuickPalikaFinder({ lang }: QuickPalikaFinderProps) {
                     ? "bg-blue-600/30 hover:bg-blue-600/50 text-white border-blue-400/40 hover:border-blue-300 shadow-md cursor-pointer"
                     : "bg-white/5 text-slate-500 border-white/5 cursor-not-allowed pointer-events-none"
                 }`}
-                title="पालिका प्रोफाइल हेर्नुहोस् (खुल्ला विवरण)"
+                title="पालिका प्रतिवेदन हेर्नुहोस् (खुल्ला विवरण)"
               >
                 <Building className="w-4 h-4 shrink-0 text-amber-300" />
-                <span>{canAccessForm ? "प्रोफाइल" : "🏛️ पालिका प्रोफाइल हेर्नुहोस्"}</span>
+                <span>{canAccessForm ? "प्रतिवेदन" : "📄 पालिका प्रतिवेदन हेर्नुहोस्"}</span>
                 {!canAccessForm && <ArrowRight className="w-4 h-4 shrink-0 text-amber-300 ml-1" />}
               </Link>
             </div>

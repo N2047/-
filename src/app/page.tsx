@@ -64,82 +64,53 @@ export default function HomePage() {
               कोशी प्रदेशका १४ जिल्लाका १३७ स्थानीय तहबाट वार्षिक प्रतिवेदन संकलन, संघीय तथा प्रदेश कानुनको डिजिटल भण्डार र विस्तृत विषयगत विश्लेषण।
             </p>
 
-            {/* Action Buttons */}
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+            {/* Action Buttons: कानुन, १. पालिका प्रतिवेदन, २. समग्र प्रतिवेदन */}
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
               <Link
                 href="/laws"
-                className="px-6 py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-base shadow-lg shadow-amber-500/20 flex items-center gap-2 transition-all transform hover:-translate-y-0.5 cursor-pointer"
+                className="px-5 sm:px-6 py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm sm:text-base shadow-lg shadow-amber-500/20 flex items-center gap-2 transition-all transform hover:-translate-y-0.5 cursor-pointer"
               >
                 <FileText className="w-5 h-5" aria-hidden="true" />
                 <span>{t.hero_btn_laws}</span>
               </Link>
 
-              {/* प्रतिवेदन Dropdown (१. पालिका प्रतिवेदन, २. समग्र प्रतिवेदन) */}
-              <div className="relative group" ref={heroReportsRef}>
-                <button
-                  type="button"
-                  onClick={() => setHeroReportsOpen(!heroReportsOpen)}
-                  onMouseEnter={() => setHeroReportsOpen(true)}
-                  className="px-6 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-base shadow-lg shadow-blue-600/25 flex items-center gap-2 border border-blue-400/40 transition-all transform hover:-translate-y-0.5 cursor-pointer"
-                  aria-expanded={heroReportsOpen}
-                  aria-haspopup="true"
-                >
-                  <BarChart3 className="w-5 h-5 text-amber-300" aria-hidden="true" />
-                  <span>{t.nav_reports}</span>
-                  <ChevronDown
-                    className={`w-4 h-4 transition-transform duration-200 ${
-                      heroReportsOpen ? "rotate-180 text-amber-300" : ""
-                    }`}
-                    aria-hidden="true"
-                  />
-                </button>
-
-                {/* Dropdown Menu */}
-                <div
-                  onMouseLeave={() => setHeroReportsOpen(false)}
-                  className={`${
-                    heroReportsOpen ? "block" : "hidden group-hover:block"
-                  } absolute left-0 sm:left-1/2 sm:-translate-x-1/2 top-full mt-2 w-64 bg-slate-900/95 backdrop-blur-md rounded-2xl shadow-2xl border border-blue-500/30 p-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150 text-left`}
-                >
-                  <Link
-                    href="/local-reporting"
-                    onClick={() => setHeroReportsOpen(false)}
-                    className="flex items-center gap-3 px-3.5 py-3 rounded-xl hover:bg-blue-800/80 text-white font-semibold text-sm transition-colors group/item"
-                  >
-                    <div className="w-8 h-8 rounded-lg bg-blue-600/60 flex items-center justify-center shrink-0 group-hover/item:bg-blue-500">
-                      <Building2 className="w-4 h-4 text-amber-300" />
-                    </div>
-                    <div>
-                      <div className="text-white font-bold text-sm">
-                        {t.nav_palika_report}
-                      </div>
-                      <div className="text-blue-200/80 text-[11px] font-normal">
-                        १३७ स्थानीय तह कार्यसम्पादन
-                      </div>
-                    </div>
-                  </Link>
-
-                  <div className="border-t border-slate-800 my-1" />
-
-                  <Link
-                    href="/reports"
-                    onClick={() => setHeroReportsOpen(false)}
-                    className="flex items-center gap-3 px-3.5 py-3 rounded-xl hover:bg-blue-800/80 text-white font-semibold text-sm transition-colors group/item"
-                  >
-                    <div className="w-8 h-8 rounded-lg bg-emerald-700/60 flex items-center justify-center shrink-0 group-hover/item:bg-emerald-600">
-                      <BarChart3 className="w-4 h-4 text-emerald-300" />
-                    </div>
-                    <div>
-                      <div className="text-white font-bold text-sm">
-                        {t.nav_overall_report}
-                      </div>
-                      <div className="text-blue-200/80 text-[11px] font-normal">
-                        प्रदेशस्तरीय विषयगत विश्लेषण
-                      </div>
-                    </div>
-                  </Link>
+              {/* १. पालिका प्रतिवेदन (प्रत्येक वा सेलेक्ट गरिएको पालिका) */}
+              <Link
+                href="/local-reporting"
+                className="px-5 sm:px-6 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm sm:text-base shadow-lg shadow-blue-600/25 flex items-center gap-2 border border-blue-400/40 transition-all transform hover:-translate-y-0.5 cursor-pointer"
+                title="प्रत्येक पालिका वा सेलेक्ट गरिएको पालिकाको प्रतिवेदन हेर्नुहोस्"
+              >
+                <Building2 className="w-5 h-5 text-amber-300" aria-hidden="true" />
+                <div className="text-left">
+                  <span>१. पालिका प्रतिवेदन</span>
+                  <span className="block text-[10px] text-blue-200 font-normal">स्थानिय तहगत प्रतिवेदन</span>
                 </div>
-              </div>
+              </Link>
+
+              {/* २. समग्र प्रतिवेदन (सबै १३७ पालिकाको कम्पाइल प्रतिवेदन) */}
+              <Link
+                href="/reports"
+                className="px-5 sm:px-6 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm sm:text-base shadow-lg shadow-emerald-600/25 flex items-center gap-2 border border-emerald-400/40 transition-all transform hover:-translate-y-0.5 cursor-pointer"
+                title="सबै १३७ स्थानीय तहको एकीकृत कम्पाइल प्रतिवेदन तथा विषयगत विश्लेषण"
+              >
+                <BarChart3 className="w-5 h-5 text-amber-300" aria-hidden="true" />
+                <div className="text-left">
+                  <span>२. समग्र प्रतिवेदन</span>
+                  <span className="block text-[10px] text-emerald-200 font-normal">सबै १३७ पालिका कम्पाइल</span>
+                </div>
+              </Link>
+            </div>
+
+            {/* Sub-Banner Quick Indicator */}
+            <div className="mt-5 inline-flex flex-wrap items-center justify-center gap-2 px-4 py-2 bg-slate-800/80 border border-slate-700/80 rounded-2xl text-xs text-slate-300">
+              <span className="font-bold text-amber-400">📊 प्रतिवेदन वर्गीकरण:</span>
+              <Link href="/local-reporting" className="hover:text-amber-300 underline font-medium">
+                🏛️ १. पालिका प्रतिवेदन (प्रतेक वा छानिएको स्थानीय तह)
+              </Link>
+              <span className="text-slate-500">|</span>
+              <Link href="/reports" className="hover:text-amber-300 underline font-medium">
+                📈 २. समग्र प्रतिवेदन (सबै १३७ पालिकाको एकीकृत कम्पाइल)
+              </Link>
             </div>
           </div>
         </section>
