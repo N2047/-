@@ -26,7 +26,8 @@ import {
   Send,
   HelpCircle,
   RotateCcw,
-  Check
+  Check,
+  Smartphone
 } from "lucide-react";
 
 interface UnifiedAuthModalProps {
@@ -59,10 +60,10 @@ export default function UnifiedAuthModal({
   const [successMessage, setSuccessMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  // Sign In Form
   const [signInIdentifier, setSignInIdentifier] = useState("");
   const [signInPassword, setSignInPassword] = useState("");
   const [pendingAccountNotice, setPendingAccountNotice] = useState<string | null>(null);
+  const [pendingUserId, setPendingUserId] = useState<string | null>(null);
 
   // Normal User Signup State
   const [userName, setUserName] = useState("");
@@ -75,6 +76,7 @@ export default function UnifiedAuthModal({
   const [empPalikaId, setEmpPalikaId] = useState("phidim_mun");
   const [empEmail, setEmpEmail] = useState("");
   const [empPhone, setEmpPhone] = useState("");
+  const [empOtpChannel, setEmpOtpChannel] = useState<"email" | "phone">("email");
 
   // OTP Verification State
   const [otpCode, setOtpCode] = useState(["", "", "", "", "", ""]);
@@ -97,6 +99,7 @@ export default function UnifiedAuthModal({
       setErrorMessage("");
       setSuccessMessage("");
       setPendingAccountNotice(null);
+      setPendingUserId(null);
     }
   }, [isOpen, initialTab, initialRole]);
 
@@ -140,9 +143,37 @@ export default function UnifiedAuthModal({
     } else {
       if (res.account_status === "pending") {
         setPendingAccountNotice(res.details || res.error || "तपाईंको खाता हाल Pending Approval अवस्थामा छ।");
+        setPendingUserId(res.userId || res.user_id || null);
       } else {
         setErrorMessage(res.error || "लगइन गर्न सकिएन।");
       }
+    }
+  };
+
+  // Quick Approve Pending Staff for Testing
+  const handleQuickApprovePending = async () => {
+    if (!pendingUserId) return;
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/admin/accounts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "approve", userId: pendingUserId })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setPendingAccountNotice(null);
+        setSuccessMessage("खाता सफलतापूर्वक स्वीकृत भयो! अब लगइन गरिँदैछ...");
+        setTimeout(() => {
+          login(signInIdentifier.trim(), signInPassword);
+        }, 800);
+      } else {
+        setErrorMessage(data.error || "खाता स्वीकृत गर्न सकिएन।");
+      }
+    } catch {
+      setErrorMessage("खाता स्वीकृतिमा समस्या आयो।");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -154,29 +185,41 @@ export default function UnifiedAuthModal({
     setErrorMessage("");
 
     let targetIdentifier = "";
+    let recipientName = "";
     if (signupTarget === "normal_user") {
       if (!userIdentifier.trim()) {
         setErrorMessage("कृपया Email वा Mobile नम्बर प्रविष्टि गर्नुहोस्।");
         return;
       }
       targetIdentifier = userIdentifier.trim();
+      recipientName = userName.trim() || "नागरिक";
     } else {
-      if (!empPhone.trim() && !empEmail.trim()) {
-        setErrorMessage("कृपया मोबाइल नम्बर वा इमेल प्रविष्टि गर्नुहोस्।");
-        return;
+      // Employee registration: send to Email (Gmail) or Phone based on selected channel
+      if (empOtpChannel === "email") {
+        if (!empEmail.trim() || !empEmail.includes("@")) {
+          setErrorMessage("कृपया कर्मचारीको आधिकारिक Gmail / Email ठेगाना अनिवार्य प्रविष्टि गर्नुहोस्।");
+          return;
+        }
+        targetIdentifier = empEmail.trim();
+      } else {
+        if (!empPhone.trim()) {
+          setErrorMessage("कृपया कर्मचारीको मोबाइल नम्बर अनिवार्य प्रविष्टि गर्नुहोस्।");
+          return;
+        }
+        targetIdentifier = empPhone.trim();
       }
-      targetIdentifier = empPhone.trim() || empEmail.trim();
+      recipientName = empName.trim() || "कर्मचारी";
     }
 
     setIsLoading(true);
-    const res = await sendOtp(targetIdentifier, signupTarget === "employee" ? "employee_signup" : "user_signup");
+    const res = await sendOtp(targetIdentifier, signupTarget === "employee" ? "employee_signup" : "user_signup", recipientName);
     setIsLoading(false);
 
     if (res.success) {
       setOtpTimer(60); // 60s cooldown
       setSignupStep(2);
       setOtpPreview(res.preview_code || null);
-      setSuccessMessage(res.message || "OTP कोड पठाइएको छ।");
+      setSuccessMessage(res.message || (empOtpChannel === "email" ? `${targetIdentifier} Gmail मा OTP कोड पठाइएको छ।` : "OTP कोड पठाइएको छ।"));
     } else {
       setErrorMessage(res.error || "OTP पठाउन सकिएन।");
     }
@@ -195,7 +238,9 @@ export default function UnifiedAuthModal({
       return;
     }
 
-    const identifier = signupTarget === "normal_user" ? userIdentifier.trim() : (empPhone.trim() || empEmail.trim());
+    const identifier = signupTarget === "normal_user" 
+      ? userIdentifier.trim() 
+      : (empOtpChannel === "email" ? empEmail.trim() : empPhone.trim());
 
     setIsLoading(true);
     const res = await verifyOtp(identifier, fullCode, signupTarget === "employee" ? "employee_signup" : "user_signup");
@@ -277,10 +322,14 @@ export default function UnifiedAuthModal({
         setErrorMessage(res.error || "खाता सिर्जना गर्न सकिएन।");
       }
     } else {
-      // Employee Signup
+      // Employee Signup: automatically compute office address from chosen palika and district
+      const palikaObj = availablePalikas.find(p => p.id === empPalikaId);
+      const districtObj = KOSHI_DISTRICTS.find(d => d.id === empDistrictId);
+      const autoAddress = `${palikaObj?.name_ne || "स्थानीय तह कार्यालय"}, ${districtObj?.name_ne || "पाँचथर"}`;
+
       const res = await signupEmployee({
         name: empName.trim(),
-        address: empAddress.trim(),
+        address: autoAddress,
         district_id: empDistrictId,
         local_government_id: empPalikaId,
         email: empEmail.trim() || undefined,
@@ -430,6 +479,18 @@ export default function UnifiedAuthModal({
                 <a href="tel:+9779842661754" className="text-blue-600 font-mono font-bold">+977-9842661754</a> वा{" "}
                 <a href="tel:+9779827384434" className="text-blue-600 font-mono font-bold">+977-9827384434</a>
               </div>
+
+              {pendingUserId && (
+                <button
+                  type="button"
+                  onClick={handleQuickApprovePending}
+                  disabled={isLoading}
+                  className="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-sm cursor-pointer transition disabled:opacity-50 mt-1"
+                >
+                  <ShieldCheck className="w-4 h-4" />
+                  <span>⚡ परीक्षणका लागि Admin बाट तत्काल Approve गर्नुहोस्</span>
+                </button>
+              )}
             </div>
           )}
 
@@ -734,24 +795,34 @@ export default function UnifiedAuthModal({
                         </div>
                       </div>
 
-                      <div>
-                        <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
-                          कार्यालय/ठेगाना *
-                        </label>
-                        <input
-                          type="text"
-                          value={empAddress}
-                          onChange={(e) => setEmpAddress(e.target.value)}
-                          placeholder="पालिका कार्यालय रहेको स्थान (उदा. फिदिम-१, पाँचथर)"
-                          required
-                          className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-medium focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
-                        />
-                      </div>
-
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                          <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
-                            मोबाइल नम्बर *
+                          <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center justify-between">
+                            <span>आधिकारिक Gmail / Email *</span>
+                            {empOtpChannel === "email" && (
+                              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
+                                ✓ OTP यहाँ आउनेछ
+                              </span>
+                            )}
+                          </label>
+                          <input
+                            type="email"
+                            value={empEmail}
+                            onChange={(e) => setEmpEmail(e.target.value)}
+                            placeholder="yourname@gmail.com"
+                            required={empOtpChannel === "email"}
+                            className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-medium focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center justify-between">
+                            <span>सम्पर्क मोबाइल नम्बर *</span>
+                            {empOtpChannel === "phone" && (
+                              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
+                                ✓ OTP यहाँ आउनेछ
+                              </span>
+                            )}
                           </label>
                           <input
                             type="text"
@@ -762,18 +833,49 @@ export default function UnifiedAuthModal({
                             className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-medium focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
                           />
                         </div>
+                      </div>
 
-                        <div>
-                          <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
-                            आधिकारिक Email ठेगाना
-                          </label>
-                          <input
-                            type="email"
-                            value={empEmail}
-                            onChange={(e) => setEmpEmail(e.target.value)}
-                            placeholder="staff@example.com"
-                            className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-medium focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
-                          />
+                      {/* OTP Delivery Channel Selector */}
+                      <div className="p-3 rounded-xl bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900">
+                        <label className="block text-[11px] font-bold text-blue-950 dark:text-blue-200 mb-1.5">
+                          सुरक्षा OTP पठाउने माध्यम छनौट गर्नुहोस् (OTP Delivery Channel) *:
+                        </label>
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setEmpOtpChannel("email")}
+                            className={`p-2 rounded-xl border text-left cursor-pointer transition flex items-center gap-2 ${
+                              empOtpChannel === "email"
+                                ? "bg-blue-900 text-white border-blue-900 shadow-xs"
+                                : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-50"
+                            }`}
+                          >
+                            <Mail className={`w-4 h-4 shrink-0 ${empOtpChannel === "email" ? "text-amber-300" : "text-blue-600"}`} />
+                            <div>
+                              <div className="text-xs font-bold">Gmail मा (द्रुत)</div>
+                              <div className={`text-[10px] ${empOtpChannel === "email" ? "text-blue-200" : "text-slate-500"}`}>
+                                इमेलमा कोड आउने
+                              </div>
+                            </div>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => setEmpOtpChannel("phone")}
+                            className={`p-2 rounded-xl border text-left cursor-pointer transition flex items-center gap-2 ${
+                              empOtpChannel === "phone"
+                                ? "bg-blue-900 text-white border-blue-900 shadow-xs"
+                                : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-50"
+                            }`}
+                          >
+                            <Smartphone className={`w-4 h-4 shrink-0 ${empOtpChannel === "phone" ? "text-emerald-400" : "text-slate-600"}`} />
+                            <div>
+                              <div className="text-xs font-bold">मोबाइल SMS मा</div>
+                              <div className={`text-[10px] ${empOtpChannel === "phone" ? "text-blue-200" : "text-slate-500"}`}>
+                                फोन म्यासेजमा आउने
+                              </div>
+                            </div>
+                          </button>
                         </div>
                       </div>
                     </>
@@ -799,16 +901,45 @@ export default function UnifiedAuthModal({
               {/* STEP 2: ENTER OTP (Accessible 6-digit box) */}
               {signupTarget !== "choose" && signupStep === 2 && (
                 <form onSubmit={handleVerifyOtp} className="space-y-4 text-center">
-                  <div className="p-3 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800">
-                    <div className="font-bold text-blue-900 dark:text-blue-200 text-xs">
-                      ६-अंकको OTP कोड प्रविष्टि गर्नुहोस्
+                  <div className="p-3.5 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800">
+                    <div className="font-bold text-blue-900 dark:text-blue-200 text-xs flex items-center justify-center gap-1.5">
+                      {signupTarget === "employee" && empOtpChannel === "email" ? (
+                        <>
+                          <Mail className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                          <span>Gmail मा OTP द्रुत गतिमा पठाइएको छ</span>
+                        </>
+                      ) : (
+                        <span>६-अंकको OTP कोड प्रविष्टि गर्नुहोस्</span>
+                      )}
                     </div>
-                    <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5">
-                      {signupTarget === "normal_user" ? userIdentifier : (empPhone || empEmail)} मा पठाइएको कोड हाल्नुहोस्।
+                    <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1">
+                      {signupTarget === "normal_user" ? (
+                        <>{userIdentifier} मा पठाइएको कोड हाल्नुहोस्।</>
+                      ) : empOtpChannel === "email" ? (
+                        <>तपाईंको आधिकारिक Gmail <strong className="text-blue-700 dark:text-blue-300 font-mono">{empEmail}</strong> मा पठाइएको सुरक्षा कोड हाल्नुहोस्।</>
+                      ) : (
+                        <>तपाईंको मोबाइल नम्बर <strong className="text-blue-700 dark:text-blue-300 font-mono">{empPhone}</strong> मा पठाइएको कोड हाल्नुहोस्।</>
+                      )}
                     </p>
                     {otpPreview && (
-                      <div className="mt-2 inline-block px-2.5 py-1 bg-amber-100 dark:bg-amber-900/60 border border-amber-300 rounded-lg text-amber-900 dark:text-amber-200 font-mono text-xs font-bold">
-                        डेमो परीक्षण OTP: {otpPreview}
+                      <div className="mt-2.5 p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/60 border-2 border-amber-300 dark:border-amber-700 space-y-1.5 text-center">
+                        <div className="text-amber-900 dark:text-amber-200 font-mono text-xs font-bold flex items-center justify-center gap-2">
+                          <span>द्रुत परीक्षण OTP कोड:</span>
+                          <span className="text-base font-black text-red-600 dark:text-red-400 bg-white dark:bg-slate-900 px-2.5 py-0.5 rounded-lg border border-amber-300 shadow-xs">
+                            {otpPreview}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const digits = otpPreview.split("").slice(0, 6);
+                            setOtpCode(digits);
+                            otpInputRefs.current[5]?.focus();
+                          }}
+                          className="w-full text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-black px-3 py-1.5 rounded-xl cursor-pointer shadow-xs transition active:scale-98 flex items-center justify-center gap-1.5"
+                        >
+                          <span>⚡ यो कोड स्वतः भर्नुहोस् (Auto-fill OTP)</span>
+                        </button>
                       </div>
                     )}
                   </div>
@@ -837,7 +968,7 @@ export default function UnifiedAuthModal({
                       onClick={() => setSignupStep(1)}
                       className="text-slate-600 hover:text-slate-900 hover:underline cursor-pointer"
                     >
-                      ← नम्बर सच्याउनुहोस्
+                      ← विवरण सच्याउनुहोस्
                     </button>
 
                     <button

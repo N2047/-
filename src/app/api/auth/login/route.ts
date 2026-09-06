@@ -36,6 +36,8 @@ export async function POST(request: Request) {
         { 
           error: "तपाईंको कर्मचारी खाता हाल Pending Approval अवस्थामा छ।",
           account_status: "pending",
+          userId: user.id,
+          user_id: user.user_id,
           details: "तपाईंको कर्मचारी खाता दर्ता भएको छ तर Admin बाट स्वीकृत हुन बाँकी छ। थप प्रक्रियाका लागि Admin लाई +9779842661754 वा +9779827384434 मा सम्पर्क गर्नुहोस्।" 
         },
         { status: 403 }

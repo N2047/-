@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { generateOtp } from "@/lib/authStore";
+import { sendOtpEmail } from "@/lib/emailService";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { identifier, purpose = "user_signup" } = body;
+    const { identifier, purpose = "user_signup", name } = body;
 
     if (!identifier || typeof identifier !== "string" || !identifier.trim()) {
       return NextResponse.json(
@@ -26,16 +27,33 @@ export async function POST(request: Request) {
 
     const { code, expires_at } = generateOtp(clean, purpose);
 
-    // Simulate SMS / Email Dispatch
-    console.log(`[AUTH SERVICE OTP] Code: ${code} sent to ${clean}`);
+    let emailSent = false;
+    let emailNotice = "";
+
+    if (isEmail) {
+      const emailResult = await sendOtpEmail({
+        to: clean,
+        code,
+        recipientName: name || "कर्मचारी / सेवाग्राही",
+        purpose: purpose === "employee_signup" ? "कर्मचारी खाता दर्ता तथा प्रमाणीकरण" : "नागरिक खाता दर्ता तथा प्रमाणीकरण"
+      });
+
+      emailSent = emailResult.success && !emailResult.simulated;
+      if (emailResult.simulated) {
+        emailNotice = "(परीक्षण मोड: SMTP कन्फिगर नभएकोले स्क्रिनमा कोड उपलब्ध गराइएको छ)";
+      }
+    }
+
+    console.log(`[AUTH SERVICE OTP] Code: ${code} generated for ${clean} (Email sent: ${emailSent})`);
 
     return NextResponse.json({
       success: true,
       message: isEmail 
-        ? `${clean} मा ६-अंकको OTP कोड पठाइएको छ।` 
+        ? `${clean} मा ६-अंकको OTP कोड पठाइएको छ। ${emailNotice}`.trim()
         : `${clean} नम्बरमा SMS मार्फत OTP कोड पठाइएको छ।`,
       identifier: clean,
       expires_at,
+      email_sent: emailSent,
       // Provide preview code for immediate testing/demo accessibility
       preview_code: code
     });

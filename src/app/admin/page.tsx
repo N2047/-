@@ -543,6 +543,14 @@ export default function AdminPage() {
             <PhoneCall className={`w-4 h-4 ${activeAdminTab === "contacts" ? "text-emerald-300" : "text-emerald-600"}`} />
             <span>सम्पर्क व्यवस्थापन (Contact Directory)</span>
           </button>
+
+          <Link
+            href="/news"
+            className="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 cursor-pointer transition-all bg-white text-slate-700 hover:bg-slate-100 border border-slate-300 hover:border-red-400"
+          >
+            <Newspaper className="w-4 h-4 text-red-600" />
+            <span>सूचना तथा समाचार व्यवस्थापन (+ Edit / Add)</span>
+          </Link>
         </div>
 
         {/* Tab 1: Reports Dashboard */}

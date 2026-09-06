@@ -10,7 +10,7 @@
     "account_status": "approved",
     "otp_verified": true,
     "created_at": "2026-01-01T00:00:00.000Z",
-    "last_login_at": "2026-09-06T05:54:26.619Z"
+    "last_login_at": "2026-09-06T06:28:48.669Z"
   },
   {
     "id": "emp-phidim-002",
@@ -516,5 +516,45 @@
     "approved_by": "मुख्य प्रशासक (Super Admin)",
     "updated_at": "2026-09-06T05:54:26.648Z",
     "last_login_at": "2026-09-06T05:54:26.662Z"
+  },
+  {
+    "id": "usr_1788676128534_sb1s",
+    "user_id": "DIC-USR-000014",
+    "name": "नवीन कार्की (नागरिक)",
+    "email": "citizen.1788676127864@test.com",
+    "address": "नेपाल",
+    "role": "normal_user",
+    "account_status": "approved",
+    "otp_verified": true,
+    "password_hash": "citizenpassword123",
+    "created_at": "2026-09-06T06:28:48.534Z",
+    "last_login_at": "2026-09-06T06:28:48.563Z"
+  },
+  {
+    "id": "emp_1788676128623_4aa6",
+    "user_id": "DIC-EMP-000014",
+    "name": "सुमन पोखरेल (सहजकर्ता)",
+    "email": "staff.1788676128573@palika.gov.np",
+    "phone": "9842950996",
+    "address": "फिदिम बजार, पाँचथर",
+    "role": "employee",
+    "account_status": "approved",
+    "otp_verified": true,
+    "district_id": "panchthar",
+    "district_name": "पाँचथर",
+    "local_government_id": "phidim_mun",
+    "local_government_name": "फिदिम नगरपालिका",
+    "palika_id": "phidim_mun",
+    "palika_name": "फिदिम नगरपालिका",
+    "palikaId": "phidim_mun",
+    "palikaName": "फिदिम नगरपालिका",
+    "districtId": "panchthar",
+    "districtName": "पाँचथर",
+    "password_hash": "staffpassword123",
+    "created_at": "2026-09-06T06:28:48.623Z",
+    "approved_at": "2026-09-06T06:28:48.712Z",
+    "approved_by": "मुख्य प्रशासक",
+    "updated_at": "2026-09-06T06:28:48.712Z",
+    "last_login_at": "2026-09-06T06:28:48.741Z"
   }
 ]

@@ -1,5 +1,65 @@
 [
   {
+    "id": "log_1788676128804_gy97",
+    "action": "REPORT_SUBMITTED",
+    "performed_by_id": "emp_1788676128623_4aa6",
+    "performed_by_name": "सुमन पोखरेल (सहजकर्ता)",
+    "target_user_id": "phidim_mun",
+    "target_user_name": "phidim_mun",
+    "details": "वार्षिक प्रतिवेदन अन्तिम रूपमा Submit गरियो (स्थानीय तह: phidim_mun)",
+    "timestamp": "2026-09-06T06:28:48.804Z"
+  },
+  {
+    "id": "log_1788676128789_aekl",
+    "action": "REPORT_RETURNED_FOR_CORRECTION",
+    "performed_by_id": "admin-master-001",
+    "performed_by_name": "मुख्य प्रशासक",
+    "target_user_id": "phidim_mun",
+    "target_user_name": "phidim_mun",
+    "details": "प्रतिवेदन सच्याउन फिर्ता पठाइयो। सुझाव: Question 12 को महिला/पुरुष संख्या र अनुसूची १.१ को नामावली पुनः जाँच गर्नुहोस्।",
+    "timestamp": "2026-09-06T06:28:48.789Z"
+  },
+  {
+    "id": "log_1788676128773_1g3x",
+    "action": "REPORT_SUBMITTED",
+    "performed_by_id": "emp_1788676128623_4aa6",
+    "performed_by_name": "सुमन पोखरेल (सहजकर्ता)",
+    "target_user_id": "phidim_mun",
+    "target_user_name": "phidim_mun",
+    "details": "वार्षिक प्रतिवेदन अन्तिम रूपमा Submit गरियो (स्थानीय तह: phidim_mun)",
+    "timestamp": "2026-09-06T06:28:48.774Z"
+  },
+  {
+    "id": "log_1788676128714_vv5g",
+    "action": "EMPLOYEE_APPROVED",
+    "performed_by_id": "admin-master-001",
+    "performed_by_name": "मुख्य प्रशासक",
+    "target_user_id": "emp_1788676128623_4aa6",
+    "target_user_name": "सुमन पोखरेल (सहजकर्ता)",
+    "details": "कर्मचारी खाता स्वीकृत गरियो (आईडी: DIC-EMP-000014, स्थानीय तह: फिदिम नगरपालिका)",
+    "timestamp": "2026-09-06T06:28:48.714Z"
+  },
+  {
+    "id": "log_1788676128625_rwpw",
+    "action": "EMPLOYEE_REGISTERED_PENDING",
+    "performed_by_id": "emp_1788676128623_4aa6",
+    "performed_by_name": "सुमन पोखरेल (सहजकर्ता)",
+    "target_user_id": "emp_1788676128623_4aa6",
+    "target_user_name": "सुमन पोखरेल (सहजकर्ता)",
+    "details": "नयाँ कर्मचारी दर्ता भयो (आईडी: DIC-EMP-000014, स्थानीय तह: फिदिम नगरपालिका) - हाल स्वीकृति पर्खिरहेको छ।",
+    "timestamp": "2026-09-06T06:28:48.625Z"
+  },
+  {
+    "id": "log_1788676128539_xpvl",
+    "action": "USER_REGISTERED",
+    "performed_by_id": "usr_1788676128534_sb1s",
+    "performed_by_name": "नवीन कार्की (नागरिक)",
+    "target_user_id": "usr_1788676128534_sb1s",
+    "target_user_name": "नवीन कार्की (नागरिक)",
+    "details": "नयाँ सामान्य नागरिक खाता दर्ता भयो (DIC-USR-000014)",
+    "timestamp": "2026-09-06T06:28:48.539Z"
+  },
+  {
     "id": "log_1788674066725_jrsa",
     "action": "REPORT_SUBMITTED",
     "performed_by_id": "emp_1788674066575_lo9i",

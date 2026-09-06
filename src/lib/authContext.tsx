@@ -22,10 +22,10 @@ export interface RegisterEmployeeParams {
 }
 
 interface AuthContextType extends AuthState {
-  login: (identifier: string, pass: string) => Promise<{ success: boolean; user?: User; error?: string; account_status?: string; details?: string }>;
+  login: (identifier: string, pass: string) => Promise<{ success: boolean; user?: User; error?: string; account_status?: string; details?: string; userId?: string; user_id?: string }>;
   signupUser: (params: RegisterUserParams) => Promise<{ success: boolean; user?: User; error?: string }>;
   signupEmployee: (params: RegisterEmployeeParams) => Promise<{ success: boolean; user?: User; error?: string; pendingNotice?: string }>;
-  sendOtp: (identifier: string, purpose: "user_signup" | "employee_signup" | "forgot_password") => Promise<{ success: boolean; message?: string; expires_at?: number; preview_code?: string; error?: string }>;
+  sendOtp: (identifier: string, purpose?: "user_signup" | "employee_signup" | "forgot_password", name?: string) => Promise<{ success: boolean; message?: string; expires_at?: number; preview_code?: string; error?: string }>;
   verifyOtp: (identifier: string, code: string, purpose: "user_signup" | "employee_signup" | "forgot_password") => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   canEditPalika: (palikaId: string) => boolean;
@@ -77,13 +77,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // 1. Send OTP
   const sendOtp = async (
     identifier: string, 
-    purpose: "user_signup" | "employee_signup" | "forgot_password" = "user_signup"
+    purpose: "user_signup" | "employee_signup" | "forgot_password" = "user_signup",
+    name?: string
   ): Promise<{ success: boolean; message?: string; expires_at?: number; preview_code?: string; error?: string }> => {
     try {
       const res = await fetch("/api/auth/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identifier, purpose })
+        body: JSON.stringify({ identifier, purpose, name })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "OTP पठाउन सकिएन।");
@@ -157,7 +158,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (
     identifier: string, 
     pass: string
-  ): Promise<{ success: boolean; user?: User; error?: string; account_status?: string; details?: string }> => {
+  ): Promise<{ 
+    success: boolean; 
+    user?: User; 
+    error?: string; 
+    account_status?: string; 
+    details?: string;
+    userId?: string;
+    user_id?: string;
+  }> => {
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
@@ -171,6 +180,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           success: false, 
           error: data.error || "लगइन गर्न सकिएन।",
           account_status: data.account_status,
+          userId: data.userId || data.user_id,
+          user_id: data.user_id || data.userId,
           details: data.details
         };
       }
