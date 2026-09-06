@@ -177,7 +177,7 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
                   className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-gradient-to-r from-blue-700 to-indigo-800 hover:from-blue-600 hover:to-indigo-700 text-white text-[11px] font-extrabold transition-all shadow-sm cursor-pointer border border-blue-500/50 hover:border-amber-400 focus:ring-2 focus:ring-amber-400"
                 >
                   <Lock className="w-3.5 h-3.5 text-amber-300" />
-                  <span>🔐 Sign Up / Sign In</span>
+                  <span>🔐 लगइन / दर्ता</span>
                 </button>
               )}
 
@@ -216,10 +216,10 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
               DIC
             </div>
             <div className="text-center sm:text-left">
-              <span className="text-xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white leading-tight block">
+              <span className="text-xl sm:text-3xl font-black tracking-tight text-red-600 dark:text-red-400 leading-tight block">
                 {t.app_name}
               </span>
-              <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium block mt-0.5">
+              <span className="text-xs sm:text-sm text-slate-800 dark:text-slate-200 font-medium block mt-0.5">
                 {t.tagline}
               </span>
             </div>
@@ -426,52 +426,20 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
                 </Link>
               </li>
 
-              {/* ८. एडमिन (यदि Super Admin भएमा मात्र) */}
-              {isAuthenticated && (user?.role === "super_admin" || user?.role === "provincial_admin") && (
-                <li role="none">
-                  <Link
-                    href="/admin"
-                    role="menuitem"
-                    className={`inline-flex items-center px-3.5 py-2.5 text-xs font-bold rounded-t-md transition-colors border-b-2 ${
-                      pathname.startsWith("/admin")
-                        ? "bg-amber-400 text-slate-950 border-amber-500 font-black"
-                        : "bg-amber-400/90 text-slate-950 hover:bg-amber-300 border-transparent"
-                    }`}
-                  >
-                    <Lock className="w-3.5 h-3.5 mr-1" aria-hidden="true" />
-                    <span>एडमिन</span>
-                  </Link>
-                </li>
-              )}
             </ul>
 
             {/* लगइन / लगआउट Right Section */}
             <div className="flex items-center text-xs">
               {isAuthenticated && user ? (
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1.5 text-blue-100 dark:text-slate-200">
-                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                    <span className="font-semibold max-w-[130px] truncate">
-                      {user.name}
-                    </span>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded font-bold bg-blue-950 text-blue-200 border border-blue-800">
-                      {user.role === "super_admin" || user.role === "provincial_admin"
-                        ? "Admin"
-                        : user.role === "employee" || user.role === "palika_staff"
-                        ? user.palika_name || "कर्मचारी"
-                        : "नागरिक"}
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={logout}
-                    className="text-rose-300 hover:text-white ml-2 text-xs font-bold underline cursor-pointer flex items-center gap-1"
-                    title="प्रणालीबाट लगआउट गर्नुहोस्"
-                  >
-                    <LogOut className="w-3.5 h-3.5" />
-                    <span>लगआउट</span>
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={logout}
+                  className="bg-blue-800/80 hover:bg-rose-800 text-rose-200 hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all border border-blue-700/60 hover:border-rose-600 flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  title="प्रणालीबाट लगआउट गर्नुहोस्"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>लगआउट</span>
+                </button>
               ) : (
                 <button
                   type="button"
@@ -519,18 +487,18 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
             {/* Mobile Auth Status */}
             <div className="p-3 rounded-xl bg-blue-900/70 dark:bg-slate-900 border border-blue-800 dark:border-slate-800 flex items-center justify-between">
               {isAuthenticated && user ? (
-                <div className="flex-1">
-                  <div className="text-xs font-bold text-amber-300 flex items-center gap-1.5">
-                    <User className="w-4 h-4" />
-                    <span>{user.name}</span>
+                <div className="flex items-center justify-between w-full">
+                  <div className="text-xs text-slate-300">
+                    अवस्था: <span className="text-emerald-400 font-bold">सक्रिय लगइन</span>
                   </div>
-                  <div className="text-[11px] text-blue-200 mt-0.5">
-                    {user.role === "super_admin" || user.role === "provincial_admin"
-                      ? "👑 Super Admin"
-                      : user.role === "employee" || user.role === "palika_staff"
-                      ? `🏛️ ${user.palika_name || "कर्मचारी"}`
-                      : `👤 सामान्य प्रयोगकर्ता (${user.role})`}
-                  </div>
+                  <button
+                    type="button"
+                    onClick={logout}
+                    className="px-3 py-1.5 bg-rose-900 hover:bg-rose-800 text-rose-200 rounded text-xs font-bold cursor-pointer flex items-center gap-1"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                    <span>लगआउट</span>
+                  </button>
                 </div>
               ) : (
                 <button
@@ -543,16 +511,6 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
                 >
                   <Lock className="w-3.5 h-3.5 text-amber-300" />
                   <span>🔐 लगइन / दर्ता</span>
-                </button>
-              )}
-
-              {isAuthenticated && (
-                <button
-                  type="button"
-                  onClick={logout}
-                  className="px-3 py-1.5 bg-rose-900 hover:bg-rose-800 text-rose-200 rounded text-xs font-bold ml-2 shrink-0 cursor-pointer"
-                >
-                  लगआउट
                 </button>
               )}
             </div>
@@ -666,18 +624,6 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
                   <span>{t.nav_search}</span>
                 </Link>
               </li>
-              {isAuthenticated && (user?.role === "super_admin" || user?.role === "provincial_admin") && (
-                <li>
-                  <Link
-                    href="/admin"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center px-3 py-2.5 rounded-md text-sm font-bold bg-amber-500 text-slate-950 mt-2"
-                  >
-                    <Lock className="w-4 h-4 mr-2" aria-hidden="true" />
-                    <span>एडमिन ड्यासबोर्ड</span>
-                  </Link>
-                </li>
-              )}
             </ul>
           </nav>
         )}
