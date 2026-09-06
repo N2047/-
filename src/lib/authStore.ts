@@ -274,6 +274,9 @@ export function registerEmployee(params: {
   email?: string;
   phone: string;
   password: string;
+  designation?: string;
+  organization?: string;
+  ward_number?: string | number;
 }): { success: boolean; user?: User; error?: string } {
   const users = getAllUsers();
   const cleanPhone = params.phone.trim();
@@ -305,6 +308,10 @@ export function registerEmployee(params: {
     role: "employee",
     account_status: "pending", // Strict: Must be pending until Super Admin approval!
     otp_verified: true,
+    designation: params.designation?.trim() || "सहायता सहजकर्ता",
+    organization: params.organization?.trim() || palika.name_ne,
+    ward_number: params.ward_number,
+    province: "कोशी प्रदेश",
     district_id: district.id,
     district_name: district.name_ne,
     local_government_id: palika.id,
@@ -350,6 +357,9 @@ export function approveEmployee(employeeId: string, adminId: string, adminName: 
   emp.account_status = "approved";
   emp.approved_at = new Date().toISOString();
   emp.approved_by = adminName;
+  emp.blocked_at = undefined;
+  emp.blocked_by = undefined;
+  emp.block_reason = undefined;
   emp.updated_at = new Date().toISOString();
 
   users[idx] = emp;
@@ -396,6 +406,74 @@ export function rejectEmployee(employeeId: string, adminId: string, adminName: s
   );
 
   const { password_hash, ...safeUser } = emp;
+  return { success: true, user: safeUser };
+}
+
+/**
+ * BLOCK USER (Super Admin Only)
+ */
+export function blockUser(userId: string, adminId: string, adminName: string, reason?: string): { success: boolean; user?: User; error?: string } {
+  const users = getAllUsers();
+  const idx = users.findIndex(u => u.id === userId || u.user_id === userId);
+
+  if (idx < 0) {
+    return { success: false, error: "प्रयोगकर्ता फेला परेन।" };
+  }
+
+  const u = users[idx];
+  u.account_status = "blocked";
+  u.blocked_at = new Date().toISOString();
+  u.blocked_by = adminName;
+  u.block_reason = reason || "प्रशासकीय सुरक्षा नीति";
+  u.updated_at = new Date().toISOString();
+
+  users[idx] = u;
+  saveAllUsers(users);
+
+  addAuditLog(
+    "USER_BLOCKED",
+    adminId,
+    adminName,
+    u.id,
+    u.name,
+    `प्रयोगकर्ता खाता ब्लक (Blocked) गरियो (${u.user_id || u.email || u.phone})`
+  );
+
+  const { password_hash, ...safeUser } = u;
+  return { success: true, user: safeUser };
+}
+
+/**
+ * UNBLOCK USER (Super Admin Only)
+ */
+export function unblockUser(userId: string, adminId: string, adminName: string): { success: boolean; user?: User; error?: string } {
+  const users = getAllUsers();
+  const idx = users.findIndex(u => u.id === userId || u.user_id === userId);
+
+  if (idx < 0) {
+    return { success: false, error: "प्रयोगकर्ता फेला परेन।" };
+  }
+
+  const u = users[idx];
+  u.account_status = "approved";
+  u.blocked_at = undefined;
+  u.blocked_by = undefined;
+  u.block_reason = undefined;
+  u.updated_at = new Date().toISOString();
+
+  users[idx] = u;
+  saveAllUsers(users);
+
+  addAuditLog(
+    "USER_UNBLOCKED",
+    adminId,
+    adminName,
+    u.id,
+    u.name,
+    `प्रयोगकर्ता खाता अनब्लक (Unblocked / Active) गरियो (${u.user_id || u.email || u.phone})`
+  );
+
+  const { password_hash, ...safeUser } = u;
   return { success: true, user: safeUser };
 }
 

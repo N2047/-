@@ -1,6 +1,6 @@
 export type UserRole = 'normal_user' | 'employee' | 'super_admin' | 'provincial_admin' | 'palika_staff';
 
-export type AccountStatus = 'pending' | 'approved' | 'rejected' | 'suspended';
+export type AccountStatus = 'pending' | 'approved' | 'rejected' | 'suspended' | 'blocked';
 
 export type ReportStatus = 
   | 'draft' 
@@ -19,6 +19,10 @@ export interface User {
   role: UserRole;
   account_status: AccountStatus;
   otp_verified: boolean;
+  designation?: string;
+  organization?: string;
+  ward_number?: string | number;
+  province?: string;
   
   // Location mapping (strictly for employees)
   district_id?: string;
@@ -39,6 +43,9 @@ export interface User {
   updated_at?: string;
   approved_at?: string;
   approved_by?: string;
+  blocked_at?: string;
+  blocked_by?: string;
+  block_reason?: string;
   last_login_at?: string;
 }
 

@@ -455,6 +455,23 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
                 </Link>
               </li>
 
+              {/* ८. Admin Login (Requirement 2 & 27) */}
+              <li role="none">
+                <Link
+                  href="/admin"
+                  role="menuitem"
+                  className={`inline-flex items-center px-3 py-2 text-xs font-bold rounded-lg transition-all border ${
+                    pathname.startsWith("/admin")
+                      ? "text-amber-300 border-amber-400 bg-blue-800/80 shadow-xs"
+                      : "text-amber-300/90 hover:text-amber-200 bg-blue-950/60 hover:bg-blue-800/80 border-amber-400/40 hover:border-amber-300"
+                  }`}
+                  aria-label="Admin Login"
+                  title="प्रशासकीय लगइन (Admin Login)"
+                >
+                  <Lock className="w-3.5 h-3.5 mr-1 text-amber-400 shrink-0" aria-hidden="true" />
+                  <span>Admin</span>
+                </Link>
+              </li>
             </ul>
 
             {/* लगइन / लगआउट Right Section */}
@@ -651,6 +668,19 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
                 >
                   <Search className="w-4 h-4 mr-2" aria-hidden="true" />
                   <span>{t.nav_search}</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/admin"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`flex items-center px-3 py-2.5 rounded-md text-sm font-bold border border-amber-400/40 ${
+                    pathname.startsWith("/admin") ? "bg-blue-900 text-amber-300" : "bg-blue-950/70 hover:bg-blue-900 text-amber-300"
+                  }`}
+                  aria-label="Admin Login"
+                >
+                  <Lock className="w-4 h-4 mr-2 text-amber-400" aria-hidden="true" />
+                  <span>🔐 Admin</span>
                 </Link>
               </li>
             </ul>

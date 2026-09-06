@@ -4,6 +4,8 @@ import {
   approveEmployee, 
   rejectEmployee, 
   updateUserStatus, 
+  blockUser,
+  unblockUser,
   getAuditLogs 
 } from "@/lib/authStore";
 
@@ -118,6 +120,43 @@ ${signInLink}
       });
     }
 
+    if (action === "toggle_employee_status") {
+      const all = getAllUsers();
+      const current = all.find(u => u.id === userId || u.user_id === userId);
+      if (!current) {
+        return NextResponse.json({ error: "कर्मचारी फेला परेन।" }, { status: 404 });
+      }
+
+      if (current.account_status === "approved") {
+        // Toggle OFF -> Set to pending
+        const res = updateUserStatus(userId, "pending", adminId, adminName);
+        return NextResponse.json({
+          success: true,
+          message: `'${res.user?.name}' को खाता स्थिति 'Pending (स्वीकृति बाँकी)' मा परिवर्तन गरियो।`,
+          user: res.user,
+          newStatus: "pending"
+        });
+      } else {
+        // Toggle ON -> Approve
+        const res = approveEmployee(userId, adminId, adminName);
+        return NextResponse.json({
+          success: true,
+          message: `'${res.user?.name}' को खाता सफलतापूर्वक 'Approved (स्वीकृत)' गरियो।`,
+          user: res.user,
+          newStatus: "approved"
+        });
+      }
+    }
+
+    if (action === "pending") {
+      const res = updateUserStatus(userId, "pending", adminId, adminName);
+      return NextResponse.json({
+        success: true,
+        message: `'${res.user?.name}' को खाता स्थिति 'Pending (स्वीकृति बाँकी)' मा परिवर्तन गरियो।`,
+        user: res.user
+      });
+    }
+
     if (action === "suspend") {
       const res = updateUserStatus(userId, "suspended", adminId, adminName);
       return NextResponse.json({
@@ -133,6 +172,32 @@ ${signInLink}
         success: true,
         message: "खाता पुनः सक्रिय (Active) गरियो।",
         user: res.user
+      });
+    }
+
+    if (action === "block") {
+      const res = blockUser(userId, adminId, adminName, reason);
+      if (!res.success || !res.user) {
+        return NextResponse.json({ error: res.error || "प्रयोगकर्ता ब्लक गर्न सकिएन।" }, { status: 400 });
+      }
+      return NextResponse.json({
+        success: true,
+        message: `'${res.user.name}' को खाता सफलतापूर्वक Block गरियो। उक्त खाताबाट अब लगइन सम्भव हुने छैन।`,
+        user: res.user,
+        newStatus: "blocked"
+      });
+    }
+
+    if (action === "unblock") {
+      const res = unblockUser(userId, adminId, adminName);
+      if (!res.success || !res.user) {
+        return NextResponse.json({ error: res.error || "प्रयोगकर्ता Unblock गर्न सकिएन।" }, { status: 400 });
+      }
+      return NextResponse.json({
+        success: true,
+        message: `'${res.user.name}' को खाता सफलतापूर्वक Unblock गरियो। अब प्रयोगकर्ताले लगइन गर्न सक्नेछन्।`,
+        user: res.user,
+        newStatus: "approved"
       });
     }
 

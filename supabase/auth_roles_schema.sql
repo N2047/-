@@ -14,16 +14,23 @@ CREATE TABLE IF NOT EXISTS profiles (
   
   -- Role & Status
   role VARCHAR(50) NOT NULL DEFAULT 'normal_user', -- 'normal_user', 'employee', 'super_admin'
-  account_status VARCHAR(50) NOT NULL DEFAULT 'approved', -- 'pending', 'approved', 'rejected', 'suspended'
+  account_status VARCHAR(50) NOT NULL DEFAULT 'approved', -- 'pending', 'approved', 'rejected', 'suspended', 'blocked'
   otp_verified BOOLEAN NOT NULL DEFAULT false,
 
-  -- Employee Assigned Geography
+  -- Employee Details & Assigned Geography
+  designation VARCHAR(150),
+  organization VARCHAR(255),
+  ward_number VARCHAR(10),
+  province VARCHAR(100) DEFAULT 'कोशी प्रदेश',
   district_id VARCHAR(100),
   local_government_id VARCHAR(100),
   
-  -- Administrative Approval Metadata
+  -- Administrative Approval & Block Metadata
   approved_at TIMESTAMPTZ,
   approved_by VARCHAR(255),
+  blocked_at TIMESTAMPTZ,
+  blocked_by VARCHAR(255),
+  block_reason TEXT,
   last_login_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()

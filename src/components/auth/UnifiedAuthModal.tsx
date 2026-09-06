@@ -554,7 +554,7 @@ export default function UnifiedAuthModal({
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-3 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md flex items-center justify-center gap-2 transition disabled:opacity-50"
+                className="w-full py-3 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md flex items-center justify-center gap-2 transition disabled:opacity-50 cursor-pointer"
               >
                 {isLoading ? (
                   <span>जाँच हुँदैछ...</span>
@@ -565,51 +565,6 @@ export default function UnifiedAuthModal({
                   </>
                 )}
               </button>
-
-              {/* Demo Account Quick Switcher */}
-              <div className="pt-3 border-t border-slate-200 dark:border-slate-800">
-                <div className="text-[11px] font-bold text-slate-500 mb-2 flex items-center justify-between">
-                  <span>द्रुत परीक्षण खाताहरू (Demo Credentials):</span>
-                  <span className="text-[10px] text-amber-600 font-semibold">क्लिक गरी लगइन गर्नुहोस्</span>
-                </div>
-                <div className="grid grid-cols-2 gap-2 text-[11px]">
-                  <button
-                    type="button"
-                    onClick={() => handleQuickLogin("admin@dic.gov.np", "admin123")}
-                    className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-50 text-left border border-slate-200 dark:border-slate-700 transition"
-                  >
-                    <div className="font-bold text-blue-700 dark:text-blue-300">👑 Super Admin</div>
-                    <div className="text-slate-500 text-[10px]">admin@dic.gov.np</div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleQuickLogin("phidim.staff@gmail.com", "phidim123")}
-                    className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 text-left border border-slate-200 dark:border-slate-700 transition"
-                  >
-                    <div className="font-bold text-emerald-700 dark:text-emerald-300">🏛️ Approved Staff</div>
-                    <div className="text-slate-500 text-[10px]">फिदिम न.पा. (पाँचथर)</div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleQuickLogin("pending.staff@gmail.com", "pending123")}
-                    className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-amber-50 text-left border border-slate-200 dark:border-slate-700 transition"
-                  >
-                    <div className="font-bold text-amber-700 dark:text-amber-300">⏳ Pending Staff</div>
-                    <div className="text-slate-500 text-[10px]">विराटनगर (स्वीकृति बाँकी)</div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleQuickLogin("citizen@example.com", "citizen123")}
-                    className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-purple-50 text-left border border-slate-200 dark:border-slate-700 transition"
-                  >
-                    <div className="font-bold text-purple-700 dark:text-purple-300">👤 Normal Citizen</div>
-                    <div className="text-slate-500 text-[10px]">citizen@example.com</div>
-                  </button>
-                </div>
-              </div>
             </form>
           )}
 
