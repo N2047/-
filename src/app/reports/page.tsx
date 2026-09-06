@@ -40,9 +40,22 @@ import {
   FileText,
   Filter,
   DownloadCloud,
-  Clock,
-  RotateCcw
+  RotateCcw,
+  ChevronLeft,
+  ChevronRight,
+  PieChart as PieChartIcon,
+  BarChart2,
+  Download,
+  LayoutGrid,
+  SlidersHorizontal,
+  Sparkles
 } from "lucide-react";
+import { 
+  CardColorsPieChart, 
+  DisabilityTypesBarChart, 
+  SsaAndBudgetComparisonChart, 
+  GenderBreakdownPieChart 
+} from "@/components/reports/OverviewCharts";
 
 export type ReportSubject = 
   | 'overall' 
@@ -87,6 +100,35 @@ export default function ReportsPage() {
   const compiledGrandTotals = useMemo(() => {
     return calculateCompiledGrandTotals(filteredCompiledPalikas);
   }, [filteredCompiledPalikas]);
+
+  // Multi-Page Overview State (Pages 1 to 7)
+  const [overviewPage, setOverviewPage] = useState<number>(1);
+  const [overviewViewMode, setOverviewViewMode] = useState<"paginated" | "all">("paginated");
+  const [overviewChartTab, setOverviewChartTab] = useState<"all" | "card_pie" | "types_bar" | "budget_bar" | "gender_pie">("all");
+
+  // Table Column Set and Pagination
+  const [compiledColumnSet, setCompiledColumnSet] = useState<
+    | "summary"
+    | "demographics"
+    | "cards"
+    | "disability_types"
+    | "ssa"
+    | "services"
+    | "education"
+    | "livelihood"
+    | "budget_infra"
+    | "all_columns"
+  >("summary");
+  const [tablePage, setTablePage] = useState<number>(1);
+  const [tablePageSize, setTablePageSize] = useState<number>(25);
+
+  const paginatedPalikas = useMemo(() => {
+    if (tablePageSize >= 137) return filteredCompiledPalikas;
+    const start = (tablePage - 1) * tablePageSize;
+    return filteredCompiledPalikas.slice(start, start + tablePageSize);
+  }, [filteredCompiledPalikas, tablePage, tablePageSize]);
+
+  const totalTablePages = Math.ceil(filteredCompiledPalikas.length / tablePageSize) || 1;
 
   // Palika Comparison state
   const [comparisonPalikas, setComparisonPalikas] = useState<string[]>([
@@ -687,250 +729,1286 @@ export default function ReportsPage() {
               </div>
             </div>
 
-            {/* Aggregate KPI Summary Cards for Compiled View */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
-              <div className="bg-white dark:bg-slate-900 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
-                <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 block">कुल स्थानीय तह</span>
-                <span className="text-lg font-black text-slate-900 dark:text-white mt-1 block">
-                  {filteredCompiledPalikas.length}
-                </span>
-                <span className="text-[10px] text-slate-400 block">१३७ मध्ये</span>
+            {/* ========================================================= */}
+            {/* SECTION A: MULTI-PAGE OVERVIEW & VISUAL CHARTS (स्तम्भ/वृत्त चित्र) */}
+            {/* ========================================================= */}
+            <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+              
+              {/* Overview Header Toolbar */}
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-0.5 bg-blue-100 dark:bg-blue-950 text-blue-900 dark:text-blue-300 rounded-full text-xs font-black uppercase tracking-wider border border-blue-300 dark:border-blue-800">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                      समग्र तथ्याङ्क ओभरभ्यु ड्यासबोर्ड
+                    </span>
+                    <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                      सबै ५५+ परिसूचकहरू
+                    </span>
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white">
+                    अपाङ्गता सम्बन्धी समग्र स्थिति तथा कार्यसम्पादन ओभरभ्यु
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    स्थानीय तहको प्रतिवेदन फारममा भरिएका सम्पूर्ण संख्यात्मक तथ्यहरू, स्तम्भ चित्र (Bar Chart) तथा वृत्त चित्र (Pie Chart)
+                  </p>
+                </div>
+
+                {/* Toolbar Buttons: PDF Print, Full Excel, View Toggle */}
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => window.print()}
+                    className="px-3.5 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 text-white text-xs font-black flex items-center gap-1.5 shadow-sm cursor-pointer transition-all hover:-translate-y-0.5"
+                    title="ओभरभ्यु तथा सम्पूर्ण ग्राफिक्स रिपोर्ट प्रिन्ट वा PDF का रूपमा सेभ गर्नुहोस्"
+                  >
+                    <Download className="w-3.5 h-3.5 text-amber-300" />
+                    <span>📥 ओभरभ्यु रिपोर्ट PDF / प्रिन्ट</span>
+                  </button>
+
+                  <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <button
+                      type="button"
+                      onClick={() => setOverviewViewMode("paginated")}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        overviewViewMode === "paginated"
+                          ? "bg-white dark:bg-slate-700 text-blue-900 dark:text-white shadow-xs"
+                          : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                      }`}
+                    >
+                      📄 पेज अनुसार (१-७)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setOverviewViewMode("all")}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        overviewViewMode === "all"
+                          ? "bg-white dark:bg-slate-700 text-blue-900 dark:text-white shadow-xs"
+                          : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                      }`}
+                    >
+                      📑 सबै एकैपटक
+                    </button>
+                  </div>
+                </div>
               </div>
 
-              <div className="bg-white dark:bg-slate-900 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
-                <span className="text-[11px] font-bold text-blue-700 dark:text-blue-400 block">कुल पहिचान</span>
-                <span className="text-lg font-black text-blue-900 dark:text-blue-300 mt-1 block">
-                  {compiledGrandTotals.identifiedTotal.toLocaleString("ne-NP")}
-                </span>
-                <span className="text-[10px] text-slate-400 block">म: {compiledGrandTotals.identifiedFemale.toLocaleString("ne-NP")} | पु: {compiledGrandTotals.identifiedMale.toLocaleString("ne-NP")}</span>
-              </div>
+              {/* Page Navigation Controls (When Paginated Mode) */}
+              {overviewViewMode === "paginated" && (
+                <div className="space-y-3">
+                  {/* Prev / Next Header Bar */}
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700">
+                    <button
+                      type="button"
+                      disabled={overviewPage <= 1}
+                      onClick={() => setOverviewPage((p) => Math.max(1, p - 1))}
+                      className="w-full sm:w-auto px-4 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 cursor-pointer shadow-xs"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                      <span>◀ अघिल्लो पेज (Previous)</span>
+                    </button>
 
-              <div className="bg-white dark:bg-slate-900 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
-                <span className="text-[11px] font-bold text-rose-700 dark:text-rose-400 block">रातो कार्ड ('क')</span>
-                <span className="text-lg font-black text-rose-900 dark:text-rose-300 mt-1 block">
-                  {compiledGrandTotals.cardRed.toLocaleString("ne-NP")}
-                </span>
-                <span className="text-[10px] text-rose-600 block">पूर्ण अशक्त</span>
-              </div>
+                    <div className="flex items-center gap-2">
+                      <span className="px-3 py-1 rounded-full bg-blue-900 text-white text-xs font-black shadow-xs">
+                        पेज {overviewPage} / ७
+                      </span>
+                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                        {overviewPage === 1 && "१. पूर्ण जनसांख्यिकी र हाल सक्रिय संख्या (Q1-Q9)"}
+                        {overviewPage === 2 && "२. परिचयपत्र ४ वर्ग तथा प्रक्रिया (Q35 + वृत्त चित्र)"}
+                        {overviewPage === 3 && "३. १० प्रकारका अपाङ्गता वर्गीकरण (Q34 + स्तम्भ चित्र)"}
+                        {overviewPage === 4 && "४. सामाजिक सुरक्षा भत्ता (SSA) र बीमा (Q24-27 + स्तम्भ चित्र)"}
+                        {overviewPage === 5 && "५. सेवासुविधा, परामर्श, गृहभेट र पुनर्स्थापना (Q10-13)"}
+                        {overviewPage === 6 && "६. शिक्षा, बालबालिका र कानुनी सहायता (Q14-20, Q36)"}
+                        {overviewPage === 7 && "७. सीप, रोजगारी, घुम्ती कोष र स्थानीय बजेट (Q21-23, Q28-32)"}
+                      </span>
+                    </div>
 
-              <div className="bg-white dark:bg-slate-900 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
-                <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400 block">निलो कार्ड ('ख')</span>
-                <span className="text-lg font-black text-blue-800 dark:text-blue-300 mt-1 block">
-                  {compiledGrandTotals.cardBlue.toLocaleString("ne-NP")}
-                </span>
-                <span className="text-[10px] text-blue-600 block">अति अशक्त</span>
-              </div>
+                    <button
+                      type="button"
+                      disabled={overviewPage >= 7}
+                      onClick={() => setOverviewPage((p) => Math.min(7, p + 1))}
+                      className="w-full sm:w-auto px-4 py-2 rounded-xl bg-blue-900 text-white text-xs font-bold flex items-center justify-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-blue-800 cursor-pointer shadow-xs"
+                    >
+                      <span>अर्को पेज (Next Page) ▶</span>
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
 
-              <div className="bg-white dark:bg-slate-900 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
-                <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 block">भत्ता पाउने (SSA)</span>
-                <span className="text-lg font-black text-emerald-900 dark:text-emerald-300 mt-1 block">
-                  {compiledGrandTotals.ssaBeneficiaries.toLocaleString("ne-NP")}
-                </span>
-                <span className="text-[10px] text-emerald-600 block">रु. {compiledGrandTotals.ssaBudgetLakh.toFixed(1)} लाख/म.</span>
-              </div>
+                  {/* Selectable Page Tabs */}
+                  <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
+                    {[
+                      { num: 1, label: "१. जनसांख्यिकी" },
+                      { num: 2, label: "२. परिचयपत्र ४ वर्ग" },
+                      { num: 3, label: "३. १० प्रकार" },
+                      { num: 4, label: "४. भत्ता & बीमा" },
+                      { num: 5, label: "५. सेवा & गृहभेट" },
+                      { num: 6, label: "६. शिक्षा & बाल" },
+                      { num: 7, label: "७. सीप, कोष & बजेट" },
+                    ].map((pg) => (
+                      <button
+                        key={pg.num}
+                        type="button"
+                        onClick={() => setOverviewPage(pg.num)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                          overviewPage === pg.num
+                            ? "bg-blue-900 text-white shadow-xs ring-2 ring-amber-400"
+                            : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+                        }`}
+                      >
+                        {pg.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-              <div className="bg-white dark:bg-slate-900 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
-                <span className="text-[11px] font-bold text-purple-700 dark:text-purple-400 block">गृहभेट संख्या</span>
-                <span className="text-lg font-black text-purple-900 dark:text-purple-300 mt-1 block">
-                  {compiledGrandTotals.homeVisits.toLocaleString("ne-NP")}
-                </span>
-                <span className="text-[10px] text-purple-600 block">सहजकर्ता सेवा</span>
-              </div>
+              {/* OVERVIEW CONTENT PAGES */}
+              <div className="space-y-6">
+                
+                {/* PAGE 1: DEMOGRAPHICS (Q1-Q9) */}
+                {(overviewViewMode === "all" || overviewPage === 1) && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+                      <span className="text-xs font-black text-blue-900 dark:text-blue-300 uppercase tracking-wider">
+                        खण्ड १: पूर्ण जनसांख्यिकी तथा सक्रिय स्थिति (Q1 देखि Q9 सम्मका सबै तथ्य)
+                      </span>
+                    </div>
 
-              <div className="bg-white dark:bg-slate-900 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
-                <span className="text-[11px] font-bold text-teal-700 dark:text-teal-400 block">सहायक सामग्री</span>
-                <span className="text-lg font-black text-teal-900 dark:text-teal-300 mt-1 block">
-                  {compiledGrandTotals.assistiveDevices.toLocaleString("ne-NP")}
-                </span>
-                <span className="text-[10px] text-teal-600 block">थान वितरण</span>
-              </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                      <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700">
+                        <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 block">१. कुल पहिचान (Q3)</span>
+                        <span className="text-xl font-black text-blue-950 dark:text-blue-200 mt-1 block">
+                          {compiledGrandTotals.identifiedTotal.toLocaleString("ne-NP")}
+                        </span>
+                        <span className="text-[10px] text-blue-700 dark:text-blue-300 block font-medium">
+                          म: {compiledGrandTotals.identifiedFemale.toLocaleString("ne-NP")} | पु: {compiledGrandTotals.identifiedMale.toLocaleString("ne-NP")}
+                        </span>
+                      </div>
 
-              <div className="bg-white dark:bg-slate-900 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
-                <span className="text-[11px] font-bold text-amber-700 dark:text-amber-400 block">विनियोजित बजेट</span>
-                <span className="text-sm font-black text-amber-900 dark:text-amber-300 mt-1 block truncate" title={`रु. ${compiledGrandTotals.allocatedBudgetNPR.toLocaleString("ne-NP")}`}>
-                  रु. {(compiledGrandTotals.allocatedBudgetNPR / 10000000).toFixed(1)} करोड
-                </span>
-                <span className="text-[10px] text-amber-600 block">स्थानीय बजेट</span>
+                      <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700">
+                        <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 block">२. जनगणना २०७८ (Q1)</span>
+                        <span className="text-xl font-black text-slate-900 dark:text-white mt-1 block">
+                          {compiledGrandTotals.censusTotal.toLocaleString("ne-NP")}
+                        </span>
+                        <span className="text-[10px] text-slate-500 block font-medium">
+                          म: {compiledGrandTotals.censusFemale.toLocaleString("ne-NP")} | पु: {compiledGrandTotals.censusMale.toLocaleString("ne-NP")}
+                        </span>
+                      </div>
+
+                      <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700">
+                        <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 block">३. परिचयपत्र जारी (Q2)</span>
+                        <span className="text-xl font-black text-emerald-900 dark:text-emerald-300 mt-1 block">
+                          {compiledGrandTotals.idCardsIssuedTotal.toLocaleString("ne-NP")}
+                        </span>
+                        <span className="text-[10px] text-emerald-700 dark:text-emerald-400 block font-medium">
+                          म: {compiledGrandTotals.idCardsIssuedFemale.toLocaleString("ne-NP")} | पु: {compiledGrandTotals.idCardsIssuedMale.toLocaleString("ne-NP")}
+                        </span>
+                      </div>
+
+                      <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700">
+                        <span className="text-[11px] font-bold text-amber-700 dark:text-amber-400 block">४. कार्ड लिन बाँकी (Q4)</span>
+                        <span className="text-xl font-black text-amber-900 dark:text-amber-300 mt-1 block">
+                          {compiledGrandTotals.idCardPendingTotal.toLocaleString("ne-NP")}
+                        </span>
+                        <span className="text-[10px] text-amber-700 dark:text-amber-400 block font-medium">
+                          म: {compiledGrandTotals.idCardPendingFemale.toLocaleString("ne-NP")} | पु: {compiledGrandTotals.idCardPendingMale.toLocaleString("ne-NP")}
+                        </span>
+                      </div>
+
+                      <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700">
+                        <span className="text-[11px] font-bold text-purple-700 dark:text-purple-400 block">५. प्रोफाइल भरिएका (Q5)</span>
+                        <span className="text-xl font-black text-purple-900 dark:text-purple-300 mt-1 block">
+                          {compiledGrandTotals.profileCompletedTotal.toLocaleString("ne-NP")}
+                        </span>
+                        <span className="text-[10px] text-purple-700 dark:text-purple-400 block font-medium">
+                          म: {compiledGrandTotals.profileCompletedFemale.toLocaleString("ne-NP")} | पु: {compiledGrandTotals.profileCompletedMale.toLocaleString("ne-NP")}
+                        </span>
+                      </div>
+
+                      <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700">
+                        <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 block">६. प्रोफाइल बाँकी (Q6)</span>
+                        <span className="text-xl font-black text-slate-800 dark:text-slate-200 mt-1 block">
+                          {compiledGrandTotals.profilePendingTotal.toLocaleString("ne-NP")}
+                        </span>
+                        <span className="text-[10px] text-slate-500 block font-medium">
+                          म: {compiledGrandTotals.profilePendingFemale.toLocaleString("ne-NP")} | पु: {compiledGrandTotals.profilePendingMale.toLocaleString("ne-NP")}
+                        </span>
+                      </div>
+
+                      <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700">
+                        <span className="text-[11px] font-bold text-indigo-700 dark:text-indigo-400 block">७. बसाइँसराइ गएका (Q7)</span>
+                        <span className="text-xl font-black text-indigo-900 dark:text-indigo-300 mt-1 block">
+                          {compiledGrandTotals.migratedOutTotal.toLocaleString("ne-NP")}
+                        </span>
+                        <span className="text-[10px] text-indigo-700 dark:text-indigo-400 block font-medium">
+                          म: {compiledGrandTotals.migratedOutFemale.toLocaleString("ne-NP")} | पु: {compiledGrandTotals.migratedOutMale.toLocaleString("ne-NP")}
+                        </span>
+                      </div>
+
+                      <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700">
+                        <span className="text-[11px] font-bold text-rose-700 dark:text-rose-400 block">८. मृत्यु भएका (Q8)</span>
+                        <span className="text-xl font-black text-rose-900 dark:text-rose-300 mt-1 block">
+                          {compiledGrandTotals.deceasedTotal.toLocaleString("ne-NP")}
+                        </span>
+                        <span className="text-[10px] text-rose-700 dark:text-rose-400 block font-medium">
+                          म: {compiledGrandTotals.deceasedFemale.toLocaleString("ne-NP")} | पु: {compiledGrandTotals.deceasedMale.toLocaleString("ne-NP")}
+                        </span>
+                      </div>
+
+                      <div className="bg-blue-50 dark:bg-blue-950/40 p-3.5 rounded-2xl border-2 border-blue-600/40 col-span-2 sm:col-span-1 lg:col-span-2">
+                        <span className="text-[11px] font-black text-blue-950 dark:text-blue-300 block">९. हाल कायम सक्रिय संख्या (Q9)</span>
+                        <span className="text-2xl font-black text-blue-900 dark:text-blue-200 mt-1 block">
+                          {compiledGrandTotals.currentlyActiveTotal.toLocaleString("ne-NP")}
+                        </span>
+                        <span className="text-[11px] text-blue-800 dark:text-blue-300 block font-bold">
+                          महिला: {compiledGrandTotals.currentlyActiveFemale.toLocaleString("ne-NP")} | पुरुष: {compiledGrandTotals.currentlyActiveMale.toLocaleString("ne-NP")}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="pt-2">
+                      <GenderBreakdownPieChart grandTotals={compiledGrandTotals} />
+                    </div>
+                  </div>
+                )}
+
+                {/* PAGE 2: CARD COLORS (Q35 + PIE CHART) */}
+                {(overviewViewMode === "all" || overviewPage === 2) && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+                      <span className="text-xs font-black text-rose-900 dark:text-rose-300 uppercase tracking-wider">
+                        खण्ड ९: परिचयपत्र ४ वर्ग तथा प्रक्रिया विवरण (Q35 का सबै संख्यात्मक तथ्य)
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                      <div className="bg-rose-50 dark:bg-rose-950/40 p-3.5 rounded-2xl border border-rose-200 dark:border-rose-900">
+                        <span className="text-[11px] font-bold text-rose-900 dark:text-rose-300 block">रातो कार्ड ('क') पूर्ण अशक्त</span>
+                        <span className="text-2xl font-black text-rose-900 dark:text-rose-200 mt-1 block">
+                          {compiledGrandTotals.cardRedTotal.toLocaleString("ne-NP")}
+                        </span>
+                        <span className="text-[10px] text-rose-700 dark:text-rose-400 font-bold block">
+                          म: {compiledGrandTotals.cardRedFemale.toLocaleString("ne-NP")} | पु: {compiledGrandTotals.cardRedMale.toLocaleString("ne-NP")}
+                        </span>
+                      </div>
+
+                      <div className="bg-blue-50 dark:bg-blue-950/40 p-3.5 rounded-2xl border border-blue-200 dark:border-blue-900">
+                        <span className="text-[11px] font-bold text-blue-900 dark:text-blue-300 block">निलो कार्ड ('ख') अति अशक्त</span>
+                        <span className="text-2xl font-black text-blue-900 dark:text-blue-200 mt-1 block">
+                          {compiledGrandTotals.cardBlueTotal.toLocaleString("ne-NP")}
+                        </span>
+                        <span className="text-[10px] text-blue-700 dark:text-blue-400 font-bold block">
+                          म: {compiledGrandTotals.cardBlueFemale.toLocaleString("ne-NP")} | पु: {compiledGrandTotals.cardBlueMale.toLocaleString("ne-NP")}
+                        </span>
+                      </div>
+
+                      <div className="bg-amber-50 dark:bg-amber-950/40 p-3.5 rounded-2xl border border-amber-200 dark:border-amber-900">
+                        <span className="text-[11px] font-bold text-amber-900 dark:text-amber-300 block">पहेँलो कार्ड ('ग') मध्यम</span>
+                        <span className="text-2xl font-black text-amber-900 dark:text-amber-200 mt-1 block">
+                          {compiledGrandTotals.cardYellowTotal.toLocaleString("ne-NP")}
+                        </span>
+                        <span className="text-[10px] text-amber-700 dark:text-amber-400 font-bold block">
+                          म: {compiledGrandTotals.cardYellowFemale.toLocaleString("ne-NP")} | पु: {compiledGrandTotals.cardYellowMale.toLocaleString("ne-NP")}
+                        </span>
+                      </div>
+
+                      <div className="bg-slate-100 dark:bg-slate-800 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700">
+                        <span className="text-[11px] font-bold text-slate-800 dark:text-slate-300 block">सेतो कार्ड ('घ') सामान्य</span>
+                        <span className="text-2xl font-black text-slate-900 dark:text-white mt-1 block">
+                          {compiledGrandTotals.cardWhiteTotal.toLocaleString("ne-NP")}
+                        </span>
+                        <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold block">
+                          म: {compiledGrandTotals.cardWhiteFemale.toLocaleString("ne-NP")} | पु: {compiledGrandTotals.cardWhiteMale.toLocaleString("ne-NP")}
+                        </span>
+                      </div>
+
+                      <div className="bg-purple-50 dark:bg-purple-950/40 p-3.5 rounded-2xl border border-purple-200 dark:border-purple-900">
+                        <span className="text-[11px] font-bold text-purple-900 dark:text-purple-300 block">कार्ड प्रक्रियामा रहेका</span>
+                        <span className="text-2xl font-black text-purple-900 dark:text-purple-200 mt-1 block">
+                          {compiledGrandTotals.cardInProcessTotal.toLocaleString("ne-NP")}
+                        </span>
+                        <span className="text-[10px] text-purple-700 dark:text-purple-400 font-bold block">
+                          वडा तथा पालिका समितिमा
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="pt-2">
+                      <CardColorsPieChart grandTotals={compiledGrandTotals} />
+                    </div>
+                  </div>
+                )}
+
+                {/* PAGE 3: 10 DISABILITY TYPES (Q34 + BAR CHART) */}
+                {(overviewViewMode === "all" || overviewPage === 3) && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+                      <span className="text-xs font-black text-indigo-900 dark:text-indigo-300 uppercase tracking-wider">
+                        खण्ड ८: १० प्रकारका अपाङ्गता म्याट्रिक्स (Q34 का सबै संख्यात्मक तथ्य)
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+                      {[
+                        { label: "१. शारीरिक अपाङ्गता", count: compiledGrandTotals.typePhysical, color: "text-blue-700" },
+                        { label: "२. दृष्टिसम्बन्धी", count: compiledGrandTotals.typeVisual, color: "text-emerald-700" },
+                        { label: "३. सुनाइसम्बन्धी", count: compiledGrandTotals.typeHearing, color: "text-amber-700" },
+                        { label: "४. श्रवणदृष्टिविहीन", count: compiledGrandTotals.typeDeafblind, color: "text-orange-700" },
+                        { label: "५. स्वर र बोलाइ", count: compiledGrandTotals.typeSpeech, color: "text-cyan-700" },
+                        { label: "६. मानसिक/मनोसामाजिक", count: compiledGrandTotals.typeMentalPsychosocial, color: "text-purple-700" },
+                        { label: "७. बौद्धिक अपाङ्गता", count: compiledGrandTotals.typeIntellectual, color: "text-pink-700" },
+                        { label: "८. अनुवंशीय (हेमोफेलिया)", count: compiledGrandTotals.typeHemophilia, color: "text-red-700" },
+                        { label: "९. अटिजम सम्बन्धी", count: compiledGrandTotals.typeAutism, color: "text-indigo-700" },
+                        { label: "१०. बहु-अपाङ्गता", count: compiledGrandTotals.typeMultiple, color: "text-rose-700" },
+                      ].map((t, i) => (
+                        <div key={i} className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-2xl border border-slate-200 dark:border-slate-700">
+                          <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 block truncate">{t.label}</span>
+                          <span className={`text-lg font-black ${t.color} dark:text-white mt-1 block`}>
+                            {t.count.toLocaleString("ne-NP")}
+                          </span>
+                          <span className="text-[9px] text-slate-400 block">
+                            {((t.count / (compiledGrandTotals.identifiedTotal || 1)) * 100).toFixed(1)}% हिस्सा
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="pt-2">
+                      <DisabilityTypesBarChart grandTotals={compiledGrandTotals} />
+                    </div>
+                  </div>
+                )}
+
+                {/* PAGE 4: SOCIAL SECURITY ALLOWANCE & HEALTH INSURANCE (Q24-Q27, Q33) */}
+                {(overviewViewMode === "all" || overviewPage === 4) && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+                      <span className="text-xs font-black text-emerald-900 dark:text-emerald-300 uppercase tracking-wider">
+                        खण्ड ५ र ७: सामाजिक सुरक्षा भत्ता (SSA) तथा स्वास्थ्य बीमा (Q24-27, Q33 का सबै तथ्य)
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      <div className="bg-emerald-50 dark:bg-emerald-950/40 p-4 rounded-2xl border border-emerald-200 dark:border-emerald-900">
+                        <span className="text-xs font-bold text-emerald-900 dark:text-emerald-300 block">कुल भत्ता पाउने (SSA)</span>
+                        <span className="text-2xl font-black text-emerald-900 dark:text-emerald-200 mt-1 block">
+                          {compiledGrandTotals.ssaBeneficiaries.toLocaleString("ne-NP")}
+                        </span>
+                        <span className="text-[10px] text-emerald-700 dark:text-emerald-400 block font-semibold">
+                          रातो + निलो कार्ड लाभग्राही
+                        </span>
+                      </div>
+
+                      <div className="bg-rose-50 dark:bg-rose-950/40 p-4 rounded-2xl border border-rose-200 dark:border-rose-900">
+                        <span className="text-xs font-bold text-rose-900 dark:text-rose-300 block">रातो कार्ड भत्ता (रु. ४,३००/म.)</span>
+                        <span className="text-2xl font-black text-rose-900 dark:text-rose-200 mt-1 block">
+                          {compiledGrandTotals.ssaProfoundTotal.toLocaleString("ne-NP")}
+                        </span>
+                        <span className="text-[10px] text-rose-700 dark:text-rose-400 block font-semibold">
+                          म: {compiledGrandTotals.ssaProfoundFemale.toLocaleString("ne-NP")} | पु: {compiledGrandTotals.ssaProfoundMale.toLocaleString("ne-NP")}
+                        </span>
+                      </div>
+
+                      <div className="bg-blue-50 dark:bg-blue-950/40 p-4 rounded-2xl border border-blue-200 dark:border-blue-900">
+                        <span className="text-xs font-bold text-blue-900 dark:text-blue-300 block">निलो कार्ड भत्ता (रु. २,१२८/म.)</span>
+                        <span className="text-2xl font-black text-blue-900 dark:text-blue-200 mt-1 block">
+                          {compiledGrandTotals.ssaSevereTotal.toLocaleString("ne-NP")}
+                        </span>
+                        <span className="text-[10px] text-blue-700 dark:text-blue-400 block font-semibold">
+                          म: {compiledGrandTotals.ssaSevereFemale.toLocaleString("ne-NP")} | पु: {compiledGrandTotals.ssaSevereMale.toLocaleString("ne-NP")}
+                        </span>
+                      </div>
+
+                      <div className="bg-amber-50 dark:bg-amber-950/40 p-4 rounded-2xl border border-amber-200 dark:border-amber-900">
+                        <span className="text-xs font-bold text-amber-900 dark:text-amber-300 block">वार्षिक भत्ता रकम भार (रु.)</span>
+                        <span className="text-xl font-black text-amber-900 dark:text-amber-200 mt-1 block">
+                          रु. {(compiledGrandTotals.ssaBudgetNPR / 10000000).toFixed(2)} करोड
+                        </span>
+                        <span className="text-[10px] text-amber-700 dark:text-amber-400 block font-semibold">
+                          मासिक रु. {compiledGrandTotals.ssaBudgetLakh.toFixed(1)} लाख
+                        </span>
+                      </div>
+
+                      <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700">
+                        <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 block">मध्यम/अन्य योजना (Q25)</span>
+                        <span className="text-lg font-black text-slate-900 dark:text-white mt-1 block">
+                          {compiledGrandTotals.ssaModerateMildTotal.toLocaleString("ne-NP")}
+                        </span>
+                      </div>
+
+                      <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700">
+                        <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 block">स्तर नमिलेका (Q26)</span>
+                        <span className="text-lg font-black text-slate-900 dark:text-white mt-1 block">
+                          {compiledGrandTotals.ssaLevelMismatchTotal.toLocaleString("ne-NP")}
+                        </span>
+                      </div>
+
+                      <div className="bg-teal-50 dark:bg-teal-950/40 p-3.5 rounded-2xl border border-teal-200 dark:border-teal-900">
+                        <span className="text-[11px] font-bold text-teal-900 dark:text-teal-300 block">निःशुल्क स्वास्थ्य बीमा (Q33)</span>
+                        <span className="text-lg font-black text-teal-950 dark:text-teal-200 mt-1 block">
+                          {compiledGrandTotals.healthInsFreeTotal.toLocaleString("ne-NP")}
+                        </span>
+                        <span className="text-[10px] text-teal-700 dark:text-teal-400 block">
+                          म: {compiledGrandTotals.healthInsFreeFemale.toLocaleString("ne-NP")} | पु: {compiledGrandTotals.healthInsFreeMale.toLocaleString("ne-NP")}
+                        </span>
+                      </div>
+
+                      <div className="bg-indigo-50 dark:bg-indigo-950/40 p-3.5 rounded-2xl border border-indigo-200 dark:border-indigo-900">
+                        <span className="text-[11px] font-bold text-indigo-900 dark:text-indigo-300 block">सहुलियत स्वास्थ्य बीमा (Q33)</span>
+                        <span className="text-lg font-black text-indigo-950 dark:text-indigo-200 mt-1 block">
+                          {compiledGrandTotals.healthInsOtherTotal.toLocaleString("ne-NP")}
+                        </span>
+                        <span className="text-[10px] text-indigo-700 dark:text-indigo-400 block">
+                          अन्य योजना अन्तर्गत
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="pt-2">
+                      <SsaAndBudgetComparisonChart grandTotals={compiledGrandTotals} />
+                    </div>
+                  </div>
+                )}
+
+                {/* PAGE 5: SERVICES, COUNSELLING, HOME VISITS & REHABILITATION (Q10-Q13) */}
+                {(overviewViewMode === "all" || overviewPage === 5) && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+                      <span className="text-xs font-black text-purple-900 dark:text-purple-300 uppercase tracking-wider">
+                        खण्ड २: सेवा प्रवाह, परामर्श, गृहभेट र पुनर्स्थापना (Q10 देखि Q13 सम्मका सबै तथ्य)
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      <div className="bg-purple-50 dark:bg-purple-950/40 p-4 rounded-2xl border border-purple-200 dark:border-purple-900">
+                        <span className="text-xs font-bold text-purple-900 dark:text-purple-300 block">१. व्यक्तिगत परामर्श सेवा (Q10)</span>
+                        <span className="text-2xl font-black text-purple-900 dark:text-purple-200 mt-1 block">
+                          {compiledGrandTotals.counsellingTotal.toLocaleString("ne-NP")}
+                        </span>
+                        <span className="text-[10px] text-purple-700 dark:text-purple-400 block font-semibold">
+                          महिला: {compiledGrandTotals.counsellingFemale.toLocaleString("ne-NP")} | पुरुष: {compiledGrandTotals.counsellingMale.toLocaleString("ne-NP")}
+                        </span>
+                      </div>
+
+                      <div className="bg-blue-50 dark:bg-blue-950/40 p-4 rounded-2xl border border-blue-200 dark:border-blue-900">
+                        <span className="text-xs font-bold text-blue-900 dark:text-blue-300 block">२. सहजकर्ताद्वारा गृहभेट (Q11)</span>
+                        <span className="text-2xl font-black text-blue-900 dark:text-blue-200 mt-1 block">
+                          {compiledGrandTotals.homeVisitsTotal.toLocaleString("ne-NP")}
+                        </span>
+                        <span className="text-[10px] text-blue-700 dark:text-blue-400 block font-semibold">
+                          महिला: {compiledGrandTotals.homeVisitsFemale.toLocaleString("ne-NP")} | पुरुष: {compiledGrandTotals.homeVisitsMale.toLocaleString("ne-NP")}
+                        </span>
+                      </div>
+
+                      <div className="bg-teal-50 dark:bg-teal-950/40 p-4 rounded-2xl border border-teal-200 dark:border-teal-900">
+                        <span className="text-xs font-bold text-teal-900 dark:text-teal-300 block">३. सहायक सामग्री वितरण (Q12)</span>
+                        <span className="text-2xl font-black text-teal-900 dark:text-teal-200 mt-1 block">
+                          {compiledGrandTotals.assistiveDevicesTotal.toLocaleString("ne-NP")}
+                        </span>
+                        <span className="text-[10px] text-teal-700 dark:text-teal-400 block font-semibold">
+                          महिला: {compiledGrandTotals.assistiveDevicesFemale.toLocaleString("ne-NP")} | पुरुष: {compiledGrandTotals.assistiveDevicesMale.toLocaleString("ne-NP")}
+                        </span>
+                      </div>
+
+                      <div className="bg-emerald-50 dark:bg-emerald-950/40 p-4 rounded-2xl border border-emerald-200 dark:border-emerald-900">
+                        <span className="text-xs font-bold text-emerald-900 dark:text-emerald-300 block">४. स्वास्थ्य उपचार/थेरापी (Q13)</span>
+                        <span className="text-2xl font-black text-emerald-900 dark:text-emerald-200 mt-1 block">
+                          {compiledGrandTotals.treatmentReceivedTotal.toLocaleString("ne-NP")}
+                        </span>
+                        <span className="text-[10px] text-emerald-700 dark:text-emerald-400 block font-semibold">
+                          महिला: {compiledGrandTotals.treatmentReceivedFemale.toLocaleString("ne-NP")} | पुरुष: {compiledGrandTotals.treatmentReceivedMale.toLocaleString("ne-NP")}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* PAGE 6: EDUCATION, CHILDREN & LEGAL AID (Q14-Q20, Q36) */}
+                {(overviewViewMode === "all" || overviewPage === 6) && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+                      <span className="text-xs font-black text-indigo-900 dark:text-indigo-300 uppercase tracking-wider">
+                        खण्ड ३ र १०: शिक्षा, बालबालिका र कानुनी सहायता (Q14 देखि Q20, Q36 सम्मका सबै तथ्य)
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700">
+                        <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 block">१. कुल अध्ययनरत विद्यार्थी (Q15)</span>
+                        <span className="text-xl font-black text-indigo-950 dark:text-indigo-200 mt-1 block">
+                          {compiledGrandTotals.enrolledStudentsTotal.toLocaleString("ne-NP")}
+                        </span>
+                        <span className="text-[10px] text-indigo-700 dark:text-indigo-400 block font-semibold">
+                          बालिका: {compiledGrandTotals.enrolledStudentsFemale.toLocaleString("ne-NP")} | बालक: {compiledGrandTotals.enrolledStudentsMale.toLocaleString("ne-NP")}
+                        </span>
+                      </div>
+
+                      <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700">
+                        <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 block">२. यस वर्ष नयाँ भर्ना (Q14)</span>
+                        <span className="text-xl font-black text-emerald-900 dark:text-emerald-300 mt-1 block">
+                          {compiledGrandTotals.schoolNewAdmitTotal.toLocaleString("ne-NP")}
+                        </span>
+                        <span className="text-[10px] text-emerald-700 block font-semibold">
+                          बालिका: {compiledGrandTotals.schoolNewAdmitFemale.toLocaleString("ne-NP")} | बालक: {compiledGrandTotals.schoolNewAdmitMale.toLocaleString("ne-NP")}
+                        </span>
+                      </div>
+
+                      <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700">
+                        <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 block">३. छात्रवृत्ति प्राप्त (Q16)</span>
+                        <span className="text-xl font-black text-blue-900 dark:text-blue-300 mt-1 block">
+                          {compiledGrandTotals.scholarshipTotal.toLocaleString("ne-NP")}
+                        </span>
+                        <span className="text-[10px] text-blue-700 block font-semibold">
+                          बालिका: {compiledGrandTotals.scholarshipFemale.toLocaleString("ne-NP")} | बालक: {compiledGrandTotals.scholarshipMale.toLocaleString("ne-NP")}
+                        </span>
+                      </div>
+
+                      <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700">
+                        <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 block">४. गृहमा आधारित शिक्षा (Q17)</span>
+                        <span className="text-xl font-black text-purple-900 dark:text-purple-300 mt-1 block">
+                          {compiledGrandTotals.homeBasedEduTotal.toLocaleString("ne-NP")}
+                        </span>
+                        <span className="text-[10px] text-purple-700 block font-semibold">
+                          बालिका: {compiledGrandTotals.homeBasedEduFemale.toLocaleString("ne-NP")} | बालक: {compiledGrandTotals.homeBasedEduMale.toLocaleString("ne-NP")}
+                        </span>
+                      </div>
+
+                      <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700">
+                        <span className="text-[11px] font-bold text-rose-700 dark:text-rose-400 block">५. विद्यालय बाहिर रहेका (Q18)</span>
+                        <span className="text-xl font-black text-rose-900 dark:text-rose-300 mt-1 block">
+                          {compiledGrandTotals.outOfSchoolTotal.toLocaleString("ne-NP")}
+                        </span>
+                        <span className="text-[10px] text-rose-700 block font-semibold">
+                          बालिका: {compiledGrandTotals.outOfSchoolFemale.toLocaleString("ne-NP")} | बालक: {compiledGrandTotals.outOfSchoolMale.toLocaleString("ne-NP")}
+                        </span>
+                      </div>
+
+                      <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700">
+                        <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 block">६. कुल बाल क्लब संख्या (Q19)</span>
+                        <span className="text-xl font-black text-slate-900 dark:text-white mt-1 block">
+                          {compiledGrandTotals.childClubsTotal.toLocaleString("ne-NP")}
+                        </span>
+                        <span className="text-[10px] text-slate-500 block">पालिकाभर गठित</span>
+                      </div>
+
+                      <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700">
+                        <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 block">७. बाल क्लबमा सहभागी (Q20)</span>
+                        <span className="text-xl font-black text-indigo-900 dark:text-indigo-300 mt-1 block">
+                          {compiledGrandTotals.childClubPwdTotal.toLocaleString("ne-NP")}
+                        </span>
+                        <span className="text-[10px] text-indigo-700 block font-semibold">
+                          बालिका: {compiledGrandTotals.childClubPwdFemale.toLocaleString("ne-NP")} | बालक: {compiledGrandTotals.childClubPwdMale.toLocaleString("ne-NP")}
+                        </span>
+                      </div>
+
+                      <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700">
+                        <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 block">८. कानुनी सहायता प्राप्त (Q36)</span>
+                        <span className="text-xl font-black text-amber-900 dark:text-amber-300 mt-1 block">
+                          {compiledGrandTotals.legalAidTotal.toLocaleString("ne-NP")}
+                        </span>
+                        <span className="text-[10px] text-amber-700 block font-semibold">
+                          महिला: {compiledGrandTotals.legalAidFemale.toLocaleString("ne-NP")} | पुरुष: {compiledGrandTotals.legalAidMale.toLocaleString("ne-NP")}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* PAGE 7: SKILLS, LIVELIHOOD, SEED FUNDS & BUDGET (Q21-23, Q28-32, Q41-42) */}
+                {(overviewViewMode === "all" || overviewPage === 7) && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+                      <span className="text-xs font-black text-amber-900 dark:text-amber-300 uppercase tracking-wider">
+                        खण्ड ४, ६ र ७: सीप, रोजगारी, समूह, घुम्ती कोष र बजेट (सबै ५५+ तथ्य)
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                      <div className="bg-amber-50 dark:bg-amber-950/40 p-3.5 rounded-2xl border border-amber-200 dark:border-amber-900">
+                        <span className="text-[11px] font-bold text-amber-900 dark:text-amber-300 block">१. विनियोजित कुल बजेट (Q31)</span>
+                        <span className="text-lg font-black text-amber-950 dark:text-amber-200 mt-1 block">
+                          रु. {compiledGrandTotals.allocatedBudgetNPR.toLocaleString("ne-NP")}
+                        </span>
+                        <span className="text-[10px] text-amber-700 dark:text-amber-400 block font-semibold">
+                          (रु. {(compiledGrandTotals.allocatedBudgetNPR / 10000000).toFixed(2)} करोड)
+                        </span>
+                      </div>
+
+                      <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700">
+                        <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 block">२. संस्थागत अनुदान फर्छ्यौट (Q32)</span>
+                        <span className="text-lg font-black text-blue-900 dark:text-blue-300 mt-1 block">
+                          रु. {compiledGrandTotals.dpoGrantSettledNPR.toLocaleString("ne-NP")}
+                        </span>
+                        <span className="text-[10px] text-slate-500 block">अपाङ्गता संस्था अनुदान</span>
+                      </div>
+
+                      <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700">
+                        <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 block">३. सीप तालिम कार्यक्रम (Q21)</span>
+                        <span className="text-lg font-black text-purple-900 dark:text-purple-300 mt-1 block">
+                          {compiledGrandTotals.trainingProgramsCount.toLocaleString("ne-NP")} कार्यक्रम
+                        </span>
+                        <span className="text-[10px] text-purple-700 block font-semibold">
+                          सहभागी: {compiledGrandTotals.trainingTraineesTotal.toLocaleString("ne-NP")} (म: {compiledGrandTotals.trainingTraineesFemale.toLocaleString("ne-NP")})
+                        </span>
+                      </div>
+
+                      <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700">
+                        <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 block">४. कुल रोजगारी/उद्यम (Q22)</span>
+                        <span className="text-lg font-black text-emerald-900 dark:text-emerald-300 mt-1 block">
+                          {compiledGrandTotals.employedTotal.toLocaleString("ne-NP")}
+                        </span>
+                        <span className="text-[10px] text-emerald-700 block font-semibold">
+                          स्वरोजगार: {compiledGrandTotals.selfEmployedTotal.toLocaleString("ne-NP")} | परिवार: {compiledGrandTotals.familyEmployedTotal.toLocaleString("ne-NP")}
+                        </span>
+                      </div>
+
+                      <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700">
+                        <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 block">५. स्वावलम्बन समूह संख्या (Q28)</span>
+                        <span className="text-lg font-black text-slate-900 dark:text-white mt-1 block">
+                          {compiledGrandTotals.shgGroupsCount.toLocaleString("ne-NP")} समूह
+                        </span>
+                        <span className="text-[10px] text-slate-500 block">
+                          सदस्य: {compiledGrandTotals.shgMembersTotal.toLocaleString("ne-NP")} जना
+                        </span>
+                      </div>
+
+                      <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700">
+                        <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 block">६. कुल समूह घुम्ती कोष (Q29)</span>
+                        <span className="text-lg font-black text-emerald-950 dark:text-emerald-200 mt-1 block">
+                          रु. {compiledGrandTotals.totalFundsNPR.toLocaleString("ne-NP")}
+                        </span>
+                        <span className="text-[10px] text-emerald-700 block font-semibold">
+                          बचत: रु. {compiledGrandTotals.memberSavingsNPR.toLocaleString("ne-NP")}
+                        </span>
+                      </div>
+
+                      <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700">
+                        <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 block">७. लगानी भएको ऋण (Q29)</span>
+                        <span className="text-lg font-black text-blue-900 dark:text-blue-300 mt-1 block">
+                          रु. {compiledGrandTotals.loanInvestedNPR.toLocaleString("ne-NP")}
+                        </span>
+                        <span className="text-[10px] text-blue-700 block font-semibold">
+                          उठ्न बाँकी: रु. {compiledGrandTotals.netLoanOutstandingNPR.toLocaleString("ne-NP")}
+                        </span>
+                      </div>
+
+                      <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700">
+                        <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 block">८. पहुँचयुक्त सरकारी संरचना (Q42)</span>
+                        <span className="text-lg font-black text-slate-900 dark:text-white mt-1 block">
+                          {compiledGrandTotals.accessibleBuildingsCount.toLocaleString("ne-NP")} संरचना
+                        </span>
+                        <span className="text-[10px] text-slate-500 block">
+                          शुल्क फिर्ता: रु. {compiledGrandTotals.feeRefundAmountNPR.toLocaleString("ne-NP")}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
               </div>
             </div>
 
-            {/* Master Compiled Table */}
+            {/* ========================================================= */}
+            {/* SECTION B: MASTER COMPILED TABLE WITH COLUMN SELECTOR */}
+            {/* ========================================================= */}
             <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
-              <div className="p-4 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2">
-                <div className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                  देखाउँदै: <strong>{filteredCompiledPalikas.length}</strong> स्थानीय तहहरू (कोशी प्रदेशका कुल १३७ मध्ये)
+              
+              {/* Table Toolbar: Column Category Selector & Options */}
+              <div className="p-4 sm:p-5 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
+                      <FileSpreadsheet className="w-5 h-5 text-emerald-600" />
+                      <span>स्थानीय तहहरूको सम्पूर्ण ५५+ तथ्यांक कम्पाइल तालिका</span>
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                      तलको स्तम्भ समूह छनौट गरेर फारममा भरिने सम्पूर्ण विषयगत अंकहरू हेर्नुहोस्
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <div className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                      प्रति पृष्ठ:
+                    </div>
+                    <div className="flex items-center bg-white dark:bg-slate-700 p-0.5 rounded-xl border border-slate-200 dark:border-slate-600">
+                      {[25, 50, 137].map((sz) => (
+                        <button
+                          key={sz}
+                          type="button"
+                          onClick={() => {
+                            setTablePageSize(sz);
+                            setTablePage(1);
+                          }}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                            tablePageSize === sz
+                              ? "bg-blue-900 text-white shadow-xs"
+                              : "text-slate-600 dark:text-slate-300 hover:text-slate-900"
+                          }`}
+                        >
+                          {sz === 137 ? "सबै १३७" : `${sz}`}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-                <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                  * कुनै पनि स्थानीय तहको विस्तृत विवरण हेर्न दायाँपट्टिको <strong>[ 📄 प्रतिवेदन ]</strong> बटन थिच्नुहोस्
+
+                {/* THEMATIC COLUMN SET SELECTOR TABS */}
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
+                  <span className="text-xs font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap mr-1">
+                    स्तम्भ समूह:
+                  </span>
+                  {[
+                    { id: "summary", label: "🌟 १. मुख्य एकीकृत सारांश" },
+                    { id: "demographics", label: "👥 २. जनसांख्यिकी (Q1-Q9)" },
+                    { id: "cards", label: "🪪 ३. परिचयपत्र ४ वर्ग (Q35)" },
+                    { id: "disability_types", label: "🩺 ४. १० प्रकार (Q34)" },
+                    { id: "ssa", label: "🛡️ ५. भत्ता & बीमा (Q24-27)" },
+                    { id: "services", label: "🤝 ६. सेवा & पुनर्स्थापना (Q10-13)" },
+                    { id: "education", label: "🎓 ७. शिक्षा & बाल (Q14-20)" },
+                    { id: "livelihood", label: "💼 ८. सीप, रोजगार & कोष (Q21-29)" },
+                    { id: "budget_infra", label: "💰 ९. बजेट & पूर्वाधार (Q30-42)" },
+                    { id: "all_columns", label: "🌐 १०. सम्पूर्ण सबै स्तम्भहरू (५५+)" },
+                  ].map((tab) => (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setCompiledColumnSet(tab.id as any)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                        compiledColumnSet === tab.id
+                          ? "bg-emerald-700 text-white shadow-xs ring-2 ring-amber-400"
+                          : "bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600"
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
                 </div>
               </div>
 
+              {/* TABLE AREA */}
               <div className="overflow-x-auto max-h-[750px] overflow-y-auto">
                 <table className="min-w-full text-xs text-left border-collapse">
                   <thead className="bg-blue-950 text-white font-bold sticky top-0 z-20 shadow-xs">
                     <tr>
-                      <th scope="col" className="p-3 text-center w-12 border-b border-blue-900">सि.नं.</th>
-                      <th scope="col" className="p-3 min-w-[190px] border-b border-blue-900">स्थानीय तहको नाम</th>
+                      <th scope="col" className="p-3 text-center w-12 border-b border-blue-900 sticky left-0 bg-blue-950 z-30">सि.नं.</th>
+                      <th scope="col" className="p-3 min-w-[200px] border-b border-blue-900 sticky left-12 bg-blue-950 z-30">स्थानीय तहको नाम</th>
                       <th scope="col" className="p-3 border-b border-blue-900">जिल्ला</th>
                       <th scope="col" className="p-3 text-center border-b border-blue-900">वडा</th>
-                      <th scope="col" className="p-3 text-right bg-blue-900/60 border-b border-blue-900">कुल पहिचान</th>
-                      <th scope="col" className="p-3 text-right border-b border-blue-900 text-rose-300">रातो ('क')</th>
-                      <th scope="col" className="p-3 text-right border-b border-blue-900 text-blue-300">निलो ('ख')</th>
-                      <th scope="col" className="p-3 text-right border-b border-blue-900 text-amber-300">पहेलो ('ग')</th>
-                      <th scope="col" className="p-3 text-right border-b border-blue-900 text-slate-200">सेतो ('घ')</th>
-                      <th scope="col" className="p-3 text-right bg-emerald-950/70 border-b border-blue-900 text-emerald-300">भत्ता पाउने (SSA)</th>
-                      <th scope="col" className="p-3 text-right border-b border-blue-900">सेवासुविधा</th>
-                      <th scope="col" className="p-3 text-right border-b border-blue-900">रोजगार/उद्यम</th>
-                      <th scope="col" className="p-3 text-right border-b border-blue-900">गृहभेट</th>
-                      <th scope="col" className="p-3 text-right border-b border-blue-900">सहायक सामग्री</th>
-                      <th scope="col" className="p-3 text-right border-b border-blue-900">बजेट (रु.)</th>
+
+                      {/* Dynamic Columns based on compiledColumnSet */}
+                      {(compiledColumnSet === "summary" || compiledColumnSet === "all_columns") && (
+                        <>
+                          <th scope="col" className="p-3 text-right bg-blue-900/60 border-b border-blue-900">कुल पहिचान</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900 text-rose-300">रातो ('क')</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900 text-blue-300">निलो ('ख')</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900 text-amber-300">पहेलो ('ग')</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900 text-slate-200">सेतो ('घ')</th>
+                          <th scope="col" className="p-3 text-right bg-emerald-950/70 border-b border-blue-900 text-emerald-300">भत्ता पाउने (SSA)</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900">सेवासुविधा</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900">रोजगार/उद्यम</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900">गृहभेट</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900">सहायक सामग्री</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900">बजेट (रु.)</th>
+                        </>
+                      )}
+
+                      {compiledColumnSet === "demographics" && (
+                        <>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900">जनगणना २०७८</th>
+                          <th scope="col" className="p-3 text-right bg-blue-900/60 border-b border-blue-900">कुल पहिचान</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900 text-pink-300">महिला</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900 text-blue-300">पुरुष</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900 text-emerald-300">कार्ड जारी</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900 text-amber-300">लिन बाँकी</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900">प्रोफाइल भरिएका</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900">प्रोफाइल बाँकी</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900">बसाइँसराइ</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900">मृत्यु</th>
+                          <th scope="col" className="p-3 text-right bg-emerald-950/70 border-b border-blue-900 text-emerald-300">सक्रिय कुल</th>
+                        </>
+                      )}
+
+                      {compiledColumnSet === "cards" && (
+                        <>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900 text-rose-300">रातो कुल</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900 text-rose-200">रातो महिला</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900 text-rose-200">रातो पुरुष</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900 text-blue-300">निलो कुल</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900 text-blue-200">निलो महिला</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900 text-blue-200">निलो पुरुष</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900 text-amber-300">पहेँलो कुल</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900 text-slate-200">सेतो कुल</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900 text-purple-300">प्रक्रियामा</th>
+                        </>
+                      )}
+
+                      {compiledColumnSet === "disability_types" && (
+                        <>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900">शारीरिक</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900">दृष्टिसम्बन्धी</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900">सुनाइसम्बन्धी</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900">श्रवणदृष्टिविहीन</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900">स्वर र बोलाइ</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900">मनोसामाजिक</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900">बौद्धिक</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900">हेमोफेलिया</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900">अटिजम</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900">बहु-अपाङ्गता</th>
+                        </>
+                      )}
+
+                      {compiledColumnSet === "ssa" && (
+                        <>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900 text-rose-300">रातो SSA</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900 text-blue-300">निलो SSA</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900 text-emerald-300">कुल SSA लाभग्राही</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900">मासिक भत्ता (रु. लाख)</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900">वार्षिक भत्ता बजेट</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900 text-teal-300">निःशुल्क स्वास्थ्य बीमा</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900">सहुलियत बीमा</th>
+                        </>
+                      )}
+
+                      {compiledColumnSet === "services" && (
+                        <>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900 text-purple-300">परामर्श सेवा कुल</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900">परामर्श महिला</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900 text-blue-300">गृहभेट सेवा कुल</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900">गृहभेट महिला</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900 text-teal-300">सहायक सामग्री वितरण</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900 text-emerald-300">स्वास्थ्य उपचार/पुनर्स्थापना</th>
+                        </>
+                      )}
+
+                      {compiledColumnSet === "education" && (
+                        <>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900 text-emerald-300">नयाँ भर्ना</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900 text-indigo-300">कुल अध्ययनरत</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900">छात्रा</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900">छात्र</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900 text-amber-300">छात्रवृत्ति प्राप्त</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900">गृह शिक्षा</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900 text-rose-300">विद्यालय बाहिर</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900">बाल क्लब PwD</th>
+                        </>
+                      )}
+
+                      {compiledColumnSet === "livelihood" && (
+                        <>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900">तालिम संख्या</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900">तालिम सहभागी</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900 text-emerald-300">कुल रोजगारी/उद्यम</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900">स्वरोजगार</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900">समूह संख्या</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900">समूह सदस्य</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900 text-emerald-300">कुल कोष रु.</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900 text-blue-300">ऋण लगानी रु.</th>
+                        </>
+                      )}
+
+                      {compiledColumnSet === "budget_infra" && (
+                        <>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900 text-amber-300">विनियोजित बजेट रु.</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900">अनुदान फर्छ्यौट रु.</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900">समिति बैठक</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900 text-teal-300">पहुँचयुक्त संरचना</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900">कानुनी सहायता</th>
+                          <th scope="col" className="p-3 text-right border-b border-blue-900">शुल्क फिर्ता रु.</th>
+                        </>
+                      )}
+
                       <th scope="col" className="p-3 text-center border-b border-blue-900">स्थिति</th>
-                      <th scope="col" className="p-3 text-center min-w-[140px] sticky right-0 bg-blue-950 border-b border-blue-900 z-10">कार्य</th>
+                      <th scope="col" className="p-3 text-center min-w-[130px] sticky right-0 bg-blue-950 border-b border-blue-900 z-30">कार्य</th>
                     </tr>
                   </thead>
+
                   <tbody className="divide-y divide-slate-200 dark:divide-slate-800 bg-white dark:bg-slate-900">
-                    {filteredCompiledPalikas.length === 0 ? (
+                    {paginatedPalikas.length === 0 ? (
                       <tr>
-                        <td colSpan={17} className="p-8 text-center text-slate-500">
+                        <td colSpan={18} className="p-8 text-center text-slate-500">
                           कुनै पनि स्थानीय तह फेला परेन। कृपया फिल्टर वा सर्च सच्याउनुहोस्।
                         </td>
                       </tr>
                     ) : (
-                      filteredCompiledPalikas.map((p, idx) => (
-                        <tr
-                          key={p.id}
-                          className="hover:bg-blue-50/70 dark:hover:bg-slate-800/60 transition-colors group"
-                        >
-                          <td className="p-3 text-center text-slate-400 font-bold">{idx + 1}</td>
-                          <td className="p-3 font-bold text-slate-900 dark:text-white">
-                            <div className="flex items-center gap-1.5">
-                              <span>{p.name_ne}</span>
-                              <span className={`text-[10px] font-semibold px-1.5 py-0.2 rounded-md ${
-                                p.type === "महानगरपालिका" 
-                                  ? "bg-purple-100 text-purple-900" 
-                                  : p.type === "उपमहानगरपालिका"
-                                  ? "bg-blue-100 text-blue-900"
-                                  : p.type === "नगरपालिका"
-                                  ? "bg-emerald-100 text-emerald-900"
-                                  : "bg-slate-100 text-slate-700"
+                      paginatedPalikas.map((p, idx) => {
+                        const serialNum = (tablePage - 1) * tablePageSize + idx + 1;
+                        return (
+                          <tr
+                            key={p.id}
+                            className="hover:bg-blue-50/70 dark:hover:bg-slate-800/60 transition-colors group"
+                          >
+                            <td className="p-3 text-center text-slate-400 font-bold sticky left-0 bg-white dark:bg-slate-900 group-hover:bg-blue-50/70 dark:group-hover:bg-slate-800/60 z-10">
+                              {serialNum}
+                            </td>
+                            <td className="p-3 font-bold text-slate-900 dark:text-white sticky left-12 bg-white dark:bg-slate-900 group-hover:bg-blue-50/70 dark:group-hover:bg-slate-800/60 z-10">
+                              <div className="flex items-center gap-1.5">
+                                <span>{p.name_ne}</span>
+                                <span className={`text-[10px] font-semibold px-1.5 py-0.2 rounded-md ${
+                                  p.type === "महानगरपालिका" 
+                                    ? "bg-purple-100 text-purple-900" 
+                                    : p.type === "उपमहानगरपालिका"
+                                    ? "bg-blue-100 text-blue-900"
+                                    : p.type === "नगरपालिका"
+                                    ? "bg-emerald-100 text-emerald-900"
+                                    : "bg-slate-100 text-slate-700"
+                                }`}>
+                                  {p.type === "महानगरपालिका" ? "म.न.पा." : p.type === "उपमहानगरपालिका" ? "उप.म.न.पा." : p.type === "नगरपालिका" ? "न.पा." : "गा.पा."}
+                                </span>
+                              </div>
+                              <span className="text-[10px] text-slate-400 font-normal block">{p.name_en}</span>
+                            </td>
+                            <td className="p-3 text-slate-600 dark:text-slate-400 font-medium">
+                              {p.districtName_ne}
+                            </td>
+                            <td className="p-3 text-center font-mono text-slate-500">
+                              {p.total_wards}
+                            </td>
+
+                            {/* Summary / All Columns */}
+                            {(compiledColumnSet === "summary" || compiledColumnSet === "all_columns") && (
+                              <>
+                                <td className="p-3 text-right font-mono font-bold text-blue-950 dark:text-blue-200 bg-blue-50/40 dark:bg-blue-950/20">
+                                  {p.identifiedTotal.toLocaleString("ne-NP")}
+                                  <span className="block text-[9px] text-slate-400 font-normal">म:{p.identifiedFemale} पु:{p.identifiedMale}</span>
+                                </td>
+                                <td className="p-3 text-right font-mono font-bold text-rose-700 dark:text-rose-400">{p.cardRedTotal}</td>
+                                <td className="p-3 text-right font-mono font-bold text-blue-700 dark:text-blue-400">{p.cardBlueTotal}</td>
+                                <td className="p-3 text-right font-mono text-amber-700 dark:text-amber-400 font-medium">{p.cardYellowTotal}</td>
+                                <td className="p-3 text-right font-mono text-slate-500 font-medium">{p.cardWhiteTotal}</td>
+                                <td className="p-3 text-right font-mono font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50/40 dark:bg-emerald-950/20">{p.ssaBeneficiaries}</td>
+                                <td className="p-3 text-right font-mono text-slate-700 dark:text-slate-300">{p.counsellingTotal}</td>
+                                <td className="p-3 text-right font-mono text-slate-700 dark:text-slate-300">{p.employedTotal}</td>
+                                <td className="p-3 text-right font-mono text-purple-700 dark:text-purple-400 font-bold">{p.homeVisitsTotal}</td>
+                                <td className="p-3 text-right font-mono text-teal-700 dark:text-teal-400 font-bold">{p.assistiveDevicesTotal}</td>
+                                <td className="p-3 text-right font-mono font-semibold text-slate-700 dark:text-slate-300">{p.allocatedBudgetNPR.toLocaleString("ne-NP")}</td>
+                              </>
+                            )}
+
+                            {/* Demographics */}
+                            {compiledColumnSet === "demographics" && (
+                              <>
+                                <td className="p-3 text-right font-mono text-slate-700">{p.censusTotal}</td>
+                                <td className="p-3 text-right font-mono font-bold text-blue-900 bg-blue-50/40">{p.identifiedTotal}</td>
+                                <td className="p-3 text-right font-mono text-pink-700">{p.identifiedFemale}</td>
+                                <td className="p-3 text-right font-mono text-blue-700">{p.identifiedMale}</td>
+                                <td className="p-3 text-right font-mono text-emerald-700 font-bold">{p.idCardsIssuedTotal}</td>
+                                <td className="p-3 text-right font-mono text-amber-700">{p.idCardPendingTotal}</td>
+                                <td className="p-3 text-right font-mono text-purple-700">{p.profileCompletedTotal}</td>
+                                <td className="p-3 text-right font-mono text-slate-500">{p.profilePendingTotal}</td>
+                                <td className="p-3 text-right font-mono text-slate-600">{p.migratedOutTotal}</td>
+                                <td className="p-3 text-right font-mono text-rose-700">{p.deceasedTotal}</td>
+                                <td className="p-3 text-right font-mono font-black text-emerald-800 bg-emerald-50/40">{p.currentlyActiveTotal}</td>
+                              </>
+                            )}
+
+                            {/* Cards */}
+                            {compiledColumnSet === "cards" && (
+                              <>
+                                <td className="p-3 text-right font-mono font-bold text-rose-700">{p.cardRedTotal}</td>
+                                <td className="p-3 text-right font-mono text-rose-600">{p.cardRedFemale}</td>
+                                <td className="p-3 text-right font-mono text-rose-600">{p.cardRedMale}</td>
+                                <td className="p-3 text-right font-mono font-bold text-blue-700">{p.cardBlueTotal}</td>
+                                <td className="p-3 text-right font-mono text-blue-600">{p.cardBlueFemale}</td>
+                                <td className="p-3 text-right font-mono text-blue-600">{p.cardBlueMale}</td>
+                                <td className="p-3 text-right font-mono text-amber-700">{p.cardYellowTotal}</td>
+                                <td className="p-3 text-right font-mono text-slate-500">{p.cardWhiteTotal}</td>
+                                <td className="p-3 text-right font-mono text-purple-700">{p.cardInProcessTotal}</td>
+                              </>
+                            )}
+
+                            {/* 10 Disability Types */}
+                            {compiledColumnSet === "disability_types" && (
+                              <>
+                                <td className="p-3 text-right font-mono font-bold text-blue-700">{p.typePhysical}</td>
+                                <td className="p-3 text-right font-mono text-emerald-700">{p.typeVisual}</td>
+                                <td className="p-3 text-right font-mono text-amber-700">{p.typeHearing}</td>
+                                <td className="p-3 text-right font-mono text-slate-500">{p.typeDeafblind}</td>
+                                <td className="p-3 text-right font-mono text-slate-700">{p.typeSpeech}</td>
+                                <td className="p-3 text-right font-mono text-purple-700 font-bold">{p.typeMentalPsychosocial}</td>
+                                <td className="p-3 text-right font-mono text-pink-700">{p.typeIntellectual}</td>
+                                <td className="p-3 text-right font-mono text-red-700">{p.typeHemophilia}</td>
+                                <td className="p-3 text-right font-mono text-indigo-700">{p.typeAutism}</td>
+                                <td className="p-3 text-right font-mono text-rose-700 font-bold">{p.typeMultiple}</td>
+                              </>
+                            )}
+
+                            {/* SSA */}
+                            {compiledColumnSet === "ssa" && (
+                              <>
+                                <td className="p-3 text-right font-mono font-bold text-rose-700">{p.ssaProfoundTotal}</td>
+                                <td className="p-3 text-right font-mono font-bold text-blue-700">{p.ssaSevereTotal}</td>
+                                <td className="p-3 text-right font-mono font-black text-emerald-800 bg-emerald-50/40">{p.ssaBeneficiaries}</td>
+                                <td className="p-3 text-right font-mono text-amber-700">रु. {p.ssaBudgetLakh} L</td>
+                                <td className="p-3 text-right font-mono text-slate-700">रु. {p.ssaBudgetNPR.toLocaleString("ne-NP")}</td>
+                                <td className="p-3 text-right font-mono text-teal-700 font-bold">{p.healthInsFreeTotal}</td>
+                                <td className="p-3 text-right font-mono text-slate-500">{p.healthInsOtherTotal}</td>
+                              </>
+                            )}
+
+                            {/* Services */}
+                            {compiledColumnSet === "services" && (
+                              <>
+                                <td className="p-3 text-right font-mono font-bold text-purple-700">{p.counsellingTotal}</td>
+                                <td className="p-3 text-right font-mono text-purple-600">{p.counsellingFemale}</td>
+                                <td className="p-3 text-right font-mono font-bold text-blue-700">{p.homeVisitsTotal}</td>
+                                <td className="p-3 text-right font-mono text-blue-600">{p.homeVisitsFemale}</td>
+                                <td className="p-3 text-right font-mono font-bold text-teal-700">{p.assistiveDevicesTotal}</td>
+                                <td className="p-3 text-right font-mono text-emerald-700 font-bold">{p.treatmentReceivedTotal}</td>
+                              </>
+                            )}
+
+                            {/* Education */}
+                            {compiledColumnSet === "education" && (
+                              <>
+                                <td className="p-3 text-right font-mono font-bold text-emerald-700">{p.schoolNewAdmitTotal}</td>
+                                <td className="p-3 text-right font-mono font-bold text-indigo-700">{p.enrolledStudentsTotal}</td>
+                                <td className="p-3 text-right font-mono text-pink-600">{p.enrolledStudentsFemale}</td>
+                                <td className="p-3 text-right font-mono text-blue-600">{p.enrolledStudentsMale}</td>
+                                <td className="p-3 text-right font-mono text-amber-700 font-bold">{p.scholarshipTotal}</td>
+                                <td className="p-3 text-right font-mono text-purple-600">{p.homeBasedEduTotal}</td>
+                                <td className="p-3 text-right font-mono text-rose-700 font-bold">{p.outOfSchoolTotal}</td>
+                                <td className="p-3 text-right font-mono text-slate-700">{p.childClubPwdTotal}</td>
+                              </>
+                            )}
+
+                            {/* Livelihood */}
+                            {compiledColumnSet === "livelihood" && (
+                              <>
+                                <td className="p-3 text-right font-mono text-slate-700">{p.trainingProgramsCount}</td>
+                                <td className="p-3 text-right font-mono font-bold text-purple-700">{p.trainingTraineesTotal}</td>
+                                <td className="p-3 text-right font-mono font-black text-emerald-800">{p.employedTotal}</td>
+                                <td className="p-3 text-right font-mono text-blue-700">{p.selfEmployedTotal}</td>
+                                <td className="p-3 text-right font-mono text-slate-600">{p.shgGroupsCount}</td>
+                                <td className="p-3 text-right font-mono text-slate-800 font-bold">{p.shgMembersTotal}</td>
+                                <td className="p-3 text-right font-mono text-emerald-700">रु. {p.totalFundsNPR.toLocaleString("ne-NP")}</td>
+                                <td className="p-3 text-right font-mono text-blue-700">रु. {p.loanInvestedNPR.toLocaleString("ne-NP")}</td>
+                              </>
+                            )}
+
+                            {/* Budget & Infra */}
+                            {compiledColumnSet === "budget_infra" && (
+                              <>
+                                <td className="p-3 text-right font-mono font-bold text-amber-700">रु. {p.allocatedBudgetNPR.toLocaleString("ne-NP")}</td>
+                                <td className="p-3 text-right font-mono text-blue-700">रु. {p.dpoGrantSettledNPR.toLocaleString("ne-NP")}</td>
+                                <td className="p-3 text-right font-mono text-slate-600">{p.dpoMeetingsCount}</td>
+                                <td className="p-3 text-right font-mono font-bold text-teal-700">{p.accessibleBuildingsCount}</td>
+                                <td className="p-3 text-right font-mono text-purple-700">{p.legalAidTotal}</td>
+                                <td className="p-3 text-right font-mono text-slate-600">रु. {p.feeRefundAmountNPR.toLocaleString("ne-NP")}</td>
+                              </>
+                            )}
+
+                            <td className="p-3 text-center">
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                p.submissionStatus === 'submitted'
+                                  ? "bg-emerald-100 text-emerald-800"
+                                  : "bg-amber-100 text-amber-800"
                               }`}>
-                                {p.type === "महानगरपालिका" ? "म.न.पा." : p.type === "उपमहानगरपालिका" ? "उप.म.न.पा." : p.type === "नगरपालिका" ? "न.पा." : "गा.पा."}
+                                {p.submissionStatus === 'submitted' ? 'पेश' : 'मस्यौदा'}
                               </span>
-                            </div>
-                            <span className="text-[10px] text-slate-400 font-normal block">{p.name_en}</span>
-                          </td>
-                          <td className="p-3 text-slate-600 dark:text-slate-400 font-medium">
-                            {p.districtName_ne}
-                          </td>
-                          <td className="p-3 text-center font-mono text-slate-500">
-                            {p.total_wards}
-                          </td>
-                          <td className="p-3 text-right font-mono font-bold text-blue-950 dark:text-blue-200 bg-blue-50/40 dark:bg-blue-950/20">
-                            {p.identifiedTotal.toLocaleString("ne-NP")}
-                            <span className="block text-[9px] text-slate-400 font-normal">म:{p.identifiedFemale} पु:{p.identifiedMale}</span>
-                          </td>
-                          <td className="p-3 text-right font-mono font-bold text-rose-700 dark:text-rose-400">
-                            {p.cardRed}
-                          </td>
-                          <td className="p-3 text-right font-mono font-bold text-blue-700 dark:text-blue-400">
-                            {p.cardBlue}
-                          </td>
-                          <td className="p-3 text-right font-mono text-amber-700 dark:text-amber-400 font-medium">
-                            {p.cardYellow}
-                          </td>
-                          <td className="p-3 text-right font-mono text-slate-500 font-medium">
-                            {p.cardWhite}
-                          </td>
-                          <td className="p-3 text-right font-mono font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50/40 dark:bg-emerald-950/20">
-                            {p.ssaBeneficiaries}
-                          </td>
-                          <td className="p-3 text-right font-mono text-slate-700 dark:text-slate-300">
-                            {p.servicesCount}
-                          </td>
-                          <td className="p-3 text-right font-mono text-slate-700 dark:text-slate-300">
-                            {p.employedCount}
-                          </td>
-                          <td className="p-3 text-right font-mono text-purple-700 dark:text-purple-400 font-bold">
-                            {p.homeVisits}
-                          </td>
-                          <td className="p-3 text-right font-mono text-teal-700 dark:text-teal-400 font-bold">
-                            {p.assistiveDevices}
-                          </td>
-                          <td className="p-3 text-right font-mono font-semibold text-slate-700 dark:text-slate-300">
-                            {p.allocatedBudgetNPR.toLocaleString("ne-NP")}
-                          </td>
-                          <td className="p-3 text-center">
-                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                              p.submissionStatus === 'submitted'
-                                ? "bg-emerald-100 text-emerald-800"
-                                : "bg-amber-100 text-amber-800"
-                            }`}>
-                              {p.submissionStatus === 'submitted' ? 'पेश' : 'मस्यौदा'}
-                            </span>
-                          </td>
-                          <td className="p-3 text-center sticky right-0 bg-white dark:bg-slate-900 group-hover:bg-blue-50/90 dark:group-hover:bg-slate-800 transition-colors shadow-l">
-                            <Link
-                              href={`/local-reporting/palika/${p.id}/profile`}
-                              className="px-2.5 py-1.5 rounded-lg bg-blue-900 hover:bg-blue-800 text-white font-bold text-[11px] inline-flex items-center gap-1 shadow-xs transition-colors"
-                              title={`${p.name_ne} को व्यक्तिगत प्रतिवेदन हेर्नुहोस्`}
-                            >
-                              <FileText className="w-3 h-3 text-amber-400" />
-                              <span>प्रतिवेदन</span>
-                              <ArrowRight className="w-3 h-3 text-blue-200" />
-                            </Link>
-                          </td>
-                        </tr>
-                      ))
+                            </td>
+
+                            <td className="p-3 text-center sticky right-0 bg-white dark:bg-slate-900 group-hover:bg-blue-50/90 dark:group-hover:bg-slate-800 transition-colors shadow-l z-10">
+                              <Link
+                                href={`/local-reporting/palika/${p.id}/profile`}
+                                className="px-2.5 py-1.5 rounded-lg bg-blue-900 hover:bg-blue-800 text-white font-bold text-[11px] inline-flex items-center gap-1 shadow-xs transition-colors"
+                                title={`${p.name_ne} को व्यक्तिगत प्रतिवेदन हेर्नुहोस्`}
+                              >
+                                <FileText className="w-3 h-3 text-amber-400" />
+                                <span>प्रतिवेदन</span>
+                                <ArrowRight className="w-3 h-3 text-blue-200" />
+                              </Link>
+                            </td>
+                          </tr>
+                        );
+                      })
                     )}
                   </tbody>
+
+                  {/* DYNAMIC STICKY TOTALS FOOTER */}
                   <tfoot className="bg-slate-900 text-white font-black sticky bottom-0 z-20 shadow-md">
                     <tr>
-                      <td colSpan={4} className="p-3 text-center font-bold uppercase tracking-wider text-amber-400">
+                      <td colSpan={4} className="p-3 text-center font-bold uppercase tracking-wider text-amber-400 sticky left-0 bg-slate-900 z-30">
                         जम्मा कुल योगफल ({filteredCompiledPalikas.length} स्थानीय तह)
                       </td>
-                      <td className="p-3 text-right font-mono text-amber-300">
-                        {compiledGrandTotals.identifiedTotal.toLocaleString("ne-NP")}
-                      </td>
-                      <td className="p-3 text-right font-mono text-rose-300">
-                        {compiledGrandTotals.cardRed.toLocaleString("ne-NP")}
-                      </td>
-                      <td className="p-3 text-right font-mono text-blue-300">
-                        {compiledGrandTotals.cardBlue.toLocaleString("ne-NP")}
-                      </td>
-                      <td className="p-3 text-right font-mono text-amber-200">
-                        {compiledGrandTotals.cardYellow.toLocaleString("ne-NP")}
-                      </td>
-                      <td className="p-3 text-right font-mono text-slate-300">
-                        {compiledGrandTotals.cardWhite.toLocaleString("ne-NP")}
-                      </td>
-                      <td className="p-3 text-right font-mono text-emerald-300">
-                        {compiledGrandTotals.ssaBeneficiaries.toLocaleString("ne-NP")}
-                      </td>
-                      <td className="p-3 text-right font-mono text-slate-200">
-                        {compiledGrandTotals.servicesCount.toLocaleString("ne-NP")}
-                      </td>
-                      <td className="p-3 text-right font-mono text-slate-200">
-                        {compiledGrandTotals.employedCount.toLocaleString("ne-NP")}
-                      </td>
-                      <td className="p-3 text-right font-mono text-purple-300">
-                        {compiledGrandTotals.homeVisits.toLocaleString("ne-NP")}
-                      </td>
-                      <td className="p-3 text-right font-mono text-teal-300">
-                        {compiledGrandTotals.assistiveDevices.toLocaleString("ne-NP")}
-                      </td>
-                      <td className="p-3 text-right font-mono text-amber-300">
-                        रु. {compiledGrandTotals.allocatedBudgetNPR.toLocaleString("ne-NP")}
-                      </td>
+
+                      {(compiledColumnSet === "summary" || compiledColumnSet === "all_columns") && (
+                        <>
+                          <td className="p-3 text-right font-mono text-amber-300">{compiledGrandTotals.identifiedTotal.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-rose-300">{compiledGrandTotals.cardRedTotal.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-blue-300">{compiledGrandTotals.cardBlueTotal.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-amber-200">{compiledGrandTotals.cardYellowTotal.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-slate-300">{compiledGrandTotals.cardWhiteTotal.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-emerald-300">{compiledGrandTotals.ssaBeneficiaries.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-slate-200">{compiledGrandTotals.counsellingTotal.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-slate-200">{compiledGrandTotals.employedTotal.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-purple-300">{compiledGrandTotals.homeVisitsTotal.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-teal-300">{compiledGrandTotals.assistiveDevicesTotal.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-amber-300">रु. {compiledGrandTotals.allocatedBudgetNPR.toLocaleString("ne-NP")}</td>
+                        </>
+                      )}
+
+                      {compiledColumnSet === "demographics" && (
+                        <>
+                          <td className="p-3 text-right font-mono text-slate-200">{compiledGrandTotals.censusTotal.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-amber-300">{compiledGrandTotals.identifiedTotal.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-pink-300">{compiledGrandTotals.identifiedFemale.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-blue-300">{compiledGrandTotals.identifiedMale.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-emerald-300">{compiledGrandTotals.idCardsIssuedTotal.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-amber-200">{compiledGrandTotals.idCardPendingTotal.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-purple-300">{compiledGrandTotals.profileCompletedTotal.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-slate-300">{compiledGrandTotals.profilePendingTotal.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-slate-300">{compiledGrandTotals.migratedOutTotal.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-rose-300">{compiledGrandTotals.deceasedTotal.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-emerald-300">{compiledGrandTotals.currentlyActiveTotal.toLocaleString("ne-NP")}</td>
+                        </>
+                      )}
+
+                      {compiledColumnSet === "cards" && (
+                        <>
+                          <td className="p-3 text-right font-mono text-rose-300">{compiledGrandTotals.cardRedTotal.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-rose-200">{compiledGrandTotals.cardRedFemale.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-rose-200">{compiledGrandTotals.cardRedMale.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-blue-300">{compiledGrandTotals.cardBlueTotal.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-blue-200">{compiledGrandTotals.cardBlueFemale.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-blue-200">{compiledGrandTotals.cardBlueMale.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-amber-200">{compiledGrandTotals.cardYellowTotal.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-slate-300">{compiledGrandTotals.cardWhiteTotal.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-purple-300">{compiledGrandTotals.cardInProcessTotal.toLocaleString("ne-NP")}</td>
+                        </>
+                      )}
+
+                      {compiledColumnSet === "disability_types" && (
+                        <>
+                          <td className="p-3 text-right font-mono text-blue-300">{compiledGrandTotals.typePhysical.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-emerald-300">{compiledGrandTotals.typeVisual.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-amber-200">{compiledGrandTotals.typeHearing.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-slate-300">{compiledGrandTotals.typeDeafblind.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-slate-200">{compiledGrandTotals.typeSpeech.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-purple-300">{compiledGrandTotals.typeMentalPsychosocial.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-pink-300">{compiledGrandTotals.typeIntellectual.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-red-300">{compiledGrandTotals.typeHemophilia.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-indigo-300">{compiledGrandTotals.typeAutism.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-rose-300">{compiledGrandTotals.typeMultiple.toLocaleString("ne-NP")}</td>
+                        </>
+                      )}
+
+                      {compiledColumnSet === "ssa" && (
+                        <>
+                          <td className="p-3 text-right font-mono text-rose-300">{compiledGrandTotals.ssaProfoundTotal.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-blue-300">{compiledGrandTotals.ssaSevereTotal.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-emerald-300">{compiledGrandTotals.ssaBeneficiaries.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-amber-200">{compiledGrandTotals.ssaBudgetLakh.toFixed(1)} L</td>
+                          <td className="p-3 text-right font-mono text-amber-300">रु. {compiledGrandTotals.ssaBudgetNPR.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-teal-300">{compiledGrandTotals.healthInsFreeTotal.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-slate-300">{compiledGrandTotals.healthInsOtherTotal.toLocaleString("ne-NP")}</td>
+                        </>
+                      )}
+
+                      {compiledColumnSet === "services" && (
+                        <>
+                          <td className="p-3 text-right font-mono text-purple-300">{compiledGrandTotals.counsellingTotal.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-purple-200">{compiledGrandTotals.counsellingFemale.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-blue-300">{compiledGrandTotals.homeVisitsTotal.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-blue-200">{compiledGrandTotals.homeVisitsFemale.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-teal-300">{compiledGrandTotals.assistiveDevicesTotal.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-emerald-300">{compiledGrandTotals.treatmentReceivedTotal.toLocaleString("ne-NP")}</td>
+                        </>
+                      )}
+
+                      {compiledColumnSet === "education" && (
+                        <>
+                          <td className="p-3 text-right font-mono text-emerald-300">{compiledGrandTotals.schoolNewAdmitTotal.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-indigo-300">{compiledGrandTotals.enrolledStudentsTotal.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-pink-300">{compiledGrandTotals.enrolledStudentsFemale.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-blue-300">{compiledGrandTotals.enrolledStudentsMale.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-amber-200">{compiledGrandTotals.scholarshipTotal.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-purple-300">{compiledGrandTotals.homeBasedEduTotal.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-rose-300">{compiledGrandTotals.outOfSchoolTotal.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-slate-200">{compiledGrandTotals.childClubPwdTotal.toLocaleString("ne-NP")}</td>
+                        </>
+                      )}
+
+                      {compiledColumnSet === "livelihood" && (
+                        <>
+                          <td className="p-3 text-right font-mono text-slate-200">{compiledGrandTotals.trainingProgramsCount.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-purple-300">{compiledGrandTotals.trainingTraineesTotal.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-emerald-300">{compiledGrandTotals.employedTotal.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-blue-300">{compiledGrandTotals.selfEmployedTotal.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-slate-300">{compiledGrandTotals.shgGroupsCount.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-amber-200">{compiledGrandTotals.shgMembersTotal.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-emerald-300">रु. {compiledGrandTotals.totalFundsNPR.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-blue-300">रु. {compiledGrandTotals.loanInvestedNPR.toLocaleString("ne-NP")}</td>
+                        </>
+                      )}
+
+                      {compiledColumnSet === "budget_infra" && (
+                        <>
+                          <td className="p-3 text-right font-mono text-amber-300">रु. {compiledGrandTotals.allocatedBudgetNPR.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-blue-300">रु. {compiledGrandTotals.dpoGrantSettledNPR.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-slate-300">{compiledGrandTotals.dpoMeetingsCount.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-teal-300">{compiledGrandTotals.accessibleBuildingsCount.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-purple-300">{compiledGrandTotals.legalAidTotal.toLocaleString("ne-NP")}</td>
+                          <td className="p-3 text-right font-mono text-slate-200">रु. {compiledGrandTotals.feeRefundAmountNPR.toLocaleString("ne-NP")}</td>
+                        </>
+                      )}
+
                       <td className="p-3 text-center text-xs text-emerald-400 font-bold">
                         {compiledGrandTotals.submittedCount} पेश
                       </td>
-                      <td className="p-3 text-center sticky right-0 bg-slate-900 text-slate-400 text-[10px]">
+                      <td className="p-3 text-center sticky right-0 bg-slate-900 text-slate-400 text-[10px] z-30">
                         -
                       </td>
                     </tr>
                   </tfoot>
                 </table>
               </div>
+
+              {/* TABLE PAGINATION CONTROLS */}
+              {totalTablePages > 1 && (
+                <div className="p-4 bg-slate-50 dark:bg-slate-800/60 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
+                  <div className="text-xs text-slate-600 dark:text-slate-400 font-medium">
+                    देखाउँदै: <strong>{(tablePage - 1) * tablePageSize + 1}</strong> देखि <strong>{Math.min(tablePage * tablePageSize, filteredCompiledPalikas.length)}</strong> सम्म (कुल <strong>{filteredCompiledPalikas.length}</strong> स्थानीय तह मध्ये)
+                  </div>
+
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      disabled={tablePage <= 1}
+                      onClick={() => setTablePage((p) => Math.max(1, p - 1))}
+                      className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-xs font-bold text-slate-700 dark:text-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 cursor-pointer shadow-2xs"
+                    >
+                      ◀ अघिल्लो पृष्ठ
+                    </button>
+
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: totalTablePages }, (_, i) => i + 1).map((pg) => (
+                        <button
+                          key={pg}
+                          type="button"
+                          onClick={() => setTablePage(pg)}
+                          className={`w-7 h-7 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                            tablePage === pg
+                              ? "bg-blue-900 text-white shadow-xs"
+                              : "bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600 hover:bg-slate-100"
+                          }`}
+                        >
+                          {pg}
+                        </button>
+                      ))}
+                    </div>
+
+                    <button
+                      type="button"
+                      disabled={tablePage >= totalTablePages}
+                      onClick={() => setTablePage((p) => Math.min(totalTablePages, p + 1))}
+                      className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-xs font-bold text-slate-700 dark:text-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 cursor-pointer shadow-2xs"
+                    >
+                      अर्को पृष्ठ ▶
+                    </button>
+                  </div>
+                </div>
+              )}
+
             </div>
           </section>
         )}
