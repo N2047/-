@@ -1,5 +1,125 @@
 [
   {
+    "id": "log_1788673687624_w3ep",
+    "action": "REPORT_SUBMITTED",
+    "performed_by_id": "emp_1788673687484_szzi",
+    "performed_by_name": "सुमन पोखरेल (सहजकर्ता)",
+    "target_user_id": "phidim_mun",
+    "target_user_name": "phidim_mun",
+    "details": "वार्षिक प्रतिवेदन अन्तिम रूपमा Submit गरियो (स्थानीय तह: phidim_mun)",
+    "timestamp": "2026-09-06T05:48:07.624Z"
+  },
+  {
+    "id": "log_1788673687610_4m2i",
+    "action": "REPORT_RETURNED_FOR_CORRECTION",
+    "performed_by_id": "admin-master-001",
+    "performed_by_name": "मुख्य प्रशासक (Super Admin)",
+    "target_user_id": "phidim_mun",
+    "target_user_name": "phidim_mun",
+    "details": "प्रतिवेदन सच्याउन फिर्ता पठाइयो। सुझाव: Question 12 को महिला/पुरुष संख्या र अनुसूची १.१ को नामावली पुनः जाँच गर्नुहोस्।",
+    "timestamp": "2026-09-06T05:48:07.610Z"
+  },
+  {
+    "id": "log_1788673687594_vada",
+    "action": "REPORT_SUBMITTED",
+    "performed_by_id": "emp_1788673687484_szzi",
+    "performed_by_name": "सुमन पोखरेल (सहजकर्ता)",
+    "target_user_id": "phidim_mun",
+    "target_user_name": "phidim_mun",
+    "details": "वार्षिक प्रतिवेदन अन्तिम रूपमा Submit गरियो (स्थानीय तह: phidim_mun)",
+    "timestamp": "2026-09-06T05:48:07.594Z"
+  },
+  {
+    "id": "log_1788673687550_6clq",
+    "action": "EMPLOYEE_APPROVED",
+    "performed_by_id": "admin-master-001",
+    "performed_by_name": "मुख्य प्रशासक (Super Admin)",
+    "target_user_id": "emp_1788673687484_szzi",
+    "target_user_name": "सुमन पोखरेल (सहजकर्ता)",
+    "details": "कर्मचारी खाता स्वीकृत गरियो (आईडी: DIC-EMP-000012, स्थानीय तह: फिदिम नगरपालिका)",
+    "timestamp": "2026-09-06T05:48:07.550Z"
+  },
+  {
+    "id": "log_1788673687486_biq5",
+    "action": "EMPLOYEE_REGISTERED_PENDING",
+    "performed_by_id": "emp_1788673687484_szzi",
+    "performed_by_name": "सुमन पोखरेल (सहजकर्ता)",
+    "target_user_id": "emp_1788673687484_szzi",
+    "target_user_name": "सुमन पोखरेल (सहजकर्ता)",
+    "details": "नयाँ कर्मचारी दर्ता भयो (आईडी: DIC-EMP-000012, स्थानीय तह: फिदिम नगरपालिका) - हाल स्वीकृति पर्खिरहेको छ।",
+    "timestamp": "2026-09-06T05:48:07.486Z"
+  },
+  {
+    "id": "log_1788673687423_jmjq",
+    "action": "USER_REGISTERED",
+    "performed_by_id": "usr_1788673687417_cuxy",
+    "performed_by_name": "नवीन कार्की (नागरिक)",
+    "target_user_id": "usr_1788673687417_cuxy",
+    "target_user_name": "नवीन कार्की (नागरिक)",
+    "details": "नयाँ सामान्य नागरिक खाता दर्ता भयो (DIC-USR-000012)",
+    "timestamp": "2026-09-06T05:48:07.423Z"
+  },
+  {
+    "id": "log_1788673565463_ihgf",
+    "action": "REPORT_SUBMITTED",
+    "performed_by_id": "emp_1788673565277_msel",
+    "performed_by_name": "सुमन पोखरेल (सहजकर्ता)",
+    "target_user_id": "phidim_mun",
+    "target_user_name": "phidim_mun",
+    "details": "वार्षिक प्रतिवेदन अन्तिम रूपमा Submit गरियो (स्थानीय तह: phidim_mun)",
+    "timestamp": "2026-09-06T05:46:05.463Z"
+  },
+  {
+    "id": "log_1788673565455_66hm",
+    "action": "REPORT_RETURNED_FOR_CORRECTION",
+    "performed_by_id": "admin-master-001",
+    "performed_by_name": "मुख्य प्रशासक (Super Admin)",
+    "target_user_id": "phidim_mun",
+    "target_user_name": "phidim_mun",
+    "details": "प्रतिवेदन सच्याउन फिर्ता पठाइयो। सुझाव: Question 12 को महिला/पुरुष संख्या र अनुसूची १.१ को नामावली पुनः जाँच गर्नुहोस्।",
+    "timestamp": "2026-09-06T05:46:05.455Z"
+  },
+  {
+    "id": "log_1788673565439_tqw9",
+    "action": "REPORT_SUBMITTED",
+    "performed_by_id": "emp_1788673565277_msel",
+    "performed_by_name": "सुमन पोखरेल (सहजकर्ता)",
+    "target_user_id": "phidim_mun",
+    "target_user_name": "phidim_mun",
+    "details": "वार्षिक प्रतिवेदन अन्तिम रूपमा Submit गरियो (स्थानीय तह: phidim_mun)",
+    "timestamp": "2026-09-06T05:46:05.439Z"
+  },
+  {
+    "id": "log_1788673565382_egjy",
+    "action": "EMPLOYEE_APPROVED",
+    "performed_by_id": "admin-master-001",
+    "performed_by_name": "मुख्य प्रशासक (Super Admin)",
+    "target_user_id": "emp_1788673565277_msel",
+    "target_user_name": "सुमन पोखरेल (सहजकर्ता)",
+    "details": "कर्मचारी खाता स्वीकृत गरियो (आईडी: DIC-EMP-000011, स्थानीय तह: फिदिम नगरपालिका)",
+    "timestamp": "2026-09-06T05:46:05.382Z"
+  },
+  {
+    "id": "log_1788673565279_lul6",
+    "action": "EMPLOYEE_REGISTERED_PENDING",
+    "performed_by_id": "emp_1788673565277_msel",
+    "performed_by_name": "सुमन पोखरेल (सहजकर्ता)",
+    "target_user_id": "emp_1788673565277_msel",
+    "target_user_name": "सुमन पोखरेल (सहजकर्ता)",
+    "details": "नयाँ कर्मचारी दर्ता भयो (आईडी: DIC-EMP-000011, स्थानीय तह: फिदिम नगरपालिका) - हाल स्वीकृति पर्खिरहेको छ।",
+    "timestamp": "2026-09-06T05:46:05.279Z"
+  },
+  {
+    "id": "log_1788673565206_rmgp",
+    "action": "USER_REGISTERED",
+    "performed_by_id": "usr_1788673565202_7rck",
+    "performed_by_name": "नवीन कार्की (नागरिक)",
+    "target_user_id": "usr_1788673565202_7rck",
+    "target_user_name": "नवीन कार्की (नागरिक)",
+    "details": "नयाँ सामान्य नागरिक खाता दर्ता भयो (DIC-USR-000011)",
+    "timestamp": "2026-09-06T05:46:05.206Z"
+  },
+  {
     "id": "log_1788672910269_wwhi",
     "action": "REPORT_SUBMITTED",
     "performed_by_id": "emp_1788672910138_qf3k",

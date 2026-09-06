@@ -16,14 +16,16 @@ export const translations = {
     
     // Navigation
     nav_home: "गृहपृष्ठ",
-    nav_laws: "विद्यमान कानुनहरूको दस्तावेज",
-    nav_local_reporting: "स्थानीय सरकारको प्रतिवेदन",
-    nav_reports: "रिपोर्ट",
-    nav_news: "सूचना/समाचार",
-    nav_search: "खोजी",
     nav_about: "हाम्रो बारेमा",
+    nav_laws: "विद्यमान कानुनको दस्तावेज",
+    nav_reports: "प्रतिवेदन",
+    nav_local_reporting: "१. पालिका प्रतिवेदन",
+    nav_palika_report: "१. पालिका प्रतिवेदन",
+    nav_overall_report: "२. समग्र प्रतिवेदन",
+    nav_news: "सूचना/समाचार",
     nav_contact: "सम्पर्क",
-    nav_admin: "Admin Login",
+    nav_search: "खोजी",
+    nav_admin: "एडमिन",
     
     // Hero
     hero_title: "अपाङ्गता सूचना केन्द्र",
@@ -75,14 +77,16 @@ export const translations = {
     
     // Navigation
     nav_home: "Home",
-    nav_laws: "Laws & Policies",
-    nav_local_reporting: "Local Govt Reporting",
-    nav_reports: "Reports & Analytics",
-    nav_news: "News & Notices",
-    nav_search: "Search",
     nav_about: "About Us",
+    nav_laws: "Legal Documents",
+    nav_reports: "Reports",
+    nav_local_reporting: "1. Municipality Report",
+    nav_palika_report: "1. Municipality Report",
+    nav_overall_report: "2. Comprehensive Report",
+    nav_news: "News & Notices",
     nav_contact: "Contact",
-    nav_admin: "Admin Login",
+    nav_search: "Search",
+    nav_admin: "Admin",
     
     // Hero
     hero_title: "Disability Information Center",

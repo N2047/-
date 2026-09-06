@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { 
   Menu, 
   X, 
@@ -11,16 +12,17 @@ import {
   Newspaper, 
   Search, 
   Info, 
-  Lock,
-  Globe,
-  User,
-  LogOut,
-  ShieldCheck,
-  Volume2,
-  Moon,
-  Sun,
-  Sliders,
-  PhoneCall
+  Lock, 
+  Globe, 
+  User, 
+  LogOut, 
+  ShieldCheck, 
+  Volume2, 
+  Moon, 
+  Sun, 
+  Sliders, 
+  PhoneCall, 
+  ChevronDown 
 } from "lucide-react";
 import { translations, Language } from "@/lib/translations";
 import { useAuth } from "@/lib/authContext";
@@ -37,6 +39,21 @@ interface HeaderProps {
 export default function Header({ lang, onLanguageChange }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [reportsDropdownOpen, setReportsDropdownOpen] = useState(false);
+  const [mobileReportsOpen, setMobileReportsOpen] = useState(false);
+
+  const pathname = usePathname();
+  const reportsDropdownRef = useRef<HTMLLIElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (reportsDropdownRef.current && !reportsDropdownRef.current.contains(event.target as Node)) {
+        setReportsDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const { user, isAuthenticated, logout } = useAuth();
   const { 
@@ -48,18 +65,6 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
     fontSize 
   } = useAccessibility();
   const t = translations[lang];
-
-  const navItems = [
-    { label: t.nav_home, href: "/", icon: null },
-    { label: t.nav_laws, href: "/laws", icon: FileText },
-    { label: t.nav_local_reporting, href: "/local-reporting", icon: Building2 },
-    { label: t.nav_reports, href: "/reports", icon: BarChart3 },
-    { label: t.nav_news, href: "/news", icon: Newspaper },
-    { label: t.nav_search, href: "/search", icon: Search },
-    { label: t.nav_about, href: "/about", icon: Info },
-    { label: t.nav_contact, href: "/contact", icon: PhoneCall },
-    { label: t.nav_admin, href: "/admin", icon: Lock, isAction: true },
-  ];
 
   return (
     <>
@@ -204,61 +209,37 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
           </div>
         </aside>
 
-        {/* Main Branding Section */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
-          <div className="flex items-center space-x-3.5">
-            <Link href="/" className="flex items-center space-x-3.5" aria-label="अपाङ्गता सूचना केन्द्र गृहपृष्ठ">
-              <div className="w-11 h-11 sm:w-12 sm:h-12 bg-linear-to-br from-red-700 via-blue-900 to-indigo-950 text-white rounded-xl flex items-center justify-center font-black text-lg sm:text-xl shadow-md border-2 border-amber-400 shrink-0" aria-hidden="true">
-                DIC
-              </div>
-              <div>
-                <span className="text-lg sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white leading-tight block">
-                  {t.app_name}
-                </span>
-                <span className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
-                  {t.tagline}
-                </span>
-              </div>
-            </Link>
-          </div>
+        {/* Main Branding Section (Centered) */}
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-center text-center">
+          <Link href="/" className="flex flex-col sm:flex-row items-center text-center sm:text-left gap-3 sm:gap-4 group cursor-pointer" aria-label="अपाङ्गता सूचना केन्द्र गृहपृष्ठ">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-red-700 via-blue-900 to-indigo-950 text-white rounded-2xl flex items-center justify-center font-black text-xl sm:text-2xl shadow-lg border-2 border-amber-400 shrink-0 group-hover:scale-105 transition-transform" aria-hidden="true">
+              DIC
+            </div>
+            <div className="text-center sm:text-left">
+              <span className="text-xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white leading-tight block">
+                {t.app_name}
+              </span>
+              <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium block mt-0.5">
+                {t.tagline}
+              </span>
+            </div>
+          </Link>
 
-          {/* Action Bar (Accessibility + Prominent Sign In/Out + Mobile Hamburger) */}
-          <div className="flex items-center gap-2">
-            {!isAuthenticated ? (
-              <button
-                type="button"
-                onClick={() => setAuthModalOpen(true)}
-                className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-blue-700 to-indigo-800 hover:from-blue-600 hover:to-indigo-700 text-white font-extrabold text-xs shadow-md border border-blue-500/40 hover:border-amber-400 cursor-pointer transition-all"
-              >
-                <Lock className="w-3.5 h-3.5 text-amber-300" />
-                <span>🔐 Sign Up / Sign In</span>
-              </button>
-            ) : (
-              <div className="hidden sm:flex items-center gap-2">
-                <span className="text-xs font-bold px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-slate-800 text-blue-900 dark:text-blue-200 border border-blue-200 dark:border-slate-700">
-                  {user?.role === "super_admin" || user?.role === "provincial_admin"
-                    ? "👑 Super Admin"
-                    : user?.role === "employee" || user?.role === "palika_staff"
-                    ? `🏛️ ${user?.palika_name || "कर्मचारी"}`
-                    : `👤 ${user?.name}`}
-                </span>
-              </div>
-            )}
-
+          {/* Mobile Right Hamburger Button */}
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2 lg:hidden">
             <button
               type="button"
               onClick={() => setIsPanelOpen(true)}
-              className="lg:hidden flex items-center gap-1 px-3 py-1.5 rounded-xl bg-amber-400 text-slate-950 font-black text-xs shadow-xs"
+              className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-400 text-slate-950 font-black text-xs shadow-xs cursor-pointer"
               aria-label="पहुँचयुक्तता सेटिङ्स"
             >
               <span aria-hidden="true">♿</span>
-              <span>पहुँचयुक्तता</span>
             </button>
 
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 focus:ring-2 focus:ring-blue-600"
+              className="p-2 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 focus:ring-2 focus:ring-blue-600 cursor-pointer"
               aria-expanded={mobileMenuOpen}
               aria-label="मुख्य मेनु खोल्नुहोस् वा बन्द गर्नुहोस्"
             >
@@ -271,83 +252,234 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
         <nav aria-label="मुख्य नेभिगेसन" className="hidden lg:block bg-blue-900 dark:bg-slate-950 text-white border-t border-blue-950 dark:border-slate-800 shadow-inner">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
             <ul className="flex items-center space-x-1" role="menubar">
-              {/* PRIMARY ACCESSIBILITY BUTTON IN MAIN NAVIGATION */}
+              {/* १. गृहपृष्ठ */}
               <li role="none">
-                <button
-                  type="button"
-                  onClick={() => setIsPanelOpen(true)}
+                <Link
+                  href="/"
                   role="menuitem"
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2.5 text-xs font-black rounded-t-md bg-amber-400 hover:bg-amber-300 text-slate-950 transition-colors border-b-2 border-amber-500 shadow-xs cursor-pointer mr-1.5 focus:ring-2 focus:ring-white"
-                  aria-label="♿ पहुँचयुक्तता सेटिङ्स प्यानल खोल्नुहोस् (Alt+A)"
-                  title="♿ पहुँचयुक्तता सेटिङ्स (Alt+A)"
+                  className={`inline-flex items-center px-3.5 py-2.5 text-xs font-semibold rounded-t-md transition-colors border-b-2 ${
+                    pathname === "/"
+                      ? "text-amber-300 font-bold border-amber-400 bg-blue-800/60"
+                      : "text-slate-100 hover:text-amber-300 hover:bg-blue-800/80 dark:hover:bg-slate-800 border-transparent hover:border-amber-400"
+                  }`}
                 >
-                  <span className="text-sm" aria-hidden="true">♿</span>
-                  <span>पहुँचयुक्तता</span>
-                  {audioPin && (
-                    <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse" title="अडियो पिन सक्रिय" />
-                  )}
-                </button>
+                  <span>{t.nav_home}</span>
+                </Link>
               </li>
 
-              {navItems
-                // Filter out Admin button for non-admins to prevent cluttering normal users
-                .filter((item) => {
-                  if (item.href === "/admin") {
-                    return isAuthenticated && (user?.role === "super_admin" || user?.role === "provincial_admin");
-                  }
-                  return true;
-                })
-                .map((item, idx) => {
-                  const Icon = item.icon;
-                  return (
-                    <li key={idx} role="none">
-                      <Link
-                        href={item.href}
-                        role="menuitem"
-                        className={`inline-flex items-center px-3.5 py-2.5 text-xs font-semibold rounded-t-md transition-colors border-b-2 ${
-                          item.isAction
-                            ? "bg-amber-400 text-slate-950 hover:bg-amber-300 font-bold border-transparent"
-                            : "text-slate-100 hover:text-amber-300 hover:bg-blue-800/80 dark:hover:bg-slate-800 border-transparent hover:border-amber-400"
-                        }`}
-                      >
-                        {Icon && <Icon className="w-3.5 h-3.5 mr-1.5" aria-hidden="true" />}
-                        <span>{item.label}</span>
-                      </Link>
-                    </li>
-                  );
-                })}
+              {/* २. हाम्रो बारेमा */}
+              <li role="none">
+                <Link
+                  href="/about"
+                  role="menuitem"
+                  className={`inline-flex items-center px-3.5 py-2.5 text-xs font-semibold rounded-t-md transition-colors border-b-2 ${
+                    pathname === "/about"
+                      ? "text-amber-300 font-bold border-amber-400 bg-blue-800/60"
+                      : "text-slate-100 hover:text-amber-300 hover:bg-blue-800/80 dark:hover:bg-slate-800 border-transparent hover:border-amber-400"
+                  }`}
+                >
+                  <Info className="w-3.5 h-3.5 mr-1.5" aria-hidden="true" />
+                  <span>{t.nav_about}</span>
+                </Link>
+              </li>
+
+              {/* ३. विद्यमान कानुनको दस्तावेज */}
+              <li role="none">
+                <Link
+                  href="/laws"
+                  role="menuitem"
+                  className={`inline-flex items-center px-3.5 py-2.5 text-xs font-semibold rounded-t-md transition-colors border-b-2 ${
+                    pathname === "/laws"
+                      ? "text-amber-300 font-bold border-amber-400 bg-blue-800/60"
+                      : "text-slate-100 hover:text-amber-300 hover:bg-blue-800/80 dark:hover:bg-slate-800 border-transparent hover:border-amber-400"
+                  }`}
+                >
+                  <FileText className="w-3.5 h-3.5 mr-1.5" aria-hidden="true" />
+                  <span>{t.nav_laws}</span>
+                </Link>
+              </li>
+
+              {/* ४. प्रतिवेदन (Dropdown) */}
+              <li
+                ref={reportsDropdownRef}
+                className="relative group"
+                onMouseEnter={() => setReportsDropdownOpen(true)}
+                onMouseLeave={() => setReportsDropdownOpen(false)}
+                role="none"
+              >
+                <button
+                  type="button"
+                  onClick={() => setReportsDropdownOpen((prev) => !prev)}
+                  role="menuitem"
+                  aria-expanded={reportsDropdownOpen}
+                  aria-haspopup="true"
+                  className={`inline-flex items-center gap-1.5 px-3.5 py-2.5 text-xs font-semibold rounded-t-md transition-colors border-b-2 cursor-pointer ${
+                    pathname.startsWith("/local-reporting") || pathname.startsWith("/reports") || reportsDropdownOpen
+                      ? "text-amber-300 font-bold border-amber-400 bg-blue-800/60"
+                      : "text-slate-100 hover:text-amber-300 hover:bg-blue-800/80 dark:hover:bg-slate-800 border-transparent hover:border-amber-400"
+                  }`}
+                >
+                  <BarChart3 className="w-3.5 h-3.5 mr-0.5" aria-hidden="true" />
+                  <span>{t.nav_reports}</span>
+                  <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${reportsDropdownOpen ? "rotate-180 text-amber-400" : "group-hover:rotate-180 text-blue-200"}`} />
+                </button>
+
+                {/* Dropdown Menu */}
+                <div
+                  className={`absolute top-full left-0 w-72 bg-white dark:bg-slate-900 rounded-b-xl shadow-2xl border border-slate-200 dark:border-slate-800 py-1.5 z-50 text-slate-900 dark:text-slate-100 transition-all duration-150 ${
+                    reportsDropdownOpen ? "block" : "hidden group-hover:block"
+                  }`}
+                  role="menu"
+                  aria-label="प्रतिवेदन उप-मेनु"
+                >
+                  <Link
+                    href="/local-reporting"
+                    role="menuitem"
+                    onClick={() => setReportsDropdownOpen(false)}
+                    className={`flex items-start gap-2.5 px-3.5 py-2.5 transition-colors group/item ${
+                      pathname.startsWith("/local-reporting")
+                        ? "bg-blue-50 dark:bg-slate-800/90"
+                        : "hover:bg-blue-50 dark:hover:bg-slate-800/70"
+                    }`}
+                  >
+                    <Building2 className="w-4 h-4 text-blue-700 dark:text-blue-400 shrink-0 mt-0.5 group-hover/item:scale-110 transition-transform" />
+                    <div>
+                      <span className="text-xs font-bold text-slate-900 dark:text-slate-100 group-hover/item:text-blue-700 dark:group-hover/item:text-amber-400 block">
+                        १. पालिका प्रतिवेदन
+                      </span>
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 block">
+                        १३७ वटै स्थानीय तहका प्रोफाइल तथा वस्तुस्थिति विवरण
+                      </span>
+                    </div>
+                  </Link>
+
+                  <div className="border-t border-slate-100 dark:border-slate-800 my-1"></div>
+
+                  <Link
+                    href="/reports"
+                    role="menuitem"
+                    onClick={() => setReportsDropdownOpen(false)}
+                    className={`flex items-start gap-2.5 px-3.5 py-2.5 transition-colors group/item ${
+                      pathname.startsWith("/reports")
+                        ? "bg-blue-50 dark:bg-slate-800/90"
+                        : "hover:bg-blue-50 dark:hover:bg-slate-800/70"
+                    }`}
+                  >
+                    <BarChart3 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5 group-hover/item:scale-110 transition-transform" />
+                    <div>
+                      <span className="text-xs font-bold text-slate-900 dark:text-slate-100 group-hover/item:text-emerald-700 dark:group-hover/item:text-amber-400 block">
+                        २. समग्र प्रतिवेदन
+                      </span>
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 block">
+                        कोशी प्रदेश स्तरीय विषयगत तथा तुलनात्मक तथ्याङ्क
+                      </span>
+                    </div>
+                  </Link>
+                </div>
+              </li>
+
+              {/* ५. सूचना/समाचार */}
+              <li role="none">
+                <Link
+                  href="/news"
+                  role="menuitem"
+                  className={`inline-flex items-center px-3.5 py-2.5 text-xs font-semibold rounded-t-md transition-colors border-b-2 ${
+                    pathname === "/news"
+                      ? "text-amber-300 font-bold border-amber-400 bg-blue-800/60"
+                      : "text-slate-100 hover:text-amber-300 hover:bg-blue-800/80 dark:hover:bg-slate-800 border-transparent hover:border-amber-400"
+                  }`}
+                >
+                  <Newspaper className="w-3.5 h-3.5 mr-1.5" aria-hidden="true" />
+                  <span>{t.nav_news}</span>
+                </Link>
+              </li>
+
+              {/* ६. सम्पर्क */}
+              <li role="none">
+                <Link
+                  href="/contact"
+                  role="menuitem"
+                  className={`inline-flex items-center px-3.5 py-2.5 text-xs font-semibold rounded-t-md transition-colors border-b-2 ${
+                    pathname === "/contact"
+                      ? "text-amber-300 font-bold border-amber-400 bg-blue-800/60"
+                      : "text-slate-100 hover:text-amber-300 hover:bg-blue-800/80 dark:hover:bg-slate-800 border-transparent hover:border-amber-400"
+                  }`}
+                >
+                  <PhoneCall className="w-3.5 h-3.5 mr-1.5" aria-hidden="true" />
+                  <span>{t.nav_contact}</span>
+                </Link>
+              </li>
+
+              {/* ७. खोजी */}
+              <li role="none">
+                <Link
+                  href="/search"
+                  role="menuitem"
+                  className={`inline-flex items-center px-3.5 py-2.5 text-xs font-semibold rounded-t-md transition-colors border-b-2 ${
+                    pathname === "/search"
+                      ? "text-amber-300 font-bold border-amber-400 bg-blue-800/60"
+                      : "text-slate-100 hover:text-amber-300 hover:bg-blue-800/80 dark:hover:bg-slate-800 border-transparent hover:border-amber-400"
+                  }`}
+                >
+                  <Search className="w-3.5 h-3.5 mr-1.5" aria-hidden="true" />
+                  <span>{t.nav_search}</span>
+                </Link>
+              </li>
+
+              {/* ८. एडमिन (यदि Super Admin भएमा मात्र) */}
+              {isAuthenticated && (user?.role === "super_admin" || user?.role === "provincial_admin") && (
+                <li role="none">
+                  <Link
+                    href="/admin"
+                    role="menuitem"
+                    className={`inline-flex items-center px-3.5 py-2.5 text-xs font-bold rounded-t-md transition-colors border-b-2 ${
+                      pathname.startsWith("/admin")
+                        ? "bg-amber-400 text-slate-950 border-amber-500 font-black"
+                        : "bg-amber-400/90 text-slate-950 hover:bg-amber-300 border-transparent"
+                    }`}
+                  >
+                    <Lock className="w-3.5 h-3.5 mr-1" aria-hidden="true" />
+                    <span>एडमिन</span>
+                  </Link>
+                </li>
+              )}
             </ul>
 
-            {/* Quick Auth status in Nav */}
+            {/* लगइन / लगआउट Right Section */}
             <div className="flex items-center text-xs">
               {isAuthenticated && user ? (
                 <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1.5 text-blue-200 dark:text-slate-300">
+                  <div className="flex items-center gap-1.5 text-blue-100 dark:text-slate-200">
                     <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                    <span>
+                    <span className="font-semibold max-w-[130px] truncate">
+                      {user.name}
+                    </span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded font-bold bg-blue-950 text-blue-200 border border-blue-800">
                       {user.role === "super_admin" || user.role === "provincial_admin"
-                        ? "Super Admin"
+                        ? "Admin"
                         : user.role === "employee" || user.role === "palika_staff"
                         ? user.palika_name || "कर्मचारी"
-                        : user.name}
+                        : "नागरिक"}
                     </span>
                   </div>
                   <button
                     type="button"
                     onClick={logout}
-                    className="text-rose-300 hover:text-white ml-2 text-[11px] underline cursor-pointer"
+                    className="text-rose-300 hover:text-white ml-2 text-xs font-bold underline cursor-pointer flex items-center gap-1"
+                    title="प्रणालीबाट लगआउट गर्नुहोस्"
                   >
-                    लगआउट
+                    <LogOut className="w-3.5 h-3.5" />
+                    <span>लगआउट</span>
                   </button>
                 </div>
               ) : (
                 <button
                   type="button"
                   onClick={() => setAuthModalOpen(true)}
-                  className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-3 py-1 rounded-md text-xs flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
+                  className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-3.5 py-1.5 rounded-lg text-xs flex items-center gap-1.5 cursor-pointer shadow-sm transition-all focus:ring-2 focus:ring-white"
                 >
                   <Lock className="w-3.5 h-3.5" />
-                  <span>🔐 Sign Up / Sign In</span>
+                  <span>🔐 लगइन / दर्ता</span>
                 </button>
               )}
             </div>
@@ -410,7 +542,7 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
                   className="w-full py-2.5 bg-gradient-to-r from-blue-700 to-indigo-800 text-white rounded-lg text-xs font-black flex items-center justify-center gap-1.5 shadow-md"
                 >
                   <Lock className="w-3.5 h-3.5 text-amber-300" />
-                  <span>🔐 Sign Up / Sign In</span>
+                  <span>🔐 लगइन / दर्ता</span>
                 </button>
               )}
 
@@ -425,33 +557,127 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
               )}
             </div>
 
+            {/* Mobile Nav Links in Exact Requested Order */}
             <ul className="space-y-1">
-              {navItems
-                .filter((item) => {
-                  if (item.href === "/admin") {
-                    return isAuthenticated && (user?.role === "super_admin" || user?.role === "provincial_admin");
-                  }
-                  return true;
-                })
-                .map((item, idx) => {
-                  const Icon = item.icon;
-                  return (
-                    <li key={idx}>
-                      <Link
-                        href={item.href}
-                        onClick={() => setMobileMenuOpen(false)}
-                        className={`flex items-center px-3 py-2.5 rounded-md text-sm font-semibold ${
-                          item.isAction
-                            ? "bg-amber-500 text-slate-950 font-bold mt-2"
-                            : "hover:bg-blue-900 dark:hover:bg-slate-800 text-slate-100"
-                        }`}
-                      >
-                        {Icon && <Icon className="w-4 h-4 mr-2" aria-hidden="true" />}
-                        <span>{item.label}</span>
-                      </Link>
-                    </li>
-                  );
-                })}
+              <li>
+                <Link
+                  href="/"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`flex items-center px-3 py-2.5 rounded-md text-sm font-semibold ${
+                    pathname === "/" ? "bg-blue-900 text-amber-400 font-bold" : "hover:bg-blue-900 dark:hover:bg-slate-800 text-slate-100"
+                  }`}
+                >
+                  <span>{t.nav_home}</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/about"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`flex items-center px-3 py-2.5 rounded-md text-sm font-semibold ${
+                    pathname === "/about" ? "bg-blue-900 text-amber-400 font-bold" : "hover:bg-blue-900 dark:hover:bg-slate-800 text-slate-100"
+                  }`}
+                >
+                  <Info className="w-4 h-4 mr-2" aria-hidden="true" />
+                  <span>{t.nav_about}</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/laws"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`flex items-center px-3 py-2.5 rounded-md text-sm font-semibold ${
+                    pathname === "/laws" ? "bg-blue-900 text-amber-400 font-bold" : "hover:bg-blue-900 dark:hover:bg-slate-800 text-slate-100"
+                  }`}
+                >
+                  <FileText className="w-4 h-4 mr-2" aria-hidden="true" />
+                  <span>{t.nav_laws}</span>
+                </Link>
+              </li>
+
+              {/* Mobile Reports Accordion */}
+              <li>
+                <button
+                  type="button"
+                  onClick={() => setMobileReportsOpen(!mobileReportsOpen)}
+                  className="w-full flex items-center justify-between px-3 py-2.5 rounded-md text-sm font-semibold hover:bg-blue-900 dark:hover:bg-slate-800 text-slate-100"
+                >
+                  <span className="flex items-center gap-2">
+                    <BarChart3 className="w-4 h-4" aria-hidden="true" />
+                    <span>{t.nav_reports}</span>
+                  </span>
+                  <ChevronDown className={`w-4 h-4 transition-transform ${mobileReportsOpen ? "rotate-180 text-amber-400" : ""}`} />
+                </button>
+                {mobileReportsOpen && (
+                  <div className="pl-6 pr-2 py-1 space-y-1 bg-blue-900/40 rounded-lg mt-1">
+                    <Link
+                      href="/local-reporting"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-2 px-3 py-2 rounded text-xs font-semibold text-blue-100 hover:text-white hover:bg-blue-800"
+                    >
+                      <Building2 className="w-3.5 h-3.5 text-blue-300" />
+                      <span>१. पालिका प्रतिवेदन</span>
+                    </Link>
+                    <Link
+                      href="/reports"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-2 px-3 py-2 rounded text-xs font-semibold text-blue-100 hover:text-white hover:bg-blue-800"
+                    >
+                      <BarChart3 className="w-3.5 h-3.5 text-emerald-300" />
+                      <span>२. समग्र प्रतिवेदन</span>
+                    </Link>
+                  </div>
+                )}
+              </li>
+
+              <li>
+                <Link
+                  href="/news"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`flex items-center px-3 py-2.5 rounded-md text-sm font-semibold ${
+                    pathname === "/news" ? "bg-blue-900 text-amber-400 font-bold" : "hover:bg-blue-900 dark:hover:bg-slate-800 text-slate-100"
+                  }`}
+                >
+                  <Newspaper className="w-4 h-4 mr-2" aria-hidden="true" />
+                  <span>{t.nav_news}</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/contact"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`flex items-center px-3 py-2.5 rounded-md text-sm font-semibold ${
+                    pathname === "/contact" ? "bg-blue-900 text-amber-400 font-bold" : "hover:bg-blue-900 dark:hover:bg-slate-800 text-slate-100"
+                  }`}
+                >
+                  <PhoneCall className="w-4 h-4 mr-2" aria-hidden="true" />
+                  <span>{t.nav_contact}</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/search"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`flex items-center px-3 py-2.5 rounded-md text-sm font-semibold ${
+                    pathname === "/search" ? "bg-blue-900 text-amber-400 font-bold" : "hover:bg-blue-900 dark:hover:bg-slate-800 text-slate-100"
+                  }`}
+                >
+                  <Search className="w-4 h-4 mr-2" aria-hidden="true" />
+                  <span>{t.nav_search}</span>
+                </Link>
+              </li>
+              {isAuthenticated && (user?.role === "super_admin" || user?.role === "provincial_admin") && (
+                <li>
+                  <Link
+                    href="/admin"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center px-3 py-2.5 rounded-md text-sm font-bold bg-amber-500 text-slate-950 mt-2"
+                  >
+                    <Lock className="w-4 h-4 mr-2" aria-hidden="true" />
+                    <span>एडमिन ड्यासबोर्ड</span>
+                  </Link>
+                </li>
+              )}
             </ul>
           </nav>
         )}
