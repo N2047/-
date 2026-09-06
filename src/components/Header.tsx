@@ -209,42 +209,71 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
           </div>
         </aside>
 
-        {/* Main Branding Section (Centered) */}
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-center text-center">
-          <Link href="/" className="flex flex-col sm:flex-row items-center text-center sm:text-left gap-3 sm:gap-4 group cursor-pointer" aria-label="अपाङ्गता सूचना केन्द्र गृहपृष्ठ">
-            <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-red-700 via-blue-900 to-indigo-950 text-white rounded-2xl flex items-center justify-center font-black text-xl sm:text-2xl shadow-lg border-2 border-amber-400 shrink-0 group-hover:scale-105 transition-transform" aria-hidden="true">
+        {/* Main Branding Section (Nepal Gov Logo on Left - DIC in Center - NFD-N Logo on Right) */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-3 sm:gap-6">
+          {/* Left: Nepal Government Emblem */}
+          <div className="flex items-center shrink-0">
+            <Link href="/" title="नेपाल सरकार निसान छाप" className="block focus:outline-hidden focus:ring-2 focus:ring-red-500 rounded-lg">
+              <img
+                src="/images/emblem-nepal.svg"
+                alt="नेपाल सरकार निसान छाप"
+                className="h-12 sm:h-16 w-auto object-contain drop-shadow-xs hover:scale-105 transition-transform"
+                loading="eager"
+              />
+            </Link>
+          </div>
+
+          {/* Center: DIC Branding Title & Tagline */}
+          <Link
+            href="/"
+            className="flex flex-col sm:flex-row items-center text-center sm:text-left gap-2.5 sm:gap-4 group cursor-pointer mx-auto"
+            aria-label="अपाङ्गता सूचना केन्द्र गृहपृष्ठ"
+          >
+            <div
+              className="w-11 h-11 sm:w-14 sm:h-14 bg-gradient-to-br from-red-700 via-blue-900 to-indigo-950 text-white rounded-2xl flex items-center justify-center font-black text-lg sm:text-2xl shadow-lg border-2 border-amber-400 shrink-0 group-hover:scale-105 transition-transform"
+              aria-hidden="true"
+            >
               DIC
             </div>
             <div className="text-center sm:text-left">
-              <span className="text-xl sm:text-3xl font-black tracking-tight text-red-600 dark:text-red-400 leading-tight block">
+              <span className="text-lg sm:text-2xl lg:text-3xl font-black tracking-tight text-red-600 dark:text-red-400 leading-tight block">
                 {t.app_name}
               </span>
-              <span className="text-xs sm:text-sm text-slate-800 dark:text-slate-200 font-medium block mt-0.5">
+              <span className="text-[11px] sm:text-xs lg:text-sm text-slate-800 dark:text-slate-200 font-semibold block mt-0.5">
                 {t.tagline}
               </span>
             </div>
           </Link>
 
-          {/* Mobile Right Hamburger Button */}
-          <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2 lg:hidden">
-            <button
-              type="button"
-              onClick={() => setIsPanelOpen(true)}
-              className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-400 text-slate-950 font-black text-xs shadow-xs cursor-pointer"
-              aria-label="पहुँचयुक्तता सेटिङ्स"
+          {/* Right: NFD-N Logo & Mobile Hamburger */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <a
+              href="https://www.nfdn.org.np"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="राष्ट्रिय अपाङ्ग महासंघ नेपाल (NFD-N)"
+              className="block focus:outline-hidden focus:ring-2 focus:ring-blue-500 rounded-lg"
             >
-              <span aria-hidden="true">♿</span>
-            </button>
+              <img
+                src="/images/nfdn-logo.png"
+                alt="राष्ट्रिय अपाङ्ग महासंघ नेपाल (NFD-N) लोगो"
+                className="h-11 sm:h-15 w-auto object-contain drop-shadow-xs hover:scale-105 transition-transform"
+                loading="eager"
+              />
+            </a>
 
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 focus:ring-2 focus:ring-blue-600 cursor-pointer"
-              aria-expanded={mobileMenuOpen}
-              aria-label="मुख्य मेनु खोल्नुहोस् वा बन्द गर्नुहोस्"
-            >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
+            {/* Mobile Right Hamburger Button */}
+            <div className="flex items-center gap-1.5 lg:hidden">
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="p-1.5 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 focus:ring-2 focus:ring-blue-600 cursor-pointer"
+                aria-expanded={mobileMenuOpen}
+                aria-label="मुख्य मेनु खोल्नुहोस् वा बन्द गर्नुहोस्"
+              >
+                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            </div>
           </div>
         </div>
 

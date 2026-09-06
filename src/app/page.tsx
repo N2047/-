@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Header from "@/components/Header";
 import StatsCards from "@/components/StatsCards";
@@ -18,12 +18,25 @@ import {
   Scale, 
   Layers, 
   DownloadCloud,
-  FileCheck2
+  FileCheck2,
+  ChevronDown
 } from "lucide-react";
 
 export default function HomePage() {
   const [lang, setLang] = useState<Language>("ne");
+  const [heroReportsOpen, setHeroReportsOpen] = useState(false);
+  const heroReportsRef = useRef<HTMLDivElement>(null);
   const t = translations[lang];
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (heroReportsRef.current && !heroReportsRef.current.contains(event.target as Node)) {
+        setHeroReportsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <div className="flex-1 flex flex-col">
@@ -55,25 +68,78 @@ export default function HomePage() {
             <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
               <Link
                 href="/laws"
-                className="px-6 py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-base shadow-lg shadow-amber-500/20 flex items-center gap-2 transition-all transform hover:-translate-y-0.5"
+                className="px-6 py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-base shadow-lg shadow-amber-500/20 flex items-center gap-2 transition-all transform hover:-translate-y-0.5 cursor-pointer"
               >
                 <FileText className="w-5 h-5" aria-hidden="true" />
                 <span>{t.hero_btn_laws}</span>
               </Link>
-              <Link
-                href="/local-reporting"
-                className="px-6 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-base shadow-lg shadow-blue-600/20 flex items-center gap-2 border border-blue-400/30 transition-all transform hover:-translate-y-0.5"
-              >
-                <Building2 className="w-5 h-5" aria-hidden="true" />
-                <span>{t.hero_btn_reporting}</span>
-              </Link>
-              <Link
-                href="/reports"
-                className="px-6 py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-100 font-bold text-base border border-slate-600 flex items-center gap-2 transition-all transform hover:-translate-y-0.5"
-              >
-                <BarChart3 className="w-5 h-5 text-amber-400" aria-hidden="true" />
-                <span>{t.hero_btn_reports}</span>
-              </Link>
+
+              {/* प्रतिवेदन Dropdown (१. पालिका प्रतिवेदन, २. समग्र प्रतिवेदन) */}
+              <div className="relative group" ref={heroReportsRef}>
+                <button
+                  type="button"
+                  onClick={() => setHeroReportsOpen(!heroReportsOpen)}
+                  onMouseEnter={() => setHeroReportsOpen(true)}
+                  className="px-6 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-base shadow-lg shadow-blue-600/25 flex items-center gap-2 border border-blue-400/40 transition-all transform hover:-translate-y-0.5 cursor-pointer"
+                  aria-expanded={heroReportsOpen}
+                  aria-haspopup="true"
+                >
+                  <BarChart3 className="w-5 h-5 text-amber-300" aria-hidden="true" />
+                  <span>{t.nav_reports}</span>
+                  <ChevronDown
+                    className={`w-4 h-4 transition-transform duration-200 ${
+                      heroReportsOpen ? "rotate-180 text-amber-300" : ""
+                    }`}
+                    aria-hidden="true"
+                  />
+                </button>
+
+                {/* Dropdown Menu */}
+                <div
+                  onMouseLeave={() => setHeroReportsOpen(false)}
+                  className={`${
+                    heroReportsOpen ? "block" : "hidden group-hover:block"
+                  } absolute left-0 sm:left-1/2 sm:-translate-x-1/2 top-full mt-2 w-64 bg-slate-900/95 backdrop-blur-md rounded-2xl shadow-2xl border border-blue-500/30 p-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150 text-left`}
+                >
+                  <Link
+                    href="/local-reporting"
+                    onClick={() => setHeroReportsOpen(false)}
+                    className="flex items-center gap-3 px-3.5 py-3 rounded-xl hover:bg-blue-800/80 text-white font-semibold text-sm transition-colors group/item"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-blue-600/60 flex items-center justify-center shrink-0 group-hover/item:bg-blue-500">
+                      <Building2 className="w-4 h-4 text-amber-300" />
+                    </div>
+                    <div>
+                      <div className="text-white font-bold text-sm">
+                        {t.nav_palika_report}
+                      </div>
+                      <div className="text-blue-200/80 text-[11px] font-normal">
+                        १३७ स्थानीय तह कार्यसम्पादन
+                      </div>
+                    </div>
+                  </Link>
+
+                  <div className="border-t border-slate-800 my-1" />
+
+                  <Link
+                    href="/reports"
+                    onClick={() => setHeroReportsOpen(false)}
+                    className="flex items-center gap-3 px-3.5 py-3 rounded-xl hover:bg-blue-800/80 text-white font-semibold text-sm transition-colors group/item"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-emerald-700/60 flex items-center justify-center shrink-0 group-hover/item:bg-emerald-600">
+                      <BarChart3 className="w-4 h-4 text-emerald-300" />
+                    </div>
+                    <div>
+                      <div className="text-white font-bold text-sm">
+                        {t.nav_overall_report}
+                      </div>
+                      <div className="text-blue-200/80 text-[11px] font-normal">
+                        प्रदेशस्तरीय विषयगत विश्लेषण
+                      </div>
+                    </div>
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
         </section>
