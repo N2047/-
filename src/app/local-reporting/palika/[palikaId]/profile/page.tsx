@@ -103,8 +103,8 @@ export default function PalikaProfilePage({
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
       <Header lang={lang} onLanguageChange={setLang} />
 
-      {/* Hero / Header Banner */}
-      <section className="bg-blue-950 text-white border-b-2 border-amber-500 py-8">
+      {/* Hero / Header Banner (Screen Only - Hidden in Print) */}
+      <section className="bg-blue-950 text-white border-b-2 border-amber-500 py-8 print:hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav aria-label="ब्रेडक्रम्ब" className="flex items-center gap-2 text-xs text-blue-200 mb-3">
             <Link href="/" className="hover:text-white">गृहपृष्ठ</Link>
@@ -137,13 +137,15 @@ export default function PalikaProfilePage({
 
             {/* Action Buttons */}
             <div className="flex flex-wrap items-center gap-3">
-              <Link
-                href={`/local-reporting/palika/${palikaId}`}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-sm font-bold shadow-md transition-all cursor-pointer"
-              >
-                <Edit3 className="w-4 h-4" />
-                <span>वार्षिक फारम भर्नुहोस्</span>
-              </Link>
+              {canEdit && (
+                <Link
+                  href={`/local-reporting/palika/${palikaId}`}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-sm font-bold shadow-md transition-all cursor-pointer"
+                >
+                  <Edit3 className="w-4 h-4" />
+                  <span>वार्षिक फारम भर्नुहोस्</span>
+                </Link>
+              )}
               <button
                 type="button"
                 onClick={() => exportReportToExcel(formData, palikaInfo.name_ne, districtInfo.name_ne)}
@@ -166,11 +168,42 @@ export default function PalikaProfilePage({
       </section>
 
       {/* Main Profile Content */}
-      <main id="main-content" tabIndex={-1} className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 focus:outline-hidden">
+      <main id="main-content" tabIndex={-1} className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 print:py-2 print:px-0 focus:outline-hidden">
         
-        {/* Status Notification */}
+        {/* Official Government Statistical Report Header (Visible ONLY in Print) */}
+        <div className="hidden print:block mb-6 pb-4 border-b-2 border-slate-900 text-slate-950">
+          <div className="flex items-start justify-between border-b border-slate-300 pb-3 mb-3">
+            <div className="text-left space-y-0.5">
+              <p className="text-xs font-bold text-slate-800">नेपाल सरकार / कोशी प्रदेश सरकार</p>
+              <p className="text-xs font-semibold text-slate-700">सामाजिक विकास मन्त्रालय</p>
+              <p className="text-sm font-black text-blue-950">अपाङ्गता सूचना केन्द्र (DIC), विराटनगर</p>
+            </div>
+            <div className="text-center">
+              <div className="inline-block px-3 py-1 bg-slate-100 border border-slate-400 rounded text-xs font-black uppercase tracking-wider text-slate-900">
+                आधिकारिक अपाङ्गता वस्तुस्थिति तथ्याङ्क प्रतिवेदन
+              </div>
+              <p className="text-xs font-bold text-slate-700 mt-1">आर्थिक वर्ष: २०८२/०८३</p>
+            </div>
+            <div className="text-right text-xs text-slate-600 space-y-0.5">
+              <p>जिल्ला: <strong className="text-slate-900">{districtInfo.name_ne}</strong></p>
+              <p>वडा संख्या: <strong className="text-slate-900">{palikaInfo.total_wards || "९"}</strong></p>
+              <p>तथ्याङ्क मिति: <strong className="text-slate-900">२०८२/०५/१५</strong></p>
+            </div>
+          </div>
+
+          <div className="text-center my-2">
+            <h1 className="text-2xl font-black text-slate-950">
+              {palikaInfo.name_ne} ({palikaInfo.type})
+            </h1>
+            <p className="text-xs font-semibold text-slate-700 mt-0.5">
+              {palikaInfo.name_en} ({districtInfo.name_en} District) | वार्षिक वस्तुस्थिति विवरण तथा तथ्याङ्क
+            </p>
+          </div>
+        </div>
+
+        {/* Status Notification (Screen Only - Hidden in Print) */}
         {hasSavedData ? (
-          <div className="mb-8 p-4 bg-emerald-50 border border-emerald-300 rounded-2xl flex items-center justify-between gap-4">
+          <div className="mb-8 p-4 bg-emerald-50 border border-emerald-300 rounded-2xl flex items-center justify-between gap-4 print:hidden">
             <div className="flex items-center gap-3">
               <CheckCircle2 className="w-6 h-6 text-emerald-600 shrink-0" />
               <div>
@@ -192,7 +225,7 @@ export default function PalikaProfilePage({
             )}
           </div>
         ) : (
-          <div className="mb-8 p-4 bg-amber-50 border border-amber-300 rounded-2xl flex items-center justify-between gap-4">
+          <div className="mb-8 p-4 bg-amber-50 border border-amber-300 rounded-2xl flex items-center justify-between gap-4 print:hidden">
             <div className="flex items-center gap-3">
               <Clock className="w-6 h-6 text-amber-600 shrink-0" />
               <div>
@@ -216,29 +249,29 @@ export default function PalikaProfilePage({
         )}
 
         {/* Top 4 Key Metric Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8 print:grid-cols-4 print:gap-3 print:mb-6">
+          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs print:p-3 print:rounded-lg print:border-slate-300 print:shadow-none print:break-inside-avoid">
             <div className="flex items-center justify-between text-slate-500 mb-2">
               <span className="text-xs font-bold uppercase tracking-wider">परिचयपत्र प्राप्त</span>
-              <Award className="w-5 h-5 text-blue-600" />
+              <Award className="w-5 h-5 text-blue-600 print:hidden" />
             </div>
-            <div className="text-2xl font-black text-slate-900">
+            <div className="text-2xl font-black text-slate-900 print:text-xl">
               {totalCards > 0 ? totalCards.toLocaleString("ne-NP") : "१,२४०"}
             </div>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-slate-500 mt-1 print:text-[11px]">
               जनगणना २०७८ अनुसार: {censusPwd > 0 ? censusPwd.toLocaleString("ne-NP") : "१,४८०"}
             </p>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs print:p-3 print:rounded-lg print:border-slate-300 print:shadow-none print:break-inside-avoid">
             <div className="flex items-center justify-between text-slate-500 mb-2">
               <span className="text-xs font-bold uppercase tracking-wider">सक्रिय अपाङ्गता संख्या</span>
-              <Users className="w-5 h-5 text-emerald-600" />
+              <Users className="w-5 h-5 text-emerald-600 print:hidden" />
             </div>
-            <div className="text-2xl font-black text-emerald-700">
+            <div className="text-2xl font-black text-emerald-700 print:text-slate-900 print:text-xl">
               {activePwd > 0 ? activePwd.toLocaleString("ne-NP") : "१,१८०"}
             </div>
-            <div className="w-full bg-slate-100 rounded-full h-2 mt-2 overflow-hidden flex">
+            <div className="w-full bg-slate-100 rounded-full h-2 mt-2 overflow-hidden flex print:border print:border-slate-300">
               <div className="bg-rose-500 h-2" style={{ width: `${femalePercent}%` }} title={`महिला: ${femalePercent}%`}></div>
               <div className="bg-blue-600 h-2" style={{ width: `${malePercent}%` }} title={`पुरुष: ${malePercent}%`}></div>
             </div>
@@ -248,51 +281,51 @@ export default function PalikaProfilePage({
             </div>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs print:p-3 print:rounded-lg print:border-slate-300 print:shadow-none print:break-inside-avoid">
             <div className="flex items-center justify-between text-slate-500 mb-2">
               <span className="text-xs font-bold uppercase tracking-wider">गृहभेट सेवा प्राप्त</span>
-              <HeartHandshake className="w-5 h-5 text-purple-600" />
+              <HeartHandshake className="w-5 h-5 text-purple-600 print:hidden" />
             </div>
-            <div className="text-2xl font-black text-purple-700">
+            <div className="text-2xl font-black text-purple-700 print:text-slate-900 print:text-xl">
               {formData.q11_home_visits?.total ? formData.q11_home_visits.total.toLocaleString("ne-NP") : "६४"}
             </div>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-slate-500 mt-1 print:text-[11px]">
               अनुसूचि १.१ मा प्रविष्ट संख्या: {formData.home_visits_records?.length || 0}
             </p>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs print:p-3 print:rounded-lg print:border-slate-300 print:shadow-none print:break-inside-avoid">
             <div className="flex items-center justify-between text-slate-500 mb-2">
               <span className="text-xs font-bold uppercase tracking-wider">सहायक सामग्री वितरण</span>
-              <Layers className="w-5 h-5 text-amber-600" />
+              <Layers className="w-5 h-5 text-amber-600 print:hidden" />
             </div>
-            <div className="text-2xl font-black text-amber-600">
+            <div className="text-2xl font-black text-amber-600 print:text-slate-900 print:text-xl">
               {formData.q12_assistive_received?.total ? formData.q12_assistive_received.total.toLocaleString("ne-NP") : "३८"}
             </div>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-slate-500 mt-1 print:text-[11px]">
               अनुसूचि १.२ मा प्रविष्ट संख्या: {formData.assistive_device_records?.length || 0}
             </p>
           </div>
         </div>
 
         {/* 2-Column Grid: Left (Institutional & Cards) + Right (10 Types & Services) */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8 print:grid-cols-3 print:gap-4 print:mb-6">
           
           {/* Left Column (1 col): Institutional Contact & Card Breakdown */}
-          <div className="space-y-6">
+          <div className="space-y-6 print:space-y-4">
             
             {/* Institutional Information */}
-            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs">
-              <h2 className="text-sm font-bold text-slate-900 border-b border-slate-200 pb-3 mb-4 flex items-center gap-2">
-                <Building2 className="w-4 h-4 text-blue-900" />
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs print:p-4 print:rounded-lg print:border-slate-300 print:shadow-none print:break-inside-avoid">
+              <h2 className="text-sm font-bold text-slate-900 border-b border-slate-200 pb-3 mb-4 flex items-center gap-2 print:pb-2 print:mb-3">
+                <Building2 className="w-4 h-4 text-blue-900 print:hidden" />
                 <span>संस्थागत सम्पर्क तथा संरचना</span>
               </h2>
 
-              <dl className="space-y-3 text-xs">
+              <dl className="space-y-3 text-xs print:space-y-2">
                 <div>
                   <dt className="text-slate-500">स्थानीय तहको ठेगाना:</dt>
                   <dd className="font-semibold text-slate-800 mt-0.5 flex items-center gap-1.5">
-                    <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                    <MapPin className="w-3.5 h-3.5 text-slate-400 print:hidden" />
                     {palikaInfo.name_ne}, {districtInfo.name_ne} जिल्ला
                   </dd>
                 </div>
@@ -305,7 +338,7 @@ export default function PalikaProfilePage({
                 <div>
                   <dt className="text-slate-500">सम्पर्क नम्बर:</dt>
                   <dd className="font-semibold text-slate-800 mt-0.5 flex items-center gap-1.5">
-                    <Phone className="w-3.5 h-3.5 text-slate-400" />
+                    <Phone className="w-3.5 h-3.5 text-slate-400 print:hidden" />
                     {formData.submitted_by_phone || "९८XXXXXXXX"}
                   </dd>
                 </div>
@@ -313,9 +346,9 @@ export default function PalikaProfilePage({
                   <dt className="text-slate-500">नागरिक सहायता कक्ष (Help Desk):</dt>
                   <dd className="font-semibold text-slate-800 mt-0.5 flex items-center gap-1.5">
                     {formData.q38_desk_setup?.status ? (
-                      <span className="text-emerald-700 flex items-center gap-1"><Check className="w-3.5 h-3.5" /> स्थापना भएको</span>
+                      <span className="text-emerald-700 flex items-center gap-1"><Check className="w-3.5 h-3.5 print:hidden" /> स्थापना भएको</span>
                     ) : (
-                      <span className="text-amber-700 flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> स्थापना प्रक्रियामा</span>
+                      <span className="text-amber-700 flex items-center gap-1"><Clock className="w-3.5 h-3.5 print:hidden" /> स्थापना प्रक्रियामा</span>
                     )}
                   </dd>
                 </div>
@@ -323,7 +356,7 @@ export default function PalikaProfilePage({
                   <dt className="text-slate-500">सहजकर्ताको छुट्टै कार्यकक्ष:</dt>
                   <dd className="font-semibold text-slate-800 mt-0.5 flex items-center gap-1.5">
                     {formData.q39_dedicated_room?.status ? (
-                      <span className="text-emerald-700 flex items-center gap-1"><Check className="w-3.5 h-3.5" /> व्यवस्था भएको</span>
+                      <span className="text-emerald-700 flex items-center gap-1"><Check className="w-3.5 h-3.5 print:hidden" /> व्यवस्था भएको</span>
                     ) : (
                       <span className="text-slate-600">व्यवस्था हुन बाँकी</span>
                     )}
@@ -331,7 +364,7 @@ export default function PalikaProfilePage({
                 </div>
                 <div>
                   <dt className="text-slate-500">वार्षिक बजेट विनियोजन:</dt>
-                  <dd className="font-bold text-blue-900 mt-0.5">
+                  <dd className="font-bold text-blue-900 mt-0.5 print:text-slate-900">
                     रु. {formData.q31_budget_allocated ? Number(formData.q31_budget_allocated).toLocaleString("ne-NP") : "५,००,०००"}
                   </dd>
                 </div>
@@ -339,13 +372,13 @@ export default function PalikaProfilePage({
             </div>
 
             {/* Disability ID Card Severity Breakdown */}
-            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs">
-              <h2 className="text-sm font-bold text-slate-900 border-b border-slate-200 pb-3 mb-4 flex items-center gap-2">
-                <Award className="w-4 h-4 text-amber-600" />
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs print:p-4 print:rounded-lg print:border-slate-300 print:shadow-none print:break-inside-avoid">
+              <h2 className="text-sm font-bold text-slate-900 border-b border-slate-200 pb-3 mb-4 flex items-center gap-2 print:pb-2 print:mb-3">
+                <Award className="w-4 h-4 text-amber-600 print:hidden" />
                 <span>परिचयपत्र वर्गीकरण (Severity Breakdown)</span>
               </h2>
 
-              <div className="space-y-3">
+              <div className="space-y-3 print:space-y-2">
                 {CARD_COLORS.map((card) => {
                   const cardRow = formData.q35_cumulative_cards?.[card.id];
                   const count = cardRow?.total || 0;
@@ -356,7 +389,7 @@ export default function PalikaProfilePage({
                   return (
                     <div
                       key={card.id}
-                      className="p-3 rounded-xl border border-slate-200 flex items-center justify-between"
+                      className="p-3 rounded-xl border border-slate-200 flex items-center justify-between print:p-2 print:rounded print:border-slate-300"
                     >
                       <div className="flex items-center gap-2.5">
                         <span className={`w-3.5 h-3.5 rounded-full ${colorBadge} border border-slate-300`}></span>
@@ -376,9 +409,9 @@ export default function PalikaProfilePage({
               </div>
             </div>
 
-            {/* Circulars Compliance Check (Only for authorized Employee / Admin) */}
+            {/* Circulars Compliance Check (Only for authorized Employee / Admin - Hidden in Print) */}
             {canEdit && (
-              <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs">
+              <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs print:hidden">
                 <h2 className="text-sm font-bold text-slate-900 border-b border-slate-200 pb-3 mb-4 flex items-center gap-2">
                   <FileText className="w-4 h-4 text-blue-900" />
                   <span>स्थानीय तह परिपत्र स्थिति (Q40)</span>
@@ -431,13 +464,13 @@ export default function PalikaProfilePage({
           </div>
 
           {/* Right Column (2 cols): 10 Types Matrix & Key Sectors */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-6 print:space-y-4">
             
             {/* 10 Types of Disability Matrix */}
-            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs">
-              <div className="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs print:p-4 print:rounded-lg print:border-slate-300 print:shadow-none print:break-inside-avoid">
+              <div className="flex items-center justify-between border-b border-slate-200 pb-3 mb-4 print:pb-2 print:mb-3">
                 <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                  <Layers className="w-4 h-4 text-blue-900" />
+                  <Layers className="w-4 h-4 text-blue-900 print:hidden" />
                   <span>१० प्रकारका अपाङ्गता अनुसार वर्गीकरण (Q34)</span>
                 </h2>
                 <span className="text-xs text-slate-500">हालसम्मको संकलित विवरण</span>
@@ -447,11 +480,11 @@ export default function PalikaProfilePage({
                 <table className="w-full text-xs text-left border-collapse">
                   <thead>
                     <tr className="bg-slate-100 border-b border-slate-200 text-slate-700">
-                      <th className="p-2.5 font-bold">क्र.सं.</th>
-                      <th className="p-2.5 font-bold">अपाङ्गताको प्रकार</th>
-                      <th className="p-2.5 font-bold text-center">महिला</th>
-                      <th className="p-2.5 font-bold text-center">पुरुष</th>
-                      <th className="p-2.5 font-bold text-center">जम्मा</th>
+                      <th className="p-2.5 font-bold print:p-1.5">क्र.सं.</th>
+                      <th className="p-2.5 font-bold print:p-1.5">अपाङ्गताको प्रकार</th>
+                      <th className="p-2.5 font-bold text-center print:p-1.5">महिला</th>
+                      <th className="p-2.5 font-bold text-center print:p-1.5">पुरुष</th>
+                      <th className="p-2.5 font-bold text-center print:p-1.5">जम्मा</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -460,11 +493,11 @@ export default function PalikaProfilePage({
                       const total = row?.total || 0;
                       return (
                         <tr key={type.id} className="hover:bg-slate-50/80">
-                          <td className="p-2.5 font-bold text-slate-500">{(idx + 1).toLocaleString("ne-NP")}</td>
-                          <td className="p-2.5 font-semibold text-slate-800">{type.label}</td>
-                          <td className="p-2.5 text-center text-slate-600">{row?.female !== "" ? row?.female : "-"}</td>
-                          <td className="p-2.5 text-center text-slate-600">{row?.male !== "" ? row?.male : "-"}</td>
-                          <td className="p-2.5 text-center font-bold text-blue-900">{total > 0 ? total.toLocaleString("ne-NP") : "-"}</td>
+                          <td className="p-2.5 font-bold text-slate-500 print:p-1.5">{(idx + 1).toLocaleString("ne-NP")}</td>
+                          <td className="p-2.5 font-semibold text-slate-800 print:p-1.5">{type.label}</td>
+                          <td className="p-2.5 text-center text-slate-600 print:p-1.5">{row?.female !== "" ? row?.female : "-"}</td>
+                          <td className="p-2.5 text-center text-slate-600 print:p-1.5">{row?.male !== "" ? row?.male : "-"}</td>
+                          <td className="p-2.5 text-center font-bold text-blue-900 print:text-slate-950 print:p-1.5">{total > 0 ? total.toLocaleString("ne-NP") : "-"}</td>
                         </tr>
                       );
                     })}
@@ -474,15 +507,15 @@ export default function PalikaProfilePage({
             </div>
 
             {/* Sector Progress Cards (Education, Livelihood, Social Security, Seed Capital) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 print:grid-cols-2 print:gap-4">
               
               {/* Education */}
-              <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs">
-                <div className="flex items-center gap-2 text-slate-900 font-bold text-xs border-b border-slate-100 pb-2.5 mb-3">
-                  <GraduationCap className="w-4 h-4 text-blue-800" />
+              <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs print:p-3 print:rounded-lg print:border-slate-300 print:shadow-none print:break-inside-avoid">
+                <div className="flex items-center gap-2 text-slate-900 font-bold text-xs border-b border-slate-100 pb-2.5 mb-3 print:pb-1.5 print:mb-2">
+                  <GraduationCap className="w-4 h-4 text-blue-800 print:hidden" />
                   <span>शिक्षा क्षेत्र सूचकहरू</span>
                 </div>
-                <dl className="space-y-2 text-xs">
+                <dl className="space-y-2 text-xs print:space-y-1.5">
                   <div className="flex justify-between">
                     <dt className="text-slate-500">विद्यालय भर्ना नयाँ बालबालिका:</dt>
                     <dd className="font-bold text-slate-800">{formData.q14_school_new_admit?.total || "-"}</dd>
@@ -493,7 +526,7 @@ export default function PalikaProfilePage({
                   </div>
                   <div className="flex justify-between">
                     <dt className="text-slate-500">छात्रवृत्ति प्राप्त बालबालिका:</dt>
-                    <dd className="font-bold text-emerald-700">{formData.q16_scholarship?.total || "-"}</dd>
+                    <dd className="font-bold text-emerald-700 print:text-slate-900">{formData.q16_scholarship?.total || "-"}</dd>
                   </div>
                   <div className="flex justify-between">
                     <dt className="text-slate-500">गृहकेन्द्रित शिक्षा प्राप्त:</dt>
@@ -501,25 +534,25 @@ export default function PalikaProfilePage({
                   </div>
                   <div className="flex justify-between">
                     <dt className="text-slate-500">विद्यालय बाहिर रहेका बालबालिका:</dt>
-                    <dd className="font-bold text-rose-600">{formData.q18_out_of_school?.total || "-"}</dd>
+                    <dd className="font-bold text-rose-600 print:text-slate-900">{formData.q18_out_of_school?.total || "-"}</dd>
                   </div>
                 </dl>
               </div>
 
               {/* Livelihood & Seed Capital */}
-              <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs">
-                <div className="flex items-center gap-2 text-slate-900 font-bold text-xs border-b border-slate-100 pb-2.5 mb-3">
-                  <Briefcase className="w-4 h-4 text-amber-700" />
+              <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs print:p-3 print:rounded-lg print:border-slate-300 print:shadow-none print:break-inside-avoid">
+                <div className="flex items-center gap-2 text-slate-900 font-bold text-xs border-b border-slate-100 pb-2.5 mb-3 print:pb-1.5 print:mb-2">
+                  <Briefcase className="w-4 h-4 text-amber-700 print:hidden" />
                   <span>सीप, रोजगारी तथा बिउपुँजी</span>
                 </div>
-                <dl className="space-y-2 text-xs">
+                <dl className="space-y-2 text-xs print:space-y-1.5">
                   <div className="flex justify-between">
                     <dt className="text-slate-500">तालिम प्राप्त व्यक्ति संख्या:</dt>
                     <dd className="font-bold text-slate-800">{formData.q21_trainings?.reduce((s, r) => s + (r.total || 0), 0) || "-"}</dd>
                   </div>
                   <div className="flex justify-between">
                     <dt className="text-slate-500">रोजगारीमा संलग्न व्यक्ति:</dt>
-                    <dd className="font-bold text-emerald-700">{formData.q22_employment?.reduce((s, r) => s + (r.total || 0), 0) || "-"}</dd>
+                    <dd className="font-bold text-emerald-700 print:text-slate-900">{formData.q22_employment?.reduce((s, r) => s + (r.total || 0), 0) || "-"}</dd>
                   </div>
                   <div className="flex justify-between">
                     <dt className="text-slate-500">स्वावलम्बन समूह सदस्य:</dt>
@@ -527,7 +560,7 @@ export default function PalikaProfilePage({
                   </div>
                   <div className="flex justify-between">
                     <dt className="text-slate-500">कुल बिउपुँजी कोष मौज्दात:</dt>
-                    <dd className="font-bold text-blue-900">रु. {formData.q29_total_funds ? formData.q29_total_funds.toLocaleString("ne-NP") : "-"}</dd>
+                    <dd className="font-bold text-blue-900 print:text-slate-900">रु. {formData.q29_total_funds ? formData.q29_total_funds.toLocaleString("ne-NP") : "-"}</dd>
                   </div>
                   <div className="flex justify-between">
                     <dt className="text-slate-500">खुद लगानीमा रहेको ऋण:</dt>
@@ -538,9 +571,9 @@ export default function PalikaProfilePage({
 
             </div>
 
-            {/* Annual Reporting History Table (Admin / Authorized Employee only) */}
+            {/* Annual Reporting History Table (Admin / Authorized Employee only - Hidden in Print) */}
             {canEdit && (
-              <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs">
+              <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs print:hidden">
                 <div className="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
                   <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-blue-900" />
@@ -604,6 +637,22 @@ export default function PalikaProfilePage({
               </div>
             )}
 
+          </div>
+        </div>
+
+        {/* Official Print Verification Footer (Visible ONLY in Print) */}
+        <div className="hidden print:flex items-center justify-between text-xs text-slate-700 border-t-2 border-slate-800 pt-3 mt-8 print:break-inside-avoid">
+          <div>
+            <p className="font-bold text-slate-900">अपाङ्गता सूचना केन्द्र (DIC), कोशी प्रदेश</p>
+            <p className="text-[10px] text-slate-500">आधिकारिक डिजिटल तथ्याङ्क प्रतिलिपि | kosi-dic.vercel.app</p>
+          </div>
+          <div className="text-center">
+            <p className="text-[10px] text-slate-500">प्रतिवेदन उत्पादन मिति: २०८२/०५/१५</p>
+            <p className="font-semibold text-slate-800">{palikaInfo.name_ne}, {districtInfo.name_ne}</p>
+          </div>
+          <div className="text-right">
+            <p className="text-[10px] text-slate-500">प्रमाणीकरण / अधिकृत हस्ताक्षर</p>
+            <p className="font-semibold text-slate-800 mt-4 border-t border-dotted border-slate-400 pt-1">........................................</p>
           </div>
         </div>
 

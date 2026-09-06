@@ -417,3 +417,48 @@ html[data-motion="off"] *::after {
 .animate-fadeIn {
   animation: fadeIn 0.2s ease-out forwards;
 }
+
+/* ==========================================================================
+   PRINT MEDIA OPTIMIZATIONS (Clean Statistical Reports)
+   ========================================================================== */
+@media print {
+  header,
+  footer,
+  nav,
+  aside,
+  .print-hide,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  body {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 11pt !important;
+    line-height: 1.4 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  /* Prevent awkward page break splits */
+  .print-avoid-break,
+  table,
+  tr,
+  .rounded-2xl {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* Crisp borders & no shadows in print */
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+}

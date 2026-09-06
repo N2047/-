@@ -63,7 +63,7 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-xs transition-colors">
+      <header className="sticky top-0 z-40 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-xs transition-colors print:hidden">
         {/* Skip to Main Content Link for Screen Readers & Keyboard users */}
         <a href="#main-content" className="skip-link">
           {t.skip_to_content}
