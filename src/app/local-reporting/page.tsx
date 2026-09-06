@@ -237,11 +237,13 @@ export default function LocalReportingPage() {
                     <span className="text-xs text-slate-500">{palika.type}</span>
                   </div>
                   <Link
-                    href={`/local-reporting/palika/${palika.id}`}
-                    className="p-2 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white transition-colors"
-                    title="फारम भर्नुहोस्"
+                    href={`/local-reporting/palika/${palika.id}/profile`}
+                    className="px-3 py-1.5 rounded-lg bg-blue-900 text-white hover:bg-blue-800 text-xs font-bold flex items-center gap-1.5 transition-colors"
+                    title="पालिका प्रोफाइल तथा रिपोर्ट हेर्नुहोस्"
                   >
-                    <ArrowRight className="w-4 h-4" />
+                    <Building2 className="w-3.5 h-3.5 text-amber-300" />
+                    <span>पालिका प्रोफाइल</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
                 </div>
               ))}
@@ -257,7 +259,7 @@ export default function LocalReportingPage() {
                 {selectedDistrict?.name_ne} जिल्ला अन्तर्गतका स्थानीय तहहरू ({filteredPalikas.length})
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">
-                प्रतिवेदन भर्न वा प्रोफाइल हेर्न सम्बन्धित स्थानीय तहको &lsquo;प्रतिवेदन भर्नुहोस्&rsquo; मा थिच्नुहोस्।
+                सम्बन्धित स्थानीय तहको अपाङ्गता विवरण, प्रोफाइल तथा सार्वजनिक तथ्याङ्क प्रतिवेदन हेर्न &lsquo;पालिका प्रोफाइल&rsquo; मा थिच्नुहोस्।
               </p>
             </div>
             <div className="flex items-center gap-2 text-xs font-medium text-slate-600">
@@ -320,44 +322,57 @@ export default function LocalReportingPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 pt-3 border-t border-slate-200/80">
-                    {/* Show form edit button ONLY for Super Admin OR assigned Employee */}
-                    {!isNormalUser && (isSuperAdmin || (isEmployee && (assignedPalikaId === palika.id))) && (
-                      <Link
-                        href={`/local-reporting/palika/${palika.id}`}
-                        className={`flex-1 py-2 px-3 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition-colors shadow-xs ${
-                          isSuperAdmin
-                            ? "bg-amber-500 hover:bg-amber-400 text-slate-950"
-                            : "bg-emerald-700 hover:bg-emerald-600 text-white"
-                        }`}
-                      >
-                        {isSuperAdmin ? (
-                          <>
-                            <Edit3 className="w-3.5 h-3.5" />
-                            <span>डाटा सच्याउनुहोस्</span>
-                          </>
-                        ) : (
-                          <>
-                            <FileText className="w-3.5 h-3.5" />
-                            <span>मेरो पालिका फारम</span>
-                          </>
-                        )}
-                      </Link>
-                    )}
+                  {(() => {
+                    const canEditThisPalika = !isNormalUser && (
+                      isSuperAdmin || 
+                      (isEmployee && user?.account_status === "approved" && assignedPalikaId === palika.id)
+                    );
 
-                    <Link
-                      href={`/local-reporting/palika/${palika.id}/profile`}
-                      className={`py-2 px-3 rounded-lg font-bold text-xs transition-colors flex items-center justify-center gap-1.5 ${
-                        isNormalUser || (!isSuperAdmin && (!isEmployee || assignedPalikaId !== palika.id))
-                          ? "flex-1 bg-blue-900 hover:bg-blue-800 text-white shadow-xs"
-                          : "py-2 px-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold"
-                      }`}
-                      title="पालिका प्रोफाइल तथा सार्वजनिक रिपोर्ट"
-                    >
-                      <Building2 className="w-3.5 h-3.5" />
-                      <span>{isNormalUser || (!isSuperAdmin && (!isEmployee || assignedPalikaId !== palika.id)) ? "पालिका प्रोफाइल तथा रिपोर्ट हेर्नुहोस्" : "प्रोफाइल"}</span>
-                    </Link>
-                  </div>
+                    return (
+                      <div className="flex items-center gap-2 pt-3 border-t border-slate-200/80">
+                        {/* Show form edit button ONLY for Super Admin OR assigned Employee */}
+                        {canEditThisPalika && (
+                          <Link
+                            href={`/local-reporting/palika/${palika.id}`}
+                            className={`flex-1 py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs ${
+                              isSuperAdmin
+                                ? "bg-amber-500 hover:bg-amber-400 text-slate-950"
+                                : "bg-emerald-700 hover:bg-emerald-600 text-white"
+                            }`}
+                          >
+                            {isSuperAdmin ? (
+                              <>
+                                <Edit3 className="w-3.5 h-3.5" />
+                                <span>डाटा सच्याउनुहोस्</span>
+                              </>
+                            ) : (
+                              <>
+                                <FileText className="w-3.5 h-3.5" />
+                                <span>मेरो पालिका फारम</span>
+                              </>
+                            )}
+                          </Link>
+                        )}
+
+                        {/* Palika Profile Button: Always visible, clearly displaying "पालिका प्रोफाइल" with icon and text */}
+                        <Link
+                          href={`/local-reporting/palika/${palika.id}/profile`}
+                          className={`py-2.5 px-3.5 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 ${
+                            !canEditThisPalika
+                              ? "w-full flex-1 bg-blue-900 hover:bg-blue-800 text-white shadow-md hover:shadow-lg"
+                              : "bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300"
+                          }`}
+                          title={`${palika.name_ne} को सार्वजनिक प्रोफाइल तथा तथ्याङ्क प्रतिवेदन हेर्नुहोस्`}
+                        >
+                          <Building2 className="w-4 h-4 text-amber-400 shrink-0" />
+                          <span>पालिका प्रोफाइल</span>
+                          {!canEditThisPalika && (
+                            <ArrowRight className="w-4 h-4 ml-auto text-blue-200 shrink-0" />
+                          )}
+                        </Link>
+                      </div>
+                    );
+                  })()}
                 </div>
               ))}
             </div>

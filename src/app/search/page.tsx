@@ -201,10 +201,11 @@ export default function SearchPage() {
                         <span className="text-xs text-slate-500">{p.type}</span>
                       </div>
                       <Link
-                        href={`/local-reporting/palika/${p.id}`}
-                        className="px-3 py-1.5 bg-blue-900 text-white rounded-lg text-xs font-bold flex items-center gap-1 hover:bg-blue-800"
+                        href={`/local-reporting/palika/${p.id}/profile`}
+                        className="px-3 py-1.5 bg-blue-900 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 hover:bg-blue-800 transition-colors shadow-xs"
                       >
-                        <span>फारम</span>
+                        <Building2 className="w-3.5 h-3.5 text-amber-400" />
+                        <span>पालिका प्रोफाइल</span>
                         <ArrowRight className="w-3.5 h-3.5" />
                       </Link>
                     </div>
