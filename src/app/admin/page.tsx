@@ -79,6 +79,7 @@ export default function AdminPage() {
   const [showAdminPassword, setShowAdminPassword] = useState(false);
   const [adminLoginLoading, setAdminLoginLoading] = useState(false);
   const [adminLoginError, setAdminLoginError] = useState("");
+  const [showAdminLoginForm, setShowAdminLoginForm] = useState(false);
 
   // Super Admin Navigation Tab
   const [activeTab, setActiveTab] = useState<
@@ -396,6 +397,150 @@ export default function AdminPage() {
   // Shown when visitor is unauthenticated or not Super Admin
   // =========================================================================
   if (!isSuperAdmin) {
+    // -----------------------------------------------------------------------
+    // SCENARIO A: A logged-in Employee or Normal Citizen tries to open /admin
+    // They are STRICTLY FORBIDDEN and see a 403 Access Denied screen.
+    // ZERO login form, ZERO admin controls are shown.
+    // -----------------------------------------------------------------------
+    if (user) {
+      return (
+        <div className="min-h-screen flex flex-col bg-slate-900 text-slate-100 font-sans">
+          <Header lang={lang} onLanguageChange={setLang} />
+
+          <main id="main-content" className="flex-1 flex items-center justify-center p-4 py-12">
+            <div className="max-w-md w-full bg-slate-950 border-2 border-rose-600/70 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 text-center">
+              
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-rose-600 to-rose-950 text-white mx-auto flex items-center justify-center shadow-lg border-2 border-rose-400">
+                <ShieldAlert className="w-8 h-8 text-rose-200" />
+              </div>
+
+              <div className="inline-block text-[11px] font-black uppercase tracking-widest text-rose-400 bg-rose-950/90 px-3.5 py-1 rounded-full border border-rose-500/50">
+                ४०३ - पहुँच अस्वीकृत (Access Denied)
+              </div>
+
+              <div className="space-y-1.5">
+                <h1 className="text-xl font-black text-white">
+                  तपाईंलाई यो प्यानल खोल्ने अनुमति छैन
+                </h1>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  यो प्रशासकीय प्यानल केवल <strong>Super Admin</strong> खाताका लागि मात्र सुरक्षित गरिएको छ। कर्मचारी तथा सर्वसाधारण प्रयोगकर्ताका लागि यो प्यानल निषेध गरिएको छ।
+                </p>
+              </div>
+
+              {/* Logged in User Profile Info */}
+              <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 text-xs text-slate-300 text-left space-y-1.5">
+                <div className="flex justify-between">
+                  <span className="text-slate-400">प्रयोगकर्ता:</span>
+                  <span className="font-bold text-white">{user.name}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">भूमिका (Role):</span>
+                  <span className="font-bold text-amber-300">
+                    {user.role === "employee" || user.role === "palika_staff" ? "कर्मचारी (Palika Staff)" : "नागरिक (Public Citizen)"}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">प्रशासकीय अनुमति:</span>
+                  <span className="font-bold text-rose-400">पहुँच निषेध (Denied)</span>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="space-y-2 pt-1">
+                {(user.role === "employee" || user.role === "palika_staff") && (
+                  <Link
+                    href="/local-reporting"
+                    className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md flex items-center justify-center gap-2 transition"
+                  >
+                    <Building2 className="w-4 h-4" />
+                    <span>पालिका प्रतिवेदन पोर्टलमा जानुहोस्</span>
+                  </Link>
+                )}
+                <Link
+                  href="/"
+                  className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs shadow-md flex items-center justify-center gap-2 transition"
+                >
+                  <span>← सार्वजनिक गृहपृष्ठमा फर्कनुहोस्</span>
+                </Link>
+                <button
+                  type="button"
+                  onClick={logout}
+                  className="w-full py-2 rounded-xl text-rose-400 hover:text-rose-300 text-xs font-semibold cursor-pointer transition"
+                >
+                  Super Admin बाट लगइन गर्न लगआउट गर्नुहोस्
+                </button>
+              </div>
+            </div>
+          </main>
+
+          <Footer lang={lang} />
+        </div>
+      );
+    }
+
+    // -----------------------------------------------------------------------
+    // SCENARIO B: An unauthenticated public user visits /admin directly
+    // By default, DO NOT expose the Admin Sign In form!
+    // Show a Restricted Area security notice.
+    // Only if authorized Super Admin explicitly clicks the discreet login button,
+    // show the login form.
+    // -----------------------------------------------------------------------
+    if (!showAdminLoginForm) {
+      return (
+        <div className="min-h-screen flex flex-col bg-slate-900 text-slate-100 font-sans">
+          <Header lang={lang} onLanguageChange={setLang} />
+
+          <main id="main-content" className="flex-1 flex items-center justify-center p-4 py-12">
+            <div className="max-w-md w-full bg-slate-950 border-2 border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 text-center">
+              
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-700 to-slate-900 text-slate-300 mx-auto flex items-center justify-center shadow-lg border-2 border-slate-700">
+                <Lock className="w-8 h-8 text-amber-400" />
+              </div>
+
+              <div className="inline-block text-[11px] font-black uppercase tracking-widest text-slate-400 bg-slate-900 px-3.5 py-1 rounded-full border border-slate-800">
+                ४०३ - प्रतिबन्धित क्षेत्र (Restricted Area)
+              </div>
+
+              <div className="space-y-1.5">
+                <h1 className="text-xl font-black text-white">
+                  प्रशासकीय प्यानल सुरक्षित गरिएको छ
+                </h1>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  कोशी प्रदेश अपाङ्गता सूचना केन्द्र (DIC) को यो मुख्य प्रशासकीय पोर्टल केवल अधिकृत <strong>Super Admin</strong> का लागि मात्र उपलब्ध छ। कर्मचारी तथा सर्वसाधारणका लागि यहाँ कुनै सामग्री उपलब्ध छैन।
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="space-y-3 pt-2">
+                <Link
+                  href="/"
+                  className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md flex items-center justify-center gap-2 transition"
+                >
+                  <span>← सार्वजनिक गृहपृष्ठमा फर्कनुहोस्</span>
+                </Link>
+
+                <div className="border-t border-slate-800 pt-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowAdminLoginForm(true)}
+                    className="text-xs text-slate-400 hover:text-amber-300 transition flex items-center justify-center gap-1.5 mx-auto cursor-pointer"
+                  >
+                    <KeyRound className="w-3.5 h-3.5 text-amber-400" />
+                    <span>अधिकृत Super Admin हुनुहुन्छ? यहाँ लगइन गर्नुहोस्</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </main>
+
+          <Footer lang={lang} />
+        </div>
+      );
+    }
+
+    // -----------------------------------------------------------------------
+    // SCENARIO C: Authorized Super Admin clicked to reveal sign in form
+    // -----------------------------------------------------------------------
     return (
       <div className="min-h-screen flex flex-col bg-slate-900 text-slate-100 font-sans">
         <Header lang={lang} onLanguageChange={setLang} />
@@ -427,13 +572,6 @@ export default function AdminPage() {
               >
                 <ShieldAlert className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
                 <div className="leading-relaxed">{adminLoginError}</div>
-              </div>
-            )}
-
-            {/* If currently logged in as a normal citizen or staff, show permission notice */}
-            {user && (
-              <div className="p-3.5 rounded-2xl bg-amber-950/60 border border-amber-500/40 text-amber-200 text-xs">
-                तपाईं हाल <strong>{user.name} ({user.role === "normal_user" ? "नागरिक" : "कर्मचारी"})</strong> को रूपमा लगइन हुनुहुन्छ। सुरक्षा नीति अनुसार Admin Panel मा केवल <strong>Super Admin</strong> खातालाई मात्र अनुमति छ।
               </div>
             )}
 
@@ -497,13 +635,20 @@ export default function AdminPage() {
               </button>
             </form>
 
-            {/* Government Footer note */}
-            <div className="text-center pt-2 border-t border-slate-800/80">
+            {/* Back to restricted / home */}
+            <div className="flex items-center justify-between pt-2 border-t border-slate-800/80 text-xs">
+              <button
+                type="button"
+                onClick={() => setShowAdminLoginForm(false)}
+                className="text-slate-400 hover:text-white transition cursor-pointer"
+              >
+                ← पछाडि फर्कनुहोस्
+              </button>
               <Link
                 href="/"
-                className="text-xs text-slate-400 hover:text-amber-300 transition inline-flex items-center gap-1"
+                className="text-slate-400 hover:text-amber-300 transition"
               >
-                <span>← सार्वजनिक गृहपृष्ठमा फर्कनुहोस्</span>
+                सार्वजनिक गृहपृष्ठ
               </Link>
             </div>
           </div>

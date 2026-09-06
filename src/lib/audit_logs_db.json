@@ -1,5 +1,85 @@
 [
   {
+    "id": "log_1788713078791_nj5p",
+    "action": "USER_STATUS_CHANGED",
+    "performed_by_id": "admin-master-001",
+    "performed_by_name": "मुख्य प्रशासक (Super Admin)",
+    "target_user_id": "emp-pending-003",
+    "target_user_name": "विराटनगर सहजकर्ता (प्रतीक्षारत)",
+    "details": "खाता स्थिति परिवर्तन: pending",
+    "timestamp": "2026-09-06T16:44:38.791Z"
+  },
+  {
+    "id": "log_1788713078695_eofi",
+    "action": "USER_UNBLOCKED",
+    "performed_by_id": "admin-master-001",
+    "performed_by_name": "मुख्य प्रशासक (Super Admin)",
+    "target_user_id": "emp-pending-003",
+    "target_user_name": "विराटनगर सहजकर्ता (प्रतीक्षारत)",
+    "details": "प्रयोगकर्ता खाता अनब्लक (Unblocked / Active) गरियो (DIC-EMP-000003)",
+    "timestamp": "2026-09-06T16:44:38.696Z"
+  },
+  {
+    "id": "log_1788713078648_37rn",
+    "action": "BLOCKED_LOGIN_ATTEMPT",
+    "performed_by_id": "emp-pending-003",
+    "performed_by_name": "विराटनगर सहजकर्ता (प्रतीक्षारत)",
+    "target_user_id": "emp-pending-003",
+    "target_user_name": "विराटनगर सहजकर्ता (प्रतीक्षारत)",
+    "details": "ब्लक गरिएको खाताबाट लगइन प्रयास रोकियो (pending.staff@gmail.com)",
+    "timestamp": "2026-09-06T16:44:38.648Z"
+  },
+  {
+    "id": "log_1788713078601_ym0h",
+    "action": "USER_BLOCKED",
+    "performed_by_id": "admin-master-001",
+    "performed_by_name": "मुख्य प्रशासक (Super Admin)",
+    "target_user_id": "emp-pending-003",
+    "target_user_name": "विराटनगर सहजकर्ता (प्रतीक्षारत)",
+    "details": "प्रयोगकर्ता खाता ब्लक (Blocked) गरियो (DIC-EMP-000003)",
+    "timestamp": "2026-09-06T16:44:38.601Z"
+  },
+  {
+    "id": "log_1788713078075_cl9t",
+    "action": "EMPLOYEE_APPROVED",
+    "performed_by_id": "admin-master-001",
+    "performed_by_name": "मुख्य प्रशासक (Super Admin)",
+    "target_user_id": "emp-pending-003",
+    "target_user_name": "विराटनगर सहजकर्ता (प्रतीक्षारत)",
+    "details": "कर्मचारी खाता स्वीकृत गरियो (आईडी: DIC-EMP-000003, स्थानीय तह: विराटनगर महानगरपालिका)",
+    "timestamp": "2026-09-06T16:44:38.075Z"
+  },
+  {
+    "id": "log_1788713069478_60t1",
+    "action": "ADMIN_LOGIN_SUCCESS",
+    "performed_by_id": "admin-master-001",
+    "performed_by_name": "मुख्य प्रशासक",
+    "target_user_id": "admin-master-001",
+    "target_user_name": "मुख्य प्रशासक",
+    "details": "Super Admin सफलतापूर्वक Admin Portal मा लगइन हुनुभयो।",
+    "timestamp": "2026-09-06T16:44:29.479Z"
+  },
+  {
+    "id": "log_1788713069183_t3zb",
+    "action": "ADMIN_LOGIN_UNAUTHORIZED",
+    "performed_by_id": "emp-phidim-002",
+    "performed_by_name": "फिदिम सहायता सहजकर्ता",
+    "target_user_id": "emp-phidim-002",
+    "target_user_name": "फिदिम सहायता सहजकर्ता",
+    "details": "गैर-सुपर प्रशासक (employee) द्वारा Admin Login प्रयास निषेध गरियो",
+    "timestamp": "2026-09-06T16:44:29.183Z"
+  },
+  {
+    "id": "log_1788713068667_dwhs",
+    "action": "ADMIN_LOGIN_UNAUTHORIZED",
+    "performed_by_id": "usr-citizen-004",
+    "performed_by_name": "राम बहादुर श्रेष्ठ",
+    "target_user_id": "usr-citizen-004",
+    "target_user_name": "राम बहादुर श्रेष्ठ",
+    "details": "गैर-सुपर प्रशासक (normal_user) द्वारा Admin Login प्रयास निषेध गरियो",
+    "timestamp": "2026-09-06T16:44:28.667Z"
+  },
+  {
     "id": "log_1788711382597_r0k4",
     "action": "ADMIN_LOGIN_SUCCESS",
     "performed_by_id": "admin-master-001",

@@ -455,23 +455,25 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
                 </Link>
               </li>
 
-              {/* ८. Admin Login (Requirement 2 & 27) */}
-              <li role="none">
-                <Link
-                  href="/admin"
-                  role="menuitem"
-                  className={`inline-flex items-center px-3 py-2 text-xs font-bold rounded-lg transition-all border ${
-                    pathname.startsWith("/admin")
-                      ? "text-amber-300 border-amber-400 bg-blue-800/80 shadow-xs"
-                      : "text-amber-300/90 hover:text-amber-200 bg-blue-950/60 hover:bg-blue-800/80 border-amber-400/40 hover:border-amber-300"
-                  }`}
-                  aria-label="Admin Login"
-                  title="प्रशासकीय लगइन (Admin Login)"
-                >
-                  <Lock className="w-3.5 h-3.5 mr-1 text-amber-400 shrink-0" aria-hidden="true" />
-                  <span>Admin</span>
-                </Link>
-              </li>
+              {/* ८. Super Admin Panel (Only visible to Super Admin - Hidden from public and employees) */}
+              {user && (user.role === "super_admin" || user.role === "provincial_admin") && (
+                <li role="none">
+                  <Link
+                    href="/admin"
+                    role="menuitem"
+                    className={`inline-flex items-center px-3 py-2 text-xs font-black rounded-lg transition-all border shadow-sm ${
+                      pathname.startsWith("/admin")
+                        ? "text-amber-300 border-amber-400 bg-amber-500/20 shadow-xs ring-1 ring-amber-400"
+                        : "text-amber-300 hover:text-amber-200 bg-amber-950/70 hover:bg-amber-900/80 border-amber-400/60 hover:border-amber-300"
+                    }`}
+                    aria-label="Super Admin Panel"
+                    title="मुख्य प्रशासकीय प्यानल (Super Admin Dashboard)"
+                  >
+                    <ShieldCheck className="w-3.5 h-3.5 mr-1 text-amber-400 shrink-0" aria-hidden="true" />
+                    <span>👑 Admin</span>
+                  </Link>
+                </li>
+              )}
             </ul>
 
             {/* लगइन / लगआउट Right Section */}
@@ -670,19 +672,22 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
                   <span>{t.nav_search}</span>
                 </Link>
               </li>
-              <li>
-                <Link
-                  href="/admin"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center px-3 py-2.5 rounded-md text-sm font-bold border border-amber-400/40 ${
-                    pathname.startsWith("/admin") ? "bg-blue-900 text-amber-300" : "bg-blue-950/70 hover:bg-blue-900 text-amber-300"
-                  }`}
-                  aria-label="Admin Login"
-                >
-                  <Lock className="w-4 h-4 mr-2 text-amber-400" aria-hidden="true" />
-                  <span>🔐 Admin</span>
-                </Link>
-              </li>
+              {/* Super Admin Panel (Only visible to Super Admin - Hidden from public and employees) */}
+              {user && (user.role === "super_admin" || user.role === "provincial_admin") && (
+                <li>
+                  <Link
+                    href="/admin"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`flex items-center px-3 py-2.5 rounded-md text-sm font-black border border-amber-400/60 shadow-xs ${
+                      pathname.startsWith("/admin") ? "bg-amber-950/90 text-amber-300 ring-1 ring-amber-400" : "bg-amber-950/60 hover:bg-amber-900/80 text-amber-300"
+                    }`}
+                    aria-label="Super Admin Panel"
+                  >
+                    <ShieldCheck className="w-4 h-4 mr-2 text-amber-400" aria-hidden="true" />
+                    <span>👑 Admin Dashboard</span>
+                  </Link>
+                </li>
+              )}
             </ul>
           </nav>
         )}

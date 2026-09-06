@@ -135,11 +135,19 @@ export default function UnifiedAuthModal({
     setIsLoading(false);
 
     if (res.success) {
-      setSuccessMessage(`स्वागत छ, ${res.user?.name}!`);
-      setTimeout(() => {
-        onClose();
-        if (onSuccess) onSuccess();
-      }, 600);
+      if (res.user?.role === "super_admin" || res.user?.role === "provincial_admin") {
+        setSuccessMessage(`स्वागत छ, मुख्य प्रशासक (Super Admin)! Admin Panel खुल्दैछ...`);
+        setTimeout(() => {
+          onClose();
+          window.location.href = "/admin";
+        }, 600);
+      } else {
+        setSuccessMessage(`स्वागत छ, ${res.user?.name}!`);
+        setTimeout(() => {
+          onClose();
+          if (onSuccess) onSuccess();
+        }, 600);
+      }
     } else {
       if (res.account_status === "pending") {
         setPendingAccountNotice(res.details || res.error || "तपाईंको खाता हाल Pending Approval अवस्थामा छ।");
