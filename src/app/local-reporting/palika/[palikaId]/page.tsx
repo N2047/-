@@ -47,10 +47,12 @@ import {
   Type,
   Settings,
   RotateCcw,
-  FilePlus
+  FilePlus,
+  Undo2,
+  AlertTriangle
 } from "lucide-react";
 import { useAuth } from "@/lib/authContext";
-import AuthModal from "@/components/auth/AuthModal";
+import UnifiedAuthModal from "@/components/auth/UnifiedAuthModal";
 import { getFormConfig, DEFAULT_FORM_CONFIG, FormConfig, FormSection, deleteSection } from "@/lib/formConfig";
 import FormConfigModal from "@/components/admin/FormConfigModal";
 
@@ -70,9 +72,20 @@ export default function AnnualReportFormPage({
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const [reportSubmissionId, setReportSubmissionId] = useState<string>("");
 
+  // Submit confirmation dialog state (Requirements 41-43)
+  const [isConfirmSubmitOpen, setIsConfirmSubmitOpen] = useState(false);
+
+  // Return for correction dialog state (Requirements 45-46)
+  const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
+  const [returnNoteInput, setReturnNoteInput] = useState("");
+
+  // Auto-save feedback state (Requirements 38)
+  const [autoSaveStatus, setAutoSaveStatus] = useState<string>("");
+
   const { user, isAuthenticated, canEditPalika, login, register } = useAuth();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authModalMode, setAuthModalMode] = useState<"login" | "signup">("login");
+  const [authModalTab, setAuthModalTab] = useState<"signin" | "signup">("signin");
+  const [authModalRole, setAuthModalRole] = useState<"normal_user" | "employee">("employee");
 
   // Super Admin Form Management Modal State
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
@@ -80,7 +93,9 @@ export default function AnnualReportFormPage({
   const [adminCorrectionNotes, setAdminCorrectionNotes] = useState("");
 
   const hasEditAccess = isAuthenticated ? canEditPalika(palikaId) : false;
-  const isSuperAdmin = user?.role === "provincial_admin";
+  const isSuperAdmin = user?.role === "super_admin" || user?.role === "provincial_admin";
+  const isEmployee = user?.role === "employee" || user?.role === "palika_staff";
+  const isNormalUser = user?.role === "normal_user";
 
   const SECTIONS = formConfig.sections;
 
@@ -129,10 +144,27 @@ export default function AnnualReportFormPage({
     }
   }, [user]);
 
-  // Save Draft handler
-  const handleSaveDraft = () => {
+  // Auto-Save Draft (Requirements 38)
+  useEffect(() => {
+    if (!isAuthenticated || !hasEditAccess || formData.status === "submitted") return;
+    const timer = setTimeout(() => {
+      try {
+        localStorage.setItem(`dic_report_${palikaId}_2082_083`, JSON.stringify(formData));
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString("ne-NP", { hour: "2-digit", minute: "2-digit" });
+        setAutoSaveStatus(`स्वचालित मस्यौदा सुरक्षित भयो (${timeStr})`);
+      } catch (e) {
+        console.error("Auto save failed", e);
+      }
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [formData, isAuthenticated, hasEditAccess, palikaId]);
+
+  // Save Draft handler (Requirements 37, 39, 40)
+  const handleSaveDraft = async () => {
     if (!isAuthenticated) {
-      setAuthModalMode("login");
+      setAuthModalTab("signin");
+      setAuthModalRole("employee");
       setIsAuthModalOpen(true);
       return;
     }
@@ -143,19 +175,41 @@ export default function AnnualReportFormPage({
     }
     try {
       localStorage.setItem(`dic_report_${palikaId}_2082_083`, JSON.stringify(formData));
-      setSaveMessage("प्रतिवेदनको मस्यौदा सुरक्षित भयो!");
+      setSaveMessage("प्रतिवेदनको मस्यौदा सफलतापूर्वक सुरक्षित भयो!");
       setTimeout(() => setSaveMessage(""), 4000);
+
+      // Optionally sync to backend report manager
+      fetch("/api/reports/manage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          report_id: `rep_${palikaId}_2082`,
+          palika_id: palikaId,
+          fiscal_year: "2082/083",
+          action: "draft",
+          user_id: user?.user_id || user?.id || "EMP",
+          user_role: user?.role,
+          user_name: user?.name,
+          summary_data: {
+            q2_total: formData.q2_id_cards_issued.total || 0,
+            q9_total: formData.q9_currently_active.total || 0,
+            home_visits_count: formData.home_visits_records.length || 0,
+            assistive_devices_count: formData.assistive_device_records.length || 0,
+          },
+        }),
+      }).catch((err) => console.error(err));
     } catch (e) {
       console.error(e);
       setSaveMessage("मस्यौदा सुरक्षित गर्न सकिएन।");
     }
   };
 
-  // Submit Final handler
+  // Submit Final handler - Prompts confirmation dialog (Requirements 41)
   const handleSubmitFinal = (e: React.FormEvent) => {
     e.preventDefault();
     if (!isAuthenticated) {
-      setAuthModalMode("login");
+      setAuthModalTab("signin");
+      setAuthModalRole("employee");
       setIsAuthModalOpen(true);
       return;
     }
@@ -163,6 +217,13 @@ export default function AnnualReportFormPage({
       alert("सुरक्षा प्रतिबन्ध: तपाईंलाई यो पालिकाको प्रतिवेदन पेश गर्ने अधिकार छैन। केवल आफ्नै पालिकाको फारम पेश गर्न सक्नुहुन्छ।");
       return;
     }
+    // Open the mandatory confirmation dialog
+    setIsConfirmSubmitOpen(true);
+  };
+
+  // Execution when "Yes, Submit" is confirmed (Requirements 42-44)
+  const executeFinalSubmit = async () => {
+    setIsConfirmSubmitOpen(false);
     const submissionId = "DIC-KP-" + Math.floor(100000 + Math.random() * 900000);
     const updated = {
       ...formData,
@@ -171,7 +232,30 @@ export default function AnnualReportFormPage({
     setFormData(updated);
     setReportSubmissionId(submissionId);
     setIsSubmitted(true);
-    localStorage.setItem(`dic_report_${palikaId}_2082_083`, JSON.stringify(updated));
+    try {
+      localStorage.setItem(`dic_report_${palikaId}_2082_083`, JSON.stringify(updated));
+      await fetch("/api/reports/manage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          report_id: `rep_${palikaId}_2082`,
+          palika_id: palikaId,
+          fiscal_year: "2082/083",
+          action: "submit",
+          user_id: user?.user_id || user?.id || "EMP",
+          user_role: user?.role,
+          user_name: user?.name,
+          summary_data: {
+            q2_total: formData.q2_id_cards_issued.total || 0,
+            q9_total: formData.q9_currently_active.total || 0,
+            home_visits_count: formData.home_visits_records.length || 0,
+            assistive_devices_count: formData.assistive_device_records.length || 0,
+          },
+        }),
+      });
+    } catch (e) {
+      console.error("Submit API error", e);
+    }
   };
 
   // Super Admin Data Correction Handler (गलत डाटा सच्याउने सुविधा)
@@ -191,6 +275,40 @@ export default function AnnualReportFormPage({
     } catch (e) {
       console.error(e);
       setSaveMessage("डाटा सुरक्षित गर्न सकिएन।");
+    }
+  };
+
+  // Super Admin Return for Correction (Requirements 45-46)
+  const executeReturnForCorrection = async (note: string) => {
+    setIsReturnModalOpen(false);
+    const updated: AnnualReportFormData = {
+      ...formData,
+      status: "returned_for_correction" as const,
+      admin_notes: note,
+      admin_corrected_at: new Date().toLocaleDateString("ne-NP") + " " + new Date().toLocaleTimeString("ne-NP", { hour: "2-digit", minute: "2-digit" }),
+      admin_corrected_by: user?.name || "कोशी प्रदेश मुख्य प्रशासक",
+    };
+    setFormData(updated);
+    try {
+      localStorage.setItem(`dic_report_${palikaId}_2082_083`, JSON.stringify(updated));
+      await fetch("/api/reports/manage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          report_id: `rep_${palikaId}_2082`,
+          palika_id: palikaId,
+          fiscal_year: "2082/083",
+          action: "return_for_correction",
+          admin_notes: note,
+          user_id: user?.user_id || user?.id || "SUPER_ADMIN",
+          user_role: user?.role,
+          user_name: user?.name,
+        }),
+      });
+      setSaveMessage("प्रतिवेदन सफलतापूर्वक सच्याउन फिर्ता पठाइयो (Returned for Correction)!");
+      setTimeout(() => setSaveMessage(""), 5000);
+    } catch (e) {
+      console.error("Return for correction error", e);
     }
   };
 
@@ -341,19 +459,21 @@ export default function AnnualReportFormPage({
               <button
                 type="button"
                 onClick={() => {
-                  setAuthModalMode("login");
+                  setAuthModalTab("signin");
+                  setAuthModalRole("employee");
                   setIsAuthModalOpen(true);
                 }}
                 className="py-3.5 px-6 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-xl shadow-amber-400/20 transition-all cursor-pointer transform hover:-translate-y-0.5"
               >
                 <LogIn className="w-5 h-5" />
-                <span>कर्मचारी / प्रशासक लगइन (Sign In)</span>
+                <span>🔐 कर्मचारी / प्रशासक लगइन (Sign In)</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => {
-                  setAuthModalMode("signup");
+                  setAuthModalTab("signup");
+                  setAuthModalRole("employee");
                   setIsAuthModalOpen(true);
                 }}
                 className="py-3.5 px-6 rounded-2xl bg-blue-900 hover:bg-blue-800 text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 border border-blue-600/50 transition-all cursor-pointer transform hover:-translate-y-0.5"
@@ -368,10 +488,10 @@ export default function AnnualReportFormPage({
               <div className="flex items-center gap-2 mb-3">
                 <Sparkles className="w-4 h-4 text-amber-400" />
                 <span className="text-xs font-bold text-amber-300 uppercase tracking-wider">
-                  द्रुत परीक्षण लगइन (Quick Evaluation Login):
+                  द्रुत परीक्षण लगइन (Quick Evaluation Access):
                 </span>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <button
                   type="button"
                   onClick={() => login("admin@dic.gov.np", "admin123")}
@@ -379,43 +499,50 @@ export default function AnnualReportFormPage({
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-white group-hover:text-amber-300">
-                      🛡️ कोशी प्रदेश मुख्य प्रशासक
+                      🛡️ Super Admin
                     </span>
-                    <span className="text-[10px] bg-blue-800 text-blue-200 px-2 py-0.5 rounded font-mono">
-                      Super Admin
+                    <span className="text-[10px] bg-blue-800 text-blue-200 px-1.5 py-0.5 rounded font-mono">
+                      Universal
                     </span>
                   </div>
                   <p className="text-[11px] text-slate-400 mt-1">
-                    सबै १३७ पालिकाको पूर्ण पहुँच (Universal Access)
+                    सबै १३७ पालिकाको पूर्ण पहुँच
                   </p>
                 </button>
 
                 <button
                   type="button"
-                  onClick={() => {
-                    register({
-                      name: `${palikaInfo.name_ne} कर्मचारी`,
-                      email: `${palikaId}.staff@gmail.com`,
-                      phone: "९८४२००००००",
-                      password: "staff123",
-                      palikaId: palikaId,
-                      palikaName: palikaInfo.name_ne,
-                      districtId: districtInfo.id,
-                      role: "palika_staff",
-                    });
-                  }}
+                  onClick={() => login("phidim.staff@gmail.com", "phidim123")}
                   className="p-3 rounded-xl bg-emerald-950/60 hover:bg-emerald-900/80 border border-emerald-700/60 text-left transition-colors cursor-pointer group"
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-white group-hover:text-emerald-300">
-                      👤 {palikaInfo.name_ne} कर्मचारी लगइन
+                      🏛️ फिदिम कर्मचारी
                     </span>
-                    <span className="text-[10px] bg-emerald-900 text-emerald-200 px-2 py-0.5 rounded font-mono">
-                      This Palika Staff
+                    <span className="text-[10px] bg-emerald-900 text-emerald-200 px-1.5 py-0.5 rounded font-mono">
+                      Approved
                     </span>
                   </div>
                   <p className="text-[11px] text-slate-400 mt-1">
-                    यस पालिकाको फारम भर्ने अधिकृत पहुँच
+                    आफ्नो पालिकाको प्रतिवेदन पहुँच
+                  </p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => login("citizen@example.com", "citizen123")}
+                  className="p-3 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-600/60 text-left transition-colors cursor-pointer group"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-white group-hover:text-amber-300">
+                      👤 सामान्य नागरिक
+                    </span>
+                    <span className="text-[10px] bg-slate-700 text-slate-200 px-1.5 py-0.5 rounded font-mono">
+                      Normal
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-1">
+                    सार्वजनिक सुविधाहरू (Read Only)
                   </p>
                 </button>
               </div>
@@ -444,12 +571,11 @@ export default function AnnualReportFormPage({
 
         <Footer lang={lang} />
 
-        <AuthModal
+        <UnifiedAuthModal
           isOpen={isAuthModalOpen}
           onClose={() => setIsAuthModalOpen(false)}
-          initialMode={authModalMode}
-          initialPalikaId={palikaId}
-          initialDistrictId={districtInfo?.id}
+          initialTab={authModalTab}
+          initialRole={authModalRole}
         />
       </div>
     );
@@ -768,12 +894,176 @@ export default function AnnualReportFormPage({
 
               <button
                 type="button"
+                onClick={() => {
+                  setReturnNoteInput(formData.admin_notes || "");
+                  setIsReturnModalOpen(true);
+                }}
+                className="px-3.5 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl text-xs font-black flex items-center gap-1.5 shadow-md cursor-pointer transition-all"
+                title="प्रतिवेदन कर्मचारीलाई सच्याउन फिर्ता पठाउनुहोस्"
+              >
+                <Undo2 className="w-4 h-4" />
+                <span>सच्याउन फिर्ता (Return for Correction)</span>
+              </button>
+
+              <button
+                type="button"
                 onClick={() => handleSaveAdminCorrection()}
                 className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black flex items-center gap-2 shadow-md cursor-pointer transition-all transform hover:-translate-y-0.5"
                 title="सच्याइएको सम्पूर्ण डाटा सुरक्षित गर्नुहोस्"
               >
                 <Save className="w-4 h-4" />
                 <span>सच्याइएको डाटा सेभ गर्नुहोस्</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* AUTO-SAVE STATUS FEEDBACK (Requirements 38) */}
+      {autoSaveStatus && (
+        <div className="bg-slate-900 text-emerald-300 border-b border-slate-800 px-4 py-1 text-right text-[11px] font-medium flex items-center justify-end gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span>{autoSaveStatus}</span>
+        </div>
+      )}
+
+      {/* RETURNED FOR CORRECTION URGENT NOTICE (Requirements 45-46) */}
+      {formData.status === "returned_for_correction" && (
+        <div className="bg-amber-400 border-b-2 border-amber-600 px-4 sm:px-6 lg:px-8 py-3.5 text-slate-950 shadow-md">
+          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-slate-950 shrink-0 mt-0.5" />
+              <div>
+                <span className="text-[11px] font-black uppercase tracking-wider bg-slate-950 text-amber-300 px-2 py-0.5 rounded">
+                  ⚠️ सच्याउन फिर्ता पठाइएको प्रतिवेदन (Returned for Correction)
+                </span>
+                <p className="text-xs font-bold text-slate-900 mt-1">
+                  <strong>सुपर प्रशासकको सुझाव/कैफियत:</strong> &ldquo;{formData.admin_notes || "कृपया आवश्यक विवरणहरू पुनः जाँच गरी सच्याउनुहोस्।"}&rdquo;
+                </p>
+                <p className="text-[11px] text-slate-800">
+                  कृपया फारमका सम्बन्धित फिल्डहरू सच्याएर मस्यौदा सुरक्षित गर्नुहोस् वा पुनः Submit गर्नुहोस्।
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={handleSaveDraft}
+                className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-bold shadow-xs cursor-pointer"
+              >
+                💾 सच्याइएको ड्राफ्ट सेभ
+              </button>
+              <button
+                type="button"
+                onClick={handleSubmitFinal}
+                className="px-3.5 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg text-xs font-black shadow-xs cursor-pointer"
+              >
+                📤 पुनः Submit गर्नुहोस्
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SUBMITTED STATUS NOTICE & LOCK (Requirements 44) */}
+      {formData.status === "submitted" && (
+        <div className="bg-emerald-950 text-emerald-100 border-b-2 border-emerald-500 px-4 sm:px-6 lg:px-8 py-3 shadow-md">
+          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0" />
+              <div>
+                <span className="text-xs font-bold text-emerald-300 uppercase tracking-wider block">
+                  🔒 प्रतिवेदन अन्तिम रूपमा पेश भएको छ (Submitted & Locked)
+                </span>
+                <p className="text-xs text-emerald-200">
+                  यो प्रतिवेदन समीक्षाको पर्खाइमा छ। सामान्य कर्मचारीका लागि थप सम्पादन लक गरिएको छ।
+                </p>
+              </div>
+            </div>
+            {isSuperAdmin && (
+              <button
+                type="button"
+                onClick={() => {
+                  setReturnNoteInput(formData.admin_notes || "");
+                  setIsReturnModalOpen(true);
+                }}
+                className="px-3.5 py-1.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs rounded-xl shadow-xs cursor-pointer"
+              >
+                सच्याउन फिर्ता पठाउनुहोस्
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* SUBMIT CONFIRMATION MODAL (Requirements 41-43) */}
+      {isConfirmSubmitOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border-4 border-amber-500 animate-in fade-in zoom-in duration-200">
+            <div className="w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 mx-auto flex items-center justify-center mb-4">
+              <AlertTriangle className="w-8 h-8" />
+            </div>
+            <h3 className="text-xl font-black text-slate-900 dark:text-white text-center">
+              वार्षिक प्रतिवेदन अन्तिम Submit पुष्टि
+            </h3>
+            <p className="text-sm text-slate-600 dark:text-slate-300 mt-3 text-center leading-relaxed">
+              के तपाईं यो वार्षिक प्रतिवेदन अन्तिम रूपमा Submit गर्न चाहनुहुन्छ? Submit गरेपछि सामान्य कर्मचारीले यसलाई सम्पादन गर्न पाउने छैन।
+            </p>
+            <div className="mt-6 flex flex-col sm:flex-row gap-3">
+              <button
+                type="button"
+                onClick={executeFinalSubmit}
+                className="flex-1 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm shadow-md transition-all cursor-pointer"
+              >
+                Yes, Submit (अन्तिम रूपमा पेश गर्नुहोस्)
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsConfirmSubmitOpen(false)}
+                className="flex-1 py-3 px-4 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-sm transition-all cursor-pointer"
+              >
+                No, Keep as Draft (मस्यौदा मै राख्नुहोस्)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SUPER ADMIN RETURN FOR CORRECTION MODAL (Requirements 45) */}
+      {isReturnModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border-4 border-amber-500 animate-in fade-in zoom-in duration-200">
+            <div className="w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 mx-auto flex items-center justify-center mb-4">
+              <Undo2 className="w-8 h-8" />
+            </div>
+            <h3 className="text-xl font-black text-slate-900 dark:text-white text-center">
+              प्रतिवेदन सच्याउन फिर्ता पठाउनुहोस्
+            </h3>
+            <p className="text-xs text-slate-600 dark:text-slate-400 mt-2 text-center">
+              कर्मचारीलाई कुन तथ्याङ्क वा बुँदा सच्याउनुपर्ने हो, सुझाव वा सुधारको कैफियत (Correction Note) लेख्नुहोस्:
+            </p>
+            <textarea
+              rows={4}
+              value={returnNoteInput}
+              onChange={(e) => setReturnNoteInput(e.target.value)}
+              placeholder="उदाहरण: Question 12 को महिला/पुरुष संख्या पुनः जाँच गर्नुहोस्..."
+              className="w-full mt-4 p-3 border border-slate-300 dark:border-slate-700 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-400"
+            />
+            <div className="mt-6 flex flex-col sm:flex-row gap-3">
+              <button
+                type="button"
+                onClick={() => executeReturnForCorrection(returnNoteInput)}
+                disabled={!returnNoteInput.trim()}
+                className="flex-1 py-3 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-slate-950 font-black text-xs shadow-md transition-all cursor-pointer"
+              >
+                फिर्ता पठाउनुहोस् (Confirm Return)
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsReturnModalOpen(false)}
+                className="flex-1 py-3 px-4 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs cursor-pointer"
+              >
+                रद्द गर्नुहोस्
               </button>
             </div>
           </div>
@@ -2571,35 +2861,48 @@ export default function AnnualReportFormPage({
                   </div>
                 )}
 
-                <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <button
-                    type="button"
-                    onClick={handleSaveDraft}
-                    disabled={!hasEditAccess}
-                    className={`w-full sm:w-auto px-6 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-colors ${
-                      hasEditAccess 
-                        ? "bg-slate-100 hover:bg-slate-200 text-slate-800 cursor-pointer" 
-                        : "bg-slate-100 text-slate-400 cursor-not-allowed opacity-60"
-                    }`}
-                  >
-                    <Save className="w-4 h-4 text-slate-600" />
-                    <span>मस्यौदा सुरक्षित राख्नुहोस्</span>
-                  </button>
+                {formData.status === "submitted" && !isSuperAdmin ? (
+                  <div className="pt-4 p-4 rounded-2xl bg-emerald-100 border-2 border-emerald-400 text-emerald-950 font-bold text-xs sm:text-sm flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2.5">
+                      <CheckCircle2 className="w-6 h-6 text-emerald-600 shrink-0" />
+                      <span>यो प्रतिवेदन अन्तिम रूपमा Submit भइसकेको छ (समीक्षाको पर्खाइमा)। सामान्य कर्मचारीका लागि थप सम्पादन बन्द गरिएको छ।</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <button
+                      type="button"
+                      onClick={handleSaveDraft}
+                      disabled={!hasEditAccess}
+                      className={`w-full sm:w-auto px-6 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-colors ${
+                        hasEditAccess 
+                          ? "bg-slate-100 hover:bg-slate-200 text-slate-800 cursor-pointer" 
+                          : "bg-slate-100 text-slate-400 cursor-not-allowed opacity-60"
+                      }`}
+                    >
+                      <Save className="w-4 h-4 text-slate-600" />
+                      <span>मस्यौदा सुरक्षित राख्नुहोस्</span>
+                    </button>
 
-                  <button
-                    type="button"
-                    onClick={handleSubmitFinal}
-                    disabled={!hasEditAccess}
-                    className={`w-full sm:w-auto px-8 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${
-                      hasEditAccess 
-                        ? "bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/30 cursor-pointer transform hover:-translate-y-0.5" 
-                        : "bg-slate-200 text-slate-400 cursor-not-allowed opacity-60"
-                    }`}
-                  >
-                    <Send className="w-4 h-4" />
-                    <span>वार्षिक प्रतिवेदन पेश गर्नुहोस् (Final Submit)</span>
-                  </button>
-                </div>
+                    <button
+                      type="button"
+                      onClick={handleSubmitFinal}
+                      disabled={!hasEditAccess}
+                      className={`w-full sm:w-auto px-8 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${
+                        hasEditAccess 
+                          ? "bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/30 cursor-pointer transform hover:-translate-y-0.5" 
+                          : "bg-slate-200 text-slate-400 cursor-not-allowed opacity-60"
+                      }`}
+                    >
+                      <Send className="w-4 h-4" />
+                      <span>
+                        {formData.status === "returned_for_correction" 
+                          ? "सच्याएर पुनः पेश गर्नुहोस् (Submit Again)" 
+                          : "वार्षिक प्रतिवेदन पेश गर्नुहोस् (Final Submit)"}
+                      </span>
+                    </button>
+                  </div>
+                )}
               </section>
             )}
 
@@ -2833,6 +3136,11 @@ export default function AnnualReportFormPage({
             <span>अर्को खण्ड</span>
             <ChevronRight className="w-4 h-4" />
           </button>
+        ) : formData.status === "submitted" && !isSuperAdmin ? (
+          <span className="px-3.5 py-2 bg-emerald-900 text-emerald-200 rounded-lg text-xs font-bold flex items-center gap-1">
+            <Lock className="w-3.5 h-3.5" />
+            <span>पेश भइसकेको</span>
+          </span>
         ) : (
           <button
             type="button"
@@ -2840,7 +3148,7 @@ export default function AnnualReportFormPage({
             className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold flex items-center gap-1 shadow-md min-h-[42px] cursor-pointer"
           >
             <Send className="w-4 h-4" />
-            <span>सबमिट</span>
+            <span>{formData.status === "returned_for_correction" ? "पुनः पेश" : "सबमिट"}</span>
           </button>
         )}
       </div>

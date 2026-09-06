@@ -31,7 +31,10 @@ export default function LocalReportingPage() {
   const [typeFilter, setTypeFilter] = useState<string>("all");
 
   const { user, isAuthenticated } = useAuth();
-  const isSuperAdmin = user?.role === "provincial_admin";
+  const isSuperAdmin = user?.role === "super_admin" || user?.role === "provincial_admin";
+  const isEmployee = user?.role === "employee" || user?.role === "palika_staff";
+  const assignedPalikaId = user?.palika_id || user?.palikaId;
+  const assignedPalikaName = user?.palika_name || user?.palikaName;
 
   const t = translations[lang];
 
@@ -71,6 +74,30 @@ export default function LocalReportingPage() {
       <Header lang={lang} onLanguageChange={setLang} />
 
       <main id="main-content" tabIndex={-1} className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 focus:outline-hidden">
+        {/* PROMINENT ASSIGNED PALIKA BANNER FOR EMPLOYEE (Requirement 32-34) */}
+        {isAuthenticated && isEmployee && assignedPalikaId && (
+          <div className="mb-8 bg-gradient-to-r from-emerald-800 to-teal-900 text-white rounded-2xl p-5 sm:p-6 shadow-xl border-2 border-emerald-400 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <span className="text-xs font-black uppercase tracking-wider bg-emerald-500 text-slate-950 px-2.5 py-0.5 rounded-md">
+                🏛️ तपाईंको तोकिएको स्थानीय तह
+              </span>
+              <h2 className="text-xl sm:text-2xl font-black mt-1.5 text-white">
+                {assignedPalikaName} — वार्षिक प्रतिवेदन सम्पादन
+              </h2>
+              <p className="text-xs sm:text-sm text-emerald-100 mt-1">
+                तपाईंलाई यस स्थानीय तहको प्रतिवेदन भर्न, मस्यौदा सुरक्षित गर्न र अन्तिम पेश गर्ने अधिकृत पहुँच छ।
+              </p>
+            </div>
+            <Link
+              href={`/local-reporting/palika/${assignedPalikaId}`}
+              className="px-5 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-sm shadow-md flex items-center gap-2 shrink-0 transition-transform transform hover:-translate-y-0.5 cursor-pointer"
+            >
+              <span>मेरो पालिकाको फारम खोल्नुहोस्</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        )}
+
         {/* Page Header */}
         <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-xs mb-8">
           <div className="flex flex-wrap items-center justify-between gap-4">

@@ -28,7 +28,8 @@ import {
   Plus,
   Settings,
   Type,
-  PhoneCall
+  PhoneCall,
+  Users
 } from "lucide-react";
 import Link from "next/link";
 import FormConfigModal from "@/components/admin/FormConfigModal";
@@ -36,6 +37,9 @@ import AdminContactManager from "@/components/admin/AdminContactManager";
 import AdminGrievanceManager from "@/components/admin/AdminGrievanceManager";
 import AdminGovernmentContacts from "@/components/admin/AdminGovernmentContacts";
 import AdminGrievanceSettings from "@/components/admin/AdminGrievanceSettings";
+import AdminAccountApproval from "@/components/admin/AdminAccountApproval";
+import UnifiedAuthModal from "@/components/auth/UnifiedAuthModal";
+import { useAuth } from "@/lib/authContext";
 import { Inbox } from "lucide-react";
 
 interface ReportReviewItem {
@@ -53,17 +57,18 @@ interface ReportReviewItem {
 
 export default function AdminPage() {
   const [lang, setLang] = useState<Language>("ne");
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true); // Simulated authenticated reviewer state
   const [districtFilter, setDistrictFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [activeReviewItem, setActiveReviewItem] = useState<ReportReviewItem | null>(null);
   const [feedbackNote, setFeedbackNote] = useState<string>("");
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
-  // Main Dashboard Tab: reports review, contacts, grievances, government contacts, or grievance settings
+  // Main Dashboard Tab: reports review, accounts approval, grievances, government contacts, or grievance settings
   const [activeAdminTab, setActiveAdminTab] = useState<
-    "reports" | "grievances" | "gov_contacts" | "grievance_settings" | "contacts"
+    "reports" | "accounts" | "grievances" | "gov_contacts" | "grievance_settings" | "contacts"
   >("reports");
+  const { user, login } = useAuth();
 
   // Form Config Modal state for Super Admin
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
@@ -137,17 +142,35 @@ export default function AdminPage() {
   }, [reportsList, districtFilter, statusFilter, searchQuery]);
 
   // Handle Approve
-  const handleApprove = (item: ReportReviewItem) => {
+  const handleApprove = async (item: ReportReviewItem) => {
     const updated = reportsList.map((r) => 
       r.palikaId === item.palikaId ? { ...r, status: 'approved' as const } : r
     );
     setReportsList(updated);
     setActiveReviewItem(null);
+
+    // Sync to server API
+    try {
+      await fetch("/api/reports/manage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          palikaId: item.palikaId,
+          action: "approve",
+          submittedBy: item.submitterName,
+          actorId: user?.id || "admin-master-001",
+          actorName: user?.name || "मुख्य प्रशासक"
+        })
+      });
+    } catch (e) {
+      console.error(e);
+    }
+
     alert(`${item.palikaName} को वार्षिक प्रतिवेदन स्वीकृत (Approved) भयो।`);
   };
 
   // Handle Return
-  const handleReturn = (item: ReportReviewItem) => {
+  const handleReturn = async (item: ReportReviewItem) => {
     if (!feedbackNote.trim()) {
       alert("कृपया सच्याउन पठाउनुको कारण वा कैफियत लेख्नुहोस्।");
       return;
@@ -157,14 +180,96 @@ export default function AdminPage() {
     );
     setReportsList(updated);
     setActiveReviewItem(null);
+
+    // Sync to server API
+    try {
+      await fetch("/api/reports/manage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          palikaId: item.palikaId,
+          action: "return_for_correction",
+          adminCorrectionNotes: feedbackNote,
+          submittedBy: item.submitterName,
+          actorId: user?.id || "admin-master-001",
+          actorName: user?.name || "मुख्य प्रशासक"
+        })
+      });
+    } catch (e) {
+      console.error(e);
+    }
+
     setFeedbackNote("");
-    alert(`${item.palikaName} को प्रतिवेदन संशोधनका लागि फिर्ता पठाइयो।`);
+    alert(`${item.palikaName} को प्रतिवेदन सच्याउनका लागि फिर्ता पठाइयो र सुझाव नोट सुरक्षित गरियो।`);
   };
 
   const totalSubmitted = reportsList.filter((r) => r.status === 'submitted' || r.status === 'approved').length;
   const totalApproved = reportsList.filter((r) => r.status === 'approved').length;
   const totalReturned = reportsList.filter((r) => r.status === 'returned_for_correction').length;
   const totalPending = reportsList.filter((r) => r.status === 'pending').length;
+  const isSuperAdmin = user?.role === "super_admin" || user?.role === "provincial_admin";
+  const isEmployee = user?.role === "employee" || user?.role === "palika_staff";
+  const isNormalUser = user?.role === "normal_user";
+
+  if (!isSuperAdmin) {
+    return (
+      <div className="min-h-screen flex flex-col bg-slate-900 text-slate-100">
+        <Header lang={lang} onLanguageChange={setLang} />
+        <main className="flex-1 max-w-xl mx-auto px-4 py-16 flex flex-col justify-center text-center">
+          <div className="bg-slate-950 border-2 border-rose-500/60 rounded-3xl p-8 shadow-2xl">
+            <div className="w-16 h-16 rounded-2xl bg-rose-950/80 text-rose-400 border border-rose-500/40 mx-auto flex items-center justify-center mb-5">
+              <Lock className="w-8 h-8" />
+            </div>
+            <span className="text-xs font-black uppercase tracking-widest text-rose-400 bg-rose-950/60 px-3 py-1 rounded-full border border-rose-500/30">
+              पहुँच निषेध (Access Denied - 403)
+            </span>
+            <h1 className="text-2xl font-black text-white mt-4">
+              सुपर प्रशासक (Super Admin) अधिकार आवश्यक
+            </h1>
+            <p className="text-sm text-slate-300 mt-2 leading-relaxed">
+              {user ? (
+                <>तपाईं हाल <strong>{user.name} ({isEmployee ? "स्थानीय तह कर्मचारी" : "नागरिक"})</strong> को रूपमा लगइन हुनुहुन्छ। सुरक्षा नीति अनुसार तपाईंलाई मुख्य प्रशासकीय ड्यासबोर्ड खोल्न अनुमति छैन।</>
+              ) : (
+                <>यो ड्यासबोर्ड कोशी प्रदेश अपाङ्गता सूचना केन्द्रको मुख्य प्रशासक (Super Admin) का लागि मात्र हो। कृपया अधिकृत खाताबाट लगइन गर्नुहोस्।</>
+              )}
+            </p>
+            <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+              {!user ? (
+                <button
+                  type="button"
+                  onClick={() => setIsAuthModalOpen(true)}
+                  className="px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs cursor-pointer shadow-md"
+                >
+                  🔐 सुपर प्रशासक लगइन गर्नुहोस्
+                </button>
+              ) : (
+                <Link
+                  href="/"
+                  className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs"
+                >
+                  गृहपृष्ठमा फर्कनुहोस्
+                </Link>
+              )}
+              {isEmployee && user?.palika_id && (
+                <Link
+                  href={`/local-reporting/palika/${user.palika_id}`}
+                  className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs"
+                >
+                  मेरो पालिकाको प्रतिवेदनमा जानुहोस्
+                </Link>
+              )}
+            </div>
+          </div>
+        </main>
+        <Footer lang={lang} />
+        <UnifiedAuthModal
+          isOpen={isAuthModalOpen}
+          onClose={() => setIsAuthModalOpen(false)}
+          initialTab="signin"
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-100">
@@ -368,6 +473,20 @@ export default function AdminPage() {
             }`}>
               १३७
             </span>
+          </button>
+
+          {/* TAB: ACCOUNT APPROVAL (Requirement 22) */}
+          <button
+            type="button"
+            onClick={() => setActiveAdminTab("accounts")}
+            className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 cursor-pointer transition-all ${
+              activeAdminTab === "accounts"
+                ? "bg-blue-900 text-white shadow-md ring-2 ring-blue-700/50"
+                : "bg-white text-slate-700 hover:bg-slate-100 border border-slate-300"
+            }`}
+          >
+            <Users className={`w-4 h-4 ${activeAdminTab === "accounts" ? "text-amber-300" : "text-amber-600"}`} />
+            <span>👤 खाता स्वीकृति (Account Approval)</span>
           </button>
 
           <button
@@ -591,12 +710,17 @@ export default function AdminPage() {
         </>
       )}
 
-      {/* Tab 2: Grievance Dashboard */}
+      {/* Tab 2: Account Approval (Super Admin Only) */}
+      {activeAdminTab === "accounts" && (
+        <AdminAccountApproval />
+      )}
+
+      {/* Tab 3: Grievance Dashboard */}
       {activeAdminTab === "grievances" && (
         <AdminGrievanceManager />
       )}
 
-      {/* Tab 3: Government Master Contacts */}
+      {/* Tab 4: Government Master Contacts */}
       {activeAdminTab === "gov_contacts" && (
         <AdminGovernmentContacts />
       )}

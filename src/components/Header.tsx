@@ -25,7 +25,7 @@ import {
 import { translations, Language } from "@/lib/translations";
 import { useAuth } from "@/lib/authContext";
 import { useAccessibility } from "@/lib/accessibilityContext";
-import AuthModal from "@/components/auth/AuthModal";
+import UnifiedAuthModal from "@/components/auth/UnifiedAuthModal";
 import AccessibilityPanel from "@/components/accessibility/AccessibilityPanel";
 import LiveAnnouncer from "@/components/accessibility/LiveAnnouncer";
 
@@ -121,18 +121,43 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
 
               {/* User Authentication Status */}
               {isAuthenticated && user ? (
-                <div className="flex items-center gap-2 bg-slate-800 rounded-lg px-2 py-0.5 border border-slate-700">
-                  <div className="flex items-center gap-1 text-[11px] font-bold text-amber-300">
+                <div className="flex items-center gap-2 bg-slate-800 rounded-lg px-2.5 py-1 border border-slate-700">
+                  <div className="flex items-center gap-1.5 text-[11px] font-bold text-amber-300">
                     <User className="w-3.5 h-3.5 text-amber-400" />
-                    <span className="max-w-[130px] sm:max-w-[180px] truncate">{user.name}</span>
+                    <span className="max-w-[120px] sm:max-w-[160px] truncate">{user.name}</span>
                   </div>
-                  <span className="text-[10px] px-1.5 py-0.2 rounded bg-blue-900 text-blue-100 font-semibold hidden sm:inline">
-                    {user.role === "provincial_admin" ? "👑 मुख्य प्रशासक" : `🏛️ ${user.palika_name || "कर्मचारी"}`}
+                  <span className="text-[10px] px-2 py-0.5 rounded font-bold hidden sm:inline-flex items-center gap-1 bg-blue-900/90 text-blue-100 border border-blue-700">
+                    {user.role === "super_admin" || user.role === "provincial_admin" ? (
+                      <>👑 Super Admin</>
+                    ) : user.role === "employee" || user.role === "palika_staff" ? (
+                      <>🏛️ {user.palika_name || "कर्मचारी"}</>
+                    ) : (
+                      <>👤 नागरिक</>
+                    )}
                   </span>
+                  {/* Shortcut for Super Admin or Employee */}
+                  {(user.role === "super_admin" || user.role === "provincial_admin") && (
+                    <Link
+                      href="/admin"
+                      className="text-[10px] bg-amber-400 text-slate-950 hover:bg-amber-300 font-extrabold px-1.5 py-0.5 rounded shadow-xs"
+                      title="Admin Dashboard"
+                    >
+                      एडमिन
+                    </Link>
+                  )}
+                  {(user.role === "employee" || user.role === "palika_staff") && user.palika_id && (
+                    <Link
+                      href={`/local-reporting/palika/${user.palika_id}`}
+                      className="text-[10px] bg-emerald-500 hover:bg-emerald-400 text-white font-extrabold px-1.5 py-0.5 rounded shadow-xs"
+                      title="मेरो स्थानीय तहको प्रतिवेदन"
+                    >
+                      प्रतिवेदन
+                    </Link>
+                  )}
                   <button
                     type="button"
                     onClick={logout}
-                    className="text-[11px] text-rose-300 hover:text-white flex items-center gap-0.5 cursor-pointer ml-1"
+                    className="text-[11px] text-rose-300 hover:text-white flex items-center gap-0.5 cursor-pointer ml-1 font-semibold"
                     title="लगआउट गर्नुहोस्"
                   >
                     <LogOut className="w-3 h-3" />
@@ -142,11 +167,12 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
               ) : (
                 <button
                   type="button"
+                  id="header-sign-in-btn"
                   onClick={() => setAuthModalOpen(true)}
-                  className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-blue-700 hover:bg-blue-600 text-white text-[11px] font-bold transition-all shadow-xs cursor-pointer"
+                  className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-gradient-to-r from-blue-700 to-indigo-800 hover:from-blue-600 hover:to-indigo-700 text-white text-[11px] font-extrabold transition-all shadow-sm cursor-pointer border border-blue-500/50 hover:border-amber-400 focus:ring-2 focus:ring-amber-400"
                 >
-                  <Lock className="w-3 h-3" />
-                  <span>सुरक्षित लगइन</span>
+                  <Lock className="w-3.5 h-3.5 text-amber-300" />
+                  <span>🔐 Sign Up / Sign In</span>
                 </button>
               )}
 
@@ -196,8 +222,29 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
             </Link>
           </div>
 
-          {/* Accessibility Pill & Mobile Hamburger */}
+          {/* Action Bar (Accessibility + Prominent Sign In/Out + Mobile Hamburger) */}
           <div className="flex items-center gap-2">
+            {!isAuthenticated ? (
+              <button
+                type="button"
+                onClick={() => setAuthModalOpen(true)}
+                className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-blue-700 to-indigo-800 hover:from-blue-600 hover:to-indigo-700 text-white font-extrabold text-xs shadow-md border border-blue-500/40 hover:border-amber-400 cursor-pointer transition-all"
+              >
+                <Lock className="w-3.5 h-3.5 text-amber-300" />
+                <span>🔐 Sign Up / Sign In</span>
+              </button>
+            ) : (
+              <div className="hidden sm:flex items-center gap-2">
+                <span className="text-xs font-bold px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-slate-800 text-blue-900 dark:text-blue-200 border border-blue-200 dark:border-slate-700">
+                  {user?.role === "super_admin" || user?.role === "provincial_admin"
+                    ? "👑 Super Admin"
+                    : user?.role === "employee" || user?.role === "palika_staff"
+                    ? `🏛️ ${user?.palika_name || "कर्मचारी"}`
+                    : `👤 ${user?.name}`}
+                </span>
+              </div>
+            )}
+
             <button
               type="button"
               onClick={() => setIsPanelOpen(true)}
@@ -224,7 +271,7 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
         <nav aria-label="मुख्य नेभिगेसन" className="hidden lg:block bg-blue-900 dark:bg-slate-950 text-white border-t border-blue-950 dark:border-slate-800 shadow-inner">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
             <ul className="flex items-center space-x-1" role="menubar">
-              {/* PRIMARY ACCESSIBILITY BUTTON AS REQUESTED IN MAIN NAVIGATION */}
+              {/* PRIMARY ACCESSIBILITY BUTTON IN MAIN NAVIGATION */}
               <li role="none">
                 <button
                   type="button"
@@ -242,42 +289,65 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
                 </button>
               </li>
 
-              {navItems.map((item, idx) => {
-                const Icon = item.icon;
-                return (
-                  <li key={idx} role="none">
-                    <Link
-                      href={item.href}
-                      role="menuitem"
-                      className={`inline-flex items-center px-3.5 py-2.5 text-xs font-semibold rounded-t-md transition-colors border-b-2 ${
-                        item.isAction
-                          ? "bg-amber-400 text-slate-950 hover:bg-amber-300 font-bold border-transparent"
-                          : "text-slate-100 hover:text-amber-300 hover:bg-blue-800/80 dark:hover:bg-slate-800 border-transparent hover:border-amber-400"
-                      }`}
-                    >
-                      {Icon && <Icon className="w-3.5 h-3.5 mr-1.5" aria-hidden="true" />}
-                      <span>{item.label}</span>
-                    </Link>
-                  </li>
-                );
-              })}
+              {navItems
+                // Filter out Admin button for non-admins to prevent cluttering normal users
+                .filter((item) => {
+                  if (item.href === "/admin") {
+                    return isAuthenticated && (user?.role === "super_admin" || user?.role === "provincial_admin");
+                  }
+                  return true;
+                })
+                .map((item, idx) => {
+                  const Icon = item.icon;
+                  return (
+                    <li key={idx} role="none">
+                      <Link
+                        href={item.href}
+                        role="menuitem"
+                        className={`inline-flex items-center px-3.5 py-2.5 text-xs font-semibold rounded-t-md transition-colors border-b-2 ${
+                          item.isAction
+                            ? "bg-amber-400 text-slate-950 hover:bg-amber-300 font-bold border-transparent"
+                            : "text-slate-100 hover:text-amber-300 hover:bg-blue-800/80 dark:hover:bg-slate-800 border-transparent hover:border-amber-400"
+                        }`}
+                      >
+                        {Icon && <Icon className="w-3.5 h-3.5 mr-1.5" aria-hidden="true" />}
+                        <span>{item.label}</span>
+                      </Link>
+                    </li>
+                  );
+                })}
             </ul>
 
             {/* Quick Auth status in Nav */}
             <div className="flex items-center text-xs">
               {isAuthenticated && user ? (
-                <div className="flex items-center gap-1.5 text-blue-200 dark:text-slate-300">
-                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                  <span>प्रमाणीकृत: {user.role === "provincial_admin" ? "Super Admin" : user.palika_name}</span>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5 text-blue-200 dark:text-slate-300">
+                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                    <span>
+                      {user.role === "super_admin" || user.role === "provincial_admin"
+                        ? "Super Admin"
+                        : user.role === "employee" || user.role === "palika_staff"
+                        ? user.palika_name || "कर्मचारी"
+                        : user.name}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={logout}
+                    className="text-rose-300 hover:text-white ml-2 text-[11px] underline cursor-pointer"
+                  >
+                    लगआउट
+                  </button>
                 </div>
               ) : (
                 <button
                   type="button"
                   onClick={() => setAuthModalOpen(true)}
-                  className="text-amber-300 hover:text-white font-bold flex items-center gap-1 cursor-pointer"
+                  className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-3 py-1 rounded-md text-xs flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
                 >
                   <Lock className="w-3.5 h-3.5" />
-                  <span>कर्मचारी लगइन</span>
+                  <span>🔐 Sign Up / Sign In</span>
                 </button>
               )}
             </div>
@@ -317,13 +387,17 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
             {/* Mobile Auth Status */}
             <div className="p-3 rounded-xl bg-blue-900/70 dark:bg-slate-900 border border-blue-800 dark:border-slate-800 flex items-center justify-between">
               {isAuthenticated && user ? (
-                <div>
+                <div className="flex-1">
                   <div className="text-xs font-bold text-amber-300 flex items-center gap-1.5">
                     <User className="w-4 h-4" />
                     <span>{user.name}</span>
                   </div>
                   <div className="text-[11px] text-blue-200 mt-0.5">
-                    {user.role === "provincial_admin" ? "👑 मुख्य प्रशासक" : `🏛️ ${user.palika_name}`}
+                    {user.role === "super_admin" || user.role === "provincial_admin"
+                      ? "👑 Super Admin"
+                      : user.role === "employee" || user.role === "palika_staff"
+                      ? `🏛️ ${user.palika_name || "कर्मचारी"}`
+                      : `👤 सामान्य प्रयोगकर्ता (${user.role})`}
                   </div>
                 </div>
               ) : (
@@ -333,10 +407,10 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
                     setMobileMenuOpen(false);
                     setAuthModalOpen(true);
                   }}
-                  className="w-full py-2 bg-blue-800 text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1.5"
+                  className="w-full py-2.5 bg-gradient-to-r from-blue-700 to-indigo-800 text-white rounded-lg text-xs font-black flex items-center justify-center gap-1.5 shadow-md"
                 >
-                  <Lock className="w-3.5 h-3.5" />
-                  <span>कर्मचारी / एडमिन लगइन</span>
+                  <Lock className="w-3.5 h-3.5 text-amber-300" />
+                  <span>🔐 Sign Up / Sign In</span>
                 </button>
               )}
 
@@ -344,7 +418,7 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
                 <button
                   type="button"
                   onClick={logout}
-                  className="px-2 py-1 bg-rose-900 text-rose-200 rounded text-xs font-semibold"
+                  className="px-3 py-1.5 bg-rose-900 hover:bg-rose-800 text-rose-200 rounded text-xs font-bold ml-2 shrink-0 cursor-pointer"
                 >
                   लगआउट
                 </button>
@@ -352,25 +426,32 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
             </div>
 
             <ul className="space-y-1">
-              {navItems.map((item, idx) => {
-                const Icon = item.icon;
-                return (
-                  <li key={idx}>
-                    <Link
-                      href={item.href}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={`flex items-center px-3 py-2.5 rounded-md text-sm font-semibold ${
-                        item.isAction
-                          ? "bg-amber-500 text-slate-950 font-bold mt-2"
-                          : "hover:bg-blue-900 dark:hover:bg-slate-800 text-slate-100"
-                      }`}
-                    >
-                      {Icon && <Icon className="w-4 h-4 mr-2" aria-hidden="true" />}
-                      <span>{item.label}</span>
-                    </Link>
-                  </li>
-                );
-              })}
+              {navItems
+                .filter((item) => {
+                  if (item.href === "/admin") {
+                    return isAuthenticated && (user?.role === "super_admin" || user?.role === "provincial_admin");
+                  }
+                  return true;
+                })
+                .map((item, idx) => {
+                  const Icon = item.icon;
+                  return (
+                    <li key={idx}>
+                      <Link
+                        href={item.href}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={`flex items-center px-3 py-2.5 rounded-md text-sm font-semibold ${
+                          item.isAction
+                            ? "bg-amber-500 text-slate-950 font-bold mt-2"
+                            : "hover:bg-blue-900 dark:hover:bg-slate-800 text-slate-100"
+                        }`}
+                      >
+                        {Icon && <Icon className="w-4 h-4 mr-2" aria-hidden="true" />}
+                        <span>{item.label}</span>
+                      </Link>
+                    </li>
+                  );
+                })}
             </ul>
           </nav>
         )}
@@ -382,8 +463,8 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
       {/* Global Screen Reader Live Region Announcer */}
       <LiveAnnouncer />
 
-      {/* Global Auth Modal */}
-      <AuthModal
+      {/* Global Unified Auth Modal */}
+      <UnifiedAuthModal
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}
       />
