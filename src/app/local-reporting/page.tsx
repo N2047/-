@@ -28,9 +28,10 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/lib/authContext";
+import { useLanguage } from "@/lib/languageContext";
 
 export default function LocalReportingPage() {
-  const [lang, setLang] = useState<Language>("ne");
+  const { lang, setLang } = useLanguage();
   const [selectedDistrictId, setSelectedDistrictId] = useState<string>("taplejung");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [typeFilter, setTypeFilter] = useState<string>("all");

@@ -8,6 +8,7 @@ import Footer from "@/components/Footer";
 import { KOSHI_DISTRICTS, findPalikaById } from "@/lib/koshiGeography";
 import { translations, Language } from "@/lib/translations";
 import { useAuth } from "@/lib/authContext";
+import { useLanguage } from "@/lib/languageContext";
 import { createInitialFormData, DISABILITY_TEN_TYPES, CARD_COLORS } from "@/lib/defaultFormData";
 import { AnnualReportFormData } from "@/types/form";
 import { exportReportToExcel } from "@/lib/excelExport";
@@ -45,7 +46,7 @@ export default function PalikaProfilePage({
   const palikaId = resolvedParams.palikaId;
   const router = useRouter();
 
-  const [lang, setLang] = useState<Language>("ne");
+  const { lang, setLang } = useLanguage();
   const [formData, setFormData] = useState<AnnualReportFormData>(() => createInitialFormData(palikaId));
   const [hasSavedData, setHasSavedData] = useState<boolean>(false);
 

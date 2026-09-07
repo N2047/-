@@ -55,6 +55,7 @@ import { useAuth } from "@/lib/authContext";
 import UnifiedAuthModal from "@/components/auth/UnifiedAuthModal";
 import { getFormConfig, DEFAULT_FORM_CONFIG, FormConfig, FormSection, deleteSection } from "@/lib/formConfig";
 import FormConfigModal from "@/components/admin/FormConfigModal";
+import { useLanguage } from "@/lib/languageContext";
 
 export default function AnnualReportFormPage({
   params,
@@ -64,7 +65,7 @@ export default function AnnualReportFormPage({
   const resolvedParams = use(params);
   const palikaId = resolvedParams.palikaId;
 
-  const [lang, setLang] = useState<Language>("ne");
+  const { lang, setLang } = useLanguage();
   const [formConfig, setFormConfig] = useState<FormConfig>(DEFAULT_FORM_CONFIG);
   const [activeSection, setActiveSection] = useState<number>(1);
   const [formData, setFormData] = useState<AnnualReportFormData>(() => createInitialFormData(palikaId));

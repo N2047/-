@@ -56,6 +56,7 @@ import AdminAccountApproval from "@/components/admin/AdminAccountApproval";
 import AdminAboutManagement from "@/components/admin/AdminAboutManagement";
 import { useAuth } from "@/lib/authContext";
 import { useAccessibility } from "@/lib/accessibilityContext";
+import { useLanguage } from "@/lib/languageContext";
 
 interface ReportReviewItem {
   palikaId: string;
@@ -71,7 +72,7 @@ interface ReportReviewItem {
 }
 
 export default function AdminPage() {
-  const [lang, setLang] = useState<Language>("ne");
+  const { lang, setLang } = useLanguage();
   const { user, login, logout } = useAuth();
   const { darkMode, toggleDarkMode, fontSize } = useAccessibility();
 
@@ -736,12 +737,12 @@ export default function AdminPage() {
               }`}
             >
               <LayoutDashboard className="w-4 h-4 text-amber-400" />
-              <span>🏠 ड्यासबोर्ड (Overview)</span>
+              <span>{lang === "ne" ? "🏠 ड्यासबोर्ड (Overview)" : "🏠 Dashboard (Overview)"}</span>
             </button>
 
             {/* USER MANAGEMENT SECTION (Requirement 4 & 5) */}
             <div className="pt-2 pb-1 px-3 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-              👥 प्रयोगकर्ता व्यवस्थापन
+              {lang === "ne" ? "👥 प्रयोगकर्ता व्यवस्थापन" : "👥 User Management"}
             </div>
 
             {/* 2. Approved & Pending Module */}
@@ -759,7 +760,7 @@ export default function AdminPage() {
             >
               <span className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-amber-500" />
-                <span>Approved & Pending</span>
+                <span>{lang === "ne" ? "स्वीकृत तथा प्रतीक्षारत" : "Approved & Pending"}</span>
               </span>
               {stats.pendingUsers > 0 && (
                 <span className="px-1.5 py-0.2 bg-amber-400 text-slate-950 font-black rounded-full text-[10px]">
@@ -782,7 +783,7 @@ export default function AdminPage() {
               }`}
             >
               <Users className="w-4 h-4 text-blue-500" />
-              <span>सबै प्रयोगकर्ता (All Users)</span>
+              <span>{lang === "ne" ? "सबै प्रयोगकर्ता (All Users)" : "All Users"}</span>
             </button>
 
             {/* 4. Blocked Users */}
@@ -800,7 +801,7 @@ export default function AdminPage() {
             >
               <span className="flex items-center gap-2">
                 <Ban className="w-4 h-4 text-rose-500" />
-                <span>Blocked Users</span>
+                <span>{lang === "ne" ? "रोकिएका खाताहरू" : "Blocked Users"}</span>
               </span>
               {stats.blockedUsers > 0 && (
                 <span className="px-1.5 py-0.2 bg-rose-200 text-rose-900 font-black rounded-full text-[10px]">
@@ -811,7 +812,7 @@ export default function AdminPage() {
 
             {/* CONTENT & SYSTEM SECTION */}
             <div className="pt-3 pb-1 px-3 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-              🏛️ स्थानीय तह तथा सामग्री
+              {lang === "ne" ? "🏛️ स्थानीय तह तथा सामग्री" : "🏛️ Municipalities & Content"}
             </div>
 
             {/* 5. 137 Palikas Reports Review */}
@@ -828,7 +829,7 @@ export default function AdminPage() {
               }`}
             >
               <Building2 className="w-4 h-4 text-emerald-500" />
-              <span>१३७ स्थानीय तह प्रतिवेदन</span>
+              <span>{lang === "ne" ? "१३७ स्थानीय तह प्रतिवेदन" : "137 Local Govt Reports"}</span>
             </button>
 
             {/* 6. News Management */}
@@ -845,7 +846,7 @@ export default function AdminPage() {
               }`}
             >
               <Newspaper className="w-4 h-4 text-red-500" />
-              <span>समाचार व्यवस्थापन (News)</span>
+              <span>{lang === "ne" ? "समाचार व्यवस्थापन (News)" : "News Management"}</span>
             </button>
 
             {/* 7. Notice Management */}
@@ -862,7 +863,7 @@ export default function AdminPage() {
               }`}
             >
               <Bell className="w-4 h-4 text-amber-500" />
-              <span>सूचना व्यवस्थापन (Notices)</span>
+              <span>{lang === "ne" ? "सूचना व्यवस्थापन (Notices)" : "Notice Management"}</span>
             </button>
 
             {/* 8. Legal Documents Management */}
@@ -879,7 +880,7 @@ export default function AdminPage() {
               }`}
             >
               <Scale className="w-4 h-4 text-indigo-500" />
-              <span>कानुन तथा कानुनी दस्तावेज</span>
+              <span>{lang === "ne" ? "कानुन तथा कानुनी दस्तावेज" : "Legal Documents"}</span>
             </button>
 
             {/* About Us Management (Requirement: About Us CMS) */}
@@ -896,7 +897,7 @@ export default function AdminPage() {
               }`}
             >
               <BookOpen className="w-4 h-4 text-sky-500" />
-              <span>हाम्रो बारेमा व्यवस्थापन (About Us)</span>
+              <span>{lang === "ne" ? "हाम्रो बारेमा व्यवस्थापन (About Us)" : "About Us Management"}</span>
             </button>
 
             {/* 9. Website CMS Management */}
@@ -913,12 +914,12 @@ export default function AdminPage() {
               }`}
             >
               <Globe className="w-4 h-4 text-teal-500" />
-              <span>वेबसाइट व्यवस्थापन (CMS)</span>
+              <span>{lang === "ne" ? "वेबसाइट व्यवस्थापन (CMS)" : "Website CMS"}</span>
             </button>
 
             {/* SYSTEM & SECURITY */}
             <div className="pt-3 pb-1 px-3 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-              ⚙️ प्रणाली तथा सुरक्षा
+              {lang === "ne" ? "⚙️ प्रणाली तथा सुरक्षा" : "⚙️ System & Security"}
             </div>
 
             {/* 10. Accessibility Settings */}
@@ -935,7 +936,7 @@ export default function AdminPage() {
               }`}
             >
               <span className="text-amber-500 font-bold">♿</span>
-              <span>पहुँचयुक्तता (WCAG 2.2 AA)</span>
+              <span>{lang === "ne" ? "पहुँचयुक्तता (WCAG 2.2 AA)" : "Accessibility (WCAG 2.2 AA)"}</span>
             </button>
 
             {/* 11. System Settings */}
@@ -952,7 +953,7 @@ export default function AdminPage() {
               }`}
             >
               <Settings className="w-4 h-4 text-slate-500" />
-              <span>प्रणाली सेटिङ्स (System)</span>
+              <span>{lang === "ne" ? "प्रणाली सेटिङ्स (System)" : "System Settings"}</span>
             </button>
 
             {/* 12. Security & RBAC */}
@@ -969,7 +970,7 @@ export default function AdminPage() {
               }`}
             >
               <ShieldCheck className="w-4 h-4 text-blue-500" />
-              <span>सुरक्षा (Security & RBAC)</span>
+              <span>{lang === "ne" ? "सुरक्षा (Security & RBAC)" : "Security & Access"}</span>
             </button>
 
             {/* 13. Audit Logs */}
@@ -986,7 +987,7 @@ export default function AdminPage() {
               }`}
             >
               <History className="w-4 h-4 text-purple-500" />
-              <span>📋 Audit Logs</span>
+              <span>{lang === "ne" ? "📋 अडिट लगहरू (Audit Logs)" : "📋 Audit Logs"}</span>
             </button>
 
             {/* 14. Logout Button */}
