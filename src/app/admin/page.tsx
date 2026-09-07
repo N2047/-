@@ -79,7 +79,7 @@ export default function AdminPage() {
   const [showAdminPassword, setShowAdminPassword] = useState(false);
   const [adminLoginLoading, setAdminLoginLoading] = useState(false);
   const [adminLoginError, setAdminLoginError] = useState("");
-  const [showAdminLoginForm, setShowAdminLoginForm] = useState(false);
+  const [showAdminLoginForm, setShowAdminLoginForm] = useState(true);
 
   // Super Admin Navigation Tab
   const [activeTab, setActiveTab] = useState<
@@ -633,6 +633,19 @@ export default function AdminPage() {
                   </>
                 )}
               </button>
+
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAdminIdentifier("admin@dic.gov.np");
+                    setAdminPassword("admin123");
+                  }}
+                  className="w-full py-2 px-3 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/40 text-amber-300 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <span>⚡ १-क्लिक Super Admin विवरण भर्नुहोस् (admin@dic.gov.np)</span>
+                </button>
+              </div>
             </form>
 
             {/* Back to restricted / home */}
