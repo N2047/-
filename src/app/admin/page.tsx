@@ -46,7 +46,9 @@ import {
   ChevronRight,
   BookOpen,
   Image as ImageIcon,
-  UploadCloud
+  UploadCloud,
+  Bot,
+  Cpu
 } from "lucide-react";
 import Link from "next/link";
 import FormConfigModal from "@/components/admin/FormConfigModal";
@@ -57,6 +59,7 @@ import AdminGrievanceSettings from "@/components/admin/AdminGrievanceSettings";
 import AdminAccountApproval from "@/components/admin/AdminAccountApproval";
 import AdminAboutManagement from "@/components/admin/AdminAboutManagement";
 import AdminLawManager from "@/components/admin/AdminLawManager";
+import AdminAiConfigManager from "@/components/admin/AdminAiConfigManager";
 import { useAuth } from "@/lib/authContext";
 import { useAccessibility } from "@/lib/accessibilityContext";
 import { useLanguage } from "@/lib/languageContext";
@@ -102,6 +105,7 @@ export default function AdminPage() {
     | "website_mgmt"
     | "accessibility"
     | "system_settings"
+    | "ai_config"
     | "security"
     | "audit_logs"
     | "profile"
@@ -989,6 +993,23 @@ export default function AdminPage() {
               <span>{lang === "ne" ? "प्रणाली सेटिङ्स (System)" : "System Settings"}</span>
             </button>
 
+            {/* AI Assistant & n8n Config */}
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("ai_config");
+                setMobileSidebarOpen(false);
+              }}
+              className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${
+                activeTab === "ai_config"
+                  ? "bg-emerald-800 text-white font-bold shadow-xs"
+                  : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+              }`}
+            >
+              <Cpu className="w-4 h-4 text-emerald-500" />
+              <span>{lang === "ne" ? "🤖 AI तथा n8n कन्फिग" : "AI & n8n Config"}</span>
+            </button>
+
             {/* 12. Security & RBAC */}
             <button
               type="button"
@@ -1589,27 +1610,37 @@ export default function AdminPage() {
 
           {/* TAB 11: SYSTEM SETTINGS (Requirement 4) */}
           {activeTab === "system_settings" && (
-            <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
-              <h2 className="text-lg font-bold flex items-center gap-2">
-                <Settings className="w-5 h-5 text-slate-600" />
-                <span>प्रणाली सेटिङ्स (System Settings & Backup)</span>
-              </h2>
-              <div className="space-y-3 text-xs">
-                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
-                  <div>
-                    <div className="font-bold text-slate-900 dark:text-white">डेटाबेस पूर्ण ब्याकअप (Full Database Backup)</div>
-                    <div className="text-[11px] text-slate-500">सबै प्रयोगकर्ता, प्रतिवेदन र अडिट लगको सुरक्षित ब्याकअप</div>
+            <div className="space-y-6">
+              <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+                <h2 className="text-lg font-bold flex items-center gap-2">
+                  <Settings className="w-5 h-5 text-slate-600" />
+                  <span>प्रणाली सेटिङ्स (System Settings & Backup)</span>
+                </h2>
+                <div className="space-y-3 text-xs">
+                  <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                    <div>
+                      <div className="font-bold text-slate-900 dark:text-white">डेटाबेस पूर्ण ब्याकअप (Full Database Backup)</div>
+                      <div className="text-[11px] text-slate-500">सबै प्रयोगकर्ता, प्रतिवेदन र अडिट लगको सुरक्षित ब्याकअप</div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => alert("सम्पूर्ण प्रणालीको डेटाबेस ब्याकअप सुरक्षित रूपमा तयार भयो।")}
+                      className="px-4 py-2 bg-blue-900 hover:bg-blue-800 text-white rounded-xl font-bold cursor-pointer"
+                    >
+                      ब्याकअप डाउनलोड
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => alert("सम्पूर्ण प्रणालीको डेटाबेस ब्याकअप सुरक्षित रूपमा तयार भयो।")}
-                    className="px-4 py-2 bg-blue-900 hover:bg-blue-800 text-white rounded-xl font-bold cursor-pointer"
-                  >
-                    ब्याकअप डाउनलोड
-                  </button>
                 </div>
               </div>
+
+              {/* AI Assistant and n8n Configuration Section */}
+              <AdminAiConfigManager />
             </div>
+          )}
+
+          {/* TAB: AI CONFIGURATION (Direct Navigation) */}
+          {activeTab === "ai_config" && (
+            <AdminAiConfigManager />
           )}
 
           {/* TAB 12: SECURITY & RBAC (Requirement 21 & 22) */}

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useAccessibility } from "@/lib/accessibilityContext";
+import { useAuth } from "@/lib/authContext";
 import {
   MessageSquare,
   Bot,
@@ -52,15 +53,19 @@ const QUICK_SUGGESTIONS = [
 
 export default function DicChatbot() {
   const { darkMode, colorMode, speakText, stopSpeech } = useAccessibility();
+  const { user } = useAuth();
+  const isSuperAdmin = user?.role === "super_admin" || user?.role === "provincial_admin";
 
   const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
 
-  // Settings
+  // Settings (STRICTLY for Super Admin only)
   const [webhookUrl, setWebhookUrl] = useState("");
+  const [testWebhookUrl, setTestWebhookUrl] = useState("");
   const [openAiKey, setOpenAiKey] = useState("");
+  const [geminiKey, setGeminiKey] = useState("");
   const [saveStatus, setSaveStatus] = useState(false);
 
   // Chat state
@@ -91,10 +96,35 @@ export default function DicChatbot() {
   // Load saved settings & chat history
   useEffect(() => {
     try {
-      const savedWebhook = localStorage.getItem("dic_ai_webhook_url");
-      if (savedWebhook) setWebhookUrl(savedWebhook);
-      const savedKey = localStorage.getItem("dic_ai_openai_key");
-      if (savedKey) setOpenAiKey(savedKey);
+      // Security: Remove any legacy secrets from client localStorage
+      localStorage.removeItem("dic_ai_webhook_url");
+      localStorage.removeItem("dic_ai_openai_key");
+
+      // Only Super Admin can load and view the sensitive AI configuration
+      if (isSuperAdmin && user?.id) {
+        fetch(`/api/admin/ai-config?userId=${user.id}&role=${user.role}`, {
+          headers: {
+            "x-admin-role": user.role,
+            "x-admin-id": user.id
+          }
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (data.config) {
+              setWebhookUrl(data.config.n8n_webhook_url || "");
+              setTestWebhookUrl(data.config.n8n_test_webhook_url || "");
+              setOpenAiKey(data.config.openai_api_key || "");
+              setGeminiKey(data.config.gemini_api_key || "");
+            }
+          })
+          .catch(err => console.error("Failed to load secure AI config:", err));
+      } else {
+        setWebhookUrl("");
+        setTestWebhookUrl("");
+        setOpenAiKey("");
+        setGeminiKey("");
+        setIsSettingsOpen(false);
+      }
 
       const savedChat = localStorage.getItem("dic_ai_chat_history_v1");
       if (savedChat) {
@@ -106,7 +136,7 @@ export default function DicChatbot() {
     } catch (e) {
       console.error("Failed to load AI Chatbot settings", e);
     }
-  }, []);
+  }, [isSuperAdmin, user]);
 
   // Save chat history
   useEffect(() => {
@@ -126,16 +156,35 @@ export default function DicChatbot() {
     }
   }, [messages, isOpen, isLoading]);
 
-  // Handle Save Settings
-  const handleSaveSettings = () => {
+  // Handle Save Settings (Super Admin Only)
+  const handleSaveSettings = async () => {
+    if (!isSuperAdmin) return;
     try {
-      localStorage.setItem("dic_ai_webhook_url", webhookUrl.trim());
-      localStorage.setItem("dic_ai_openai_key", openAiKey.trim());
-      setSaveStatus(true);
-      setTimeout(() => setSaveStatus(false), 2500);
-      setIsSettingsOpen(false);
+      const res = await fetch("/api/admin/ai-config", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-role": user?.role || "",
+          "x-admin-id": user?.id || ""
+        },
+        body: JSON.stringify({
+          n8n_webhook_url: webhookUrl.trim(),
+          n8n_test_webhook_url: testWebhookUrl.trim(),
+          openai_api_key: openAiKey.trim(),
+          gemini_api_key: geminiKey.trim(),
+          user: { id: user?.id, name: user?.name, role: user?.role }
+        })
+      });
+      if (res.ok) {
+        setSaveStatus(true);
+        setTimeout(() => setSaveStatus(false), 2500);
+        setTimeout(() => setIsSettingsOpen(false), 1200);
+      } else {
+        const err = await res.json();
+        alert(err.error || "सेटिङ्स सुरक्षित गर्न सकिएन।");
+      }
     } catch (e) {
-      console.error("Failed to save webhook settings", e);
+      console.error("Failed to save AI config:", e);
     }
   };
 
@@ -213,8 +262,6 @@ export default function DicChatbot() {
           message: userMessage.content,
           sessionId: "dic-client-session",
           conversationHistory: messages.slice(-4).map(m => ({ role: m.role, content: m.content })),
-          customWebhookUrl: webhookUrl.trim() || undefined,
-          customOpenAiKey: openAiKey.trim() || undefined,
         })
       });
 
@@ -395,15 +442,17 @@ export default function DicChatbot() {
             </div>
 
             <div className="flex items-center gap-1">
-              {/* Settings Button */}
-              <button
-                onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-                title="n8n Webhook / OpenAI सेटिङ्स"
-                className={`p-1.5 rounded-lg hover:bg-white/20 transition ${isSettingsOpen ? "bg-white/25" : ""}`}
-                aria-label="सेटिङ्स खोल्नुहोस्"
-              >
-                <Settings className="w-4 h-4" />
-              </button>
+              {/* Settings Button - Strictly Super Admin Only */}
+              {isSuperAdmin && (
+                <button
+                  onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+                  title="n8n Webhook / OpenAI सेटिङ्स (केवल Super Admin)"
+                  className={`p-1.5 rounded-lg hover:bg-white/20 transition ${isSettingsOpen ? "bg-white/25" : ""}`}
+                  aria-label="सेटिङ्स खोल्नुहोस्"
+                >
+                  <Settings className="w-4 h-4" />
+                </button>
+              )}
 
               {/* Clear Chat Button */}
               <button
@@ -437,8 +486,8 @@ export default function DicChatbot() {
             </div>
           </div>
 
-          {/* Settings Panel Drawer */}
-          {isSettingsOpen && (
+          {/* Settings Panel Drawer - Strictly Super Admin Only */}
+          {isSettingsOpen && isSuperAdmin && (
             <div className="p-4 bg-slate-50 dark:bg-slate-800/90 border-b border-slate-200 dark:border-slate-700 text-xs animate-in slide-in-from-top-2">
               <div className="flex items-center justify-between mb-2">
                 <div className="font-bold flex items-center gap-1.5 text-slate-800 dark:text-slate-200 text-sm">
@@ -460,13 +509,39 @@ export default function DicChatbot() {
               <div className="space-y-2">
                 <div>
                   <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
-                    n8n Webhook URL:
+                    n8n Webhook URL (Production):
                   </label>
                   <input
                     type="url"
                     value={webhookUrl}
                     onChange={(e) => setWebhookUrl(e.target.value)}
-                    placeholder="उदा: http://localhost:5678/webhook/dic-chat"
+                    placeholder="उदा: https://navin047.app.n8n.cloud/webhook/dic-chat"
+                    className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 text-xs focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    n8n Test Webhook URL (क्यानभास परीक्षण - वैकल्पिक):
+                  </label>
+                  <input
+                    type="url"
+                    value={testWebhookUrl}
+                    onChange={(e) => setTestWebhookUrl(e.target.value)}
+                    placeholder="उदा: https://navin047.app.n8n.cloud/webhook-test/dic-chat"
+                    className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 text-xs focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    Google Gemini API Key (Direct Fallback - वैकल्पिक):
+                  </label>
+                  <input
+                    type="password"
+                    value={geminiKey}
+                    onChange={(e) => setGeminiKey(e.target.value)}
+                    placeholder="AIzaSy..."
                     className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 text-xs focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>

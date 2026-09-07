@@ -1,0 +1,8 @@
+{
+  "n8n_webhook_url": "https://navin047.app.n8n.cloud/webhook/dic-chat",
+  "n8n_test_webhook_url": "https://navin047.app.n8n.cloud/webhook-test/dic-chat",
+  "openai_api_key": "",
+  "gemini_api_key": "",
+  "updated_at": "2026-09-07T17:30:00.000Z",
+  "updated_by": "मुख्य प्रशासक (Super Admin)"
+}
