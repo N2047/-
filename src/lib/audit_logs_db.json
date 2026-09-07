@@ -1,5 +1,55 @@
 [
   {
+    "id": "log_1788775647946_exjv",
+    "action": "ABOUT_SECTION_PURGED",
+    "performed_by_id": "admin-master-001",
+    "performed_by_name": "Super Admin",
+    "target_user_id": "sec-1788775647322-968",
+    "target_user_name": "परीक्षण सेक्सन (अपडेट गरिएको)",
+    "details": "सेक्सन \"परीक्षण सेक्सन (अपडेट गरिएको)\" स्थायी रूपमा मेटाइयो (Permanently Deleted)",
+    "timestamp": "2026-09-07T10:07:27.946Z"
+  },
+  {
+    "id": "log_1788775647903_awlm",
+    "action": "ABOUT_SECTION_RESTORED",
+    "performed_by_id": "admin-master-001",
+    "performed_by_name": "Super Admin",
+    "target_user_id": "sec-1788775647322-968",
+    "target_user_name": "परीक्षण सेक्सन (अपडेट गरिएको)",
+    "details": "सेक्सन \"परीक्षण सेक्सन (अपडेट गरिएको)\" रद्दीटोकरीबाट पुनःस्थापना गरियो",
+    "timestamp": "2026-09-07T10:07:27.903Z"
+  },
+  {
+    "id": "log_1788775647817_4qr9",
+    "action": "ABOUT_SECTION_DELETED",
+    "performed_by_id": "admin-master-001",
+    "performed_by_name": "Super Admin",
+    "target_user_id": "sec-1788775647322-968",
+    "target_user_name": "परीक्षण सेक्सन (अपडेट गरिएको)",
+    "details": "सेक्सन \"परीक्षण सेक्सन (अपडेट गरिएको)\" रद्दीटोकरी (Trash) मा सारियो",
+    "timestamp": "2026-09-07T10:07:27.817Z"
+  },
+  {
+    "id": "log_1788775647412_5pik",
+    "action": "ABOUT_SECTION_UPDATED",
+    "performed_by_id": "admin-master-001",
+    "performed_by_name": "Super Admin",
+    "target_user_id": "sec-1788775647322-968",
+    "target_user_name": "परीक्षण सेक्सन (अपडेट गरिएको)",
+    "details": "सेक्सन \"परीक्षण सेक्सन (अपडेट गरिएको)\" सम्पादन गरियो (Status: published)",
+    "timestamp": "2026-09-07T10:07:27.412Z"
+  },
+  {
+    "id": "log_1788775647328_x8w4",
+    "action": "ABOUT_SECTION_CREATED",
+    "performed_by_id": "admin-master-001",
+    "performed_by_name": "Super Admin",
+    "target_user_id": "sec-1788775647322-968",
+    "target_user_name": "परीक्षण सेक्सन (नयाँ)",
+    "details": "नयाँ सेक्सन \"परीक्षण सेक्सन (नयाँ)\" सिर्जना गरियो (Status: published, Order: 5)",
+    "timestamp": "2026-09-07T10:07:27.328Z"
+  },
+  {
     "id": "log_1788713078791_nj5p",
     "action": "USER_STATUS_CHANGED",
     "performed_by_id": "admin-master-001",

@@ -43,7 +43,8 @@ import {
   KeyRound, 
   User, 
   ExternalLink,
-  ChevronRight
+  ChevronRight,
+  BookOpen
 } from "lucide-react";
 import Link from "next/link";
 import FormConfigModal from "@/components/admin/FormConfigModal";
@@ -52,6 +53,7 @@ import AdminGrievanceManager from "@/components/admin/AdminGrievanceManager";
 import AdminGovernmentContacts from "@/components/admin/AdminGovernmentContacts";
 import AdminGrievanceSettings from "@/components/admin/AdminGrievanceSettings";
 import AdminAccountApproval from "@/components/admin/AdminAccountApproval";
+import AdminAboutManagement from "@/components/admin/AdminAboutManagement";
 import { useAuth } from "@/lib/authContext";
 import { useAccessibility } from "@/lib/accessibilityContext";
 
@@ -91,6 +93,7 @@ export default function AdminPage() {
     | "news_mgmt"
     | "notice_mgmt"
     | "legal_mgmt"
+    | "about_mgmt"
     | "reports_mgmt"
     | "website_mgmt"
     | "accessibility"
@@ -879,6 +882,23 @@ export default function AdminPage() {
               <span>कानुन तथा कानुनी दस्तावेज</span>
             </button>
 
+            {/* About Us Management (Requirement: About Us CMS) */}
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("about_mgmt");
+                setMobileSidebarOpen(false);
+              }}
+              className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${
+                activeTab === "about_mgmt"
+                  ? "bg-blue-900 text-white font-bold shadow-xs"
+                  : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+              }`}
+            >
+              <BookOpen className="w-4 h-4 text-sky-500" />
+              <span>हाम्रो बारेमा व्यवस्थापन (About Us)</span>
+            </button>
+
             {/* 9. Website CMS Management */}
             <button
               type="button"
@@ -1503,6 +1523,11 @@ export default function AdminPage() {
                 </table>
               </div>
             </div>
+          )}
+
+          {/* TAB: ABOUT US CMS MANAGEMENT */}
+          {activeTab === "about_mgmt" && (
+            <AdminAboutManagement />
           )}
 
           {/* TAB 9: WEBSITE MANAGEMENT CMS (Requirement 13 & 14) */}

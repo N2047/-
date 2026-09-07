@@ -1,5 +1,5 @@
 // End-to-End API verification script
-const BASE_URL = 'http://localhost:3001';
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
 async function runTests() {
   console.log('=== E2E Integration Verification ===\n');

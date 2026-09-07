@@ -156,6 +156,8 @@ export function findUserByIdentifier(identifier: string): StoredUser | undefined
   });
 }
 
+export const getUserById = findUserByIdentifier;
+
 /**
  * OTP GENERATION & VERIFICATION
  */
@@ -556,6 +558,8 @@ export function addAuditLog(
     console.error("Failed to write audit logs:", err);
   }
 }
+
+export const logAuditEvent = addAuditLog;
 
 /**
  * ANNUAL REPORTS STATUS & CORRECTION NOTES PERSISTENCE
