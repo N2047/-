@@ -3,14 +3,17 @@
 import React from "react";
 import Link from "next/link";
 import { translations, Language } from "@/lib/translations";
+import { useLanguage } from "@/lib/languageContext";
 import { ShieldCheck, HeartHandshake, PhoneCall, Mail } from "lucide-react";
 
 interface FooterProps {
-  lang: Language;
+  lang?: Language;
 }
 
-export default function Footer({ lang }: FooterProps) {
-  const t = translations[lang];
+export default function Footer({ lang: propLang }: FooterProps) {
+  const { lang: contextLang } = useLanguage();
+  const activeLang = propLang || contextLang || "ne";
+  const t = translations[activeLang] || translations.ne;
 
   return (
     <footer className="bg-slate-900 text-slate-200 border-t-4 border-amber-500 print:hidden">
@@ -28,48 +31,48 @@ export default function Footer({ lang }: FooterProps) {
               </div>
             </div>
             <p className="text-sm text-slate-400 max-w-md leading-relaxed mb-4">
-              {t.tagline}। नेपाल सरकार तथा प्रदेश सरकार मातहत अपाङ्गता सवालका कानुन, नीति, स्थानीय तह वार्षिक कार्यसम्पादन र तथ्यांक व्यवस्थापनको एकीकृत पोर्टल।
+              {t.footer?.brandDesc || t.tagline}
             </p>
             <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-800 rounded-lg text-xs font-semibold text-amber-300 border border-slate-700">
               <ShieldCheck className="w-4 h-4 text-emerald-400" aria-hidden="true" />
-              <span>WCAG 2.2 AA मापदण्डअनुसार पहुँचयुक्त बनाउन विकास भइरहेको प्रणाली</span>
+              <span>{t.footer?.wcagBadge || "WCAG 2.2 AA Standard Compliant System"}</span>
             </div>
           </div>
 
           {/* Quick Links */}
           <div>
             <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-3 text-amber-400">
-              प्रमुख मोड्युलहरू
+              {t.footer?.quickLinksTitle || "Quick Links"}
             </h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link href="/laws" className="hover:text-amber-300 transition-colors">
-                  विद्यमान कानुनहरूको दस्तावेज
+                  {t.nav_laws}
                 </Link>
               </li>
               <li>
                 <Link href="/local-reporting" className="hover:text-amber-300 transition-colors">
-                  कोशी प्रदेश स्थानीय सरकार प्रतिवेदन
+                  {t.nav_palika_report}
                 </Link>
               </li>
               <li>
                 <Link href="/reports" className="hover:text-amber-300 transition-colors">
-                  विषयगत रिपोर्ट तथा विश्लेषण
+                  {t.nav_overall_report}
                 </Link>
               </li>
               <li>
                 <Link href="/news" className="hover:text-amber-300 transition-colors">
-                  सूचना तथा समाचार
+                  {t.nav_news}
                 </Link>
               </li>
               <li>
                 <Link href="/about" className="hover:text-amber-300 transition-colors">
-                  हाम्रो बारेमा
+                  {t.nav_about}
                 </Link>
               </li>
               <li>
                 <Link href="/contact" className="hover:text-amber-300 transition-colors font-semibold text-amber-300">
-                  सम्पर्क तथा सहायता कक्ष
+                  {t.nav_contact}
                 </Link>
               </li>
             </ul>
@@ -78,28 +81,28 @@ export default function Footer({ lang }: FooterProps) {
           {/* Contact Details */}
           <div>
             <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-3 text-amber-400">
-              सम्पर्क तथा सहयोग
+              {t.footer?.contactSupportTitle || "Contact & Support"}
             </h3>
             <ul className="space-y-2 text-sm text-slate-400">
               <li className="flex items-center gap-2">
                 <HeartHandshake className="w-4 h-4 text-rose-400 shrink-0" aria-hidden="true" />
-                <span>अपाङ्गता सहायता सहजकर्ता सहयोग कक्ष</span>
+                <span>{t.footer?.helpDeskName || "Disability Facilitator Support Desk"}</span>
               </li>
               <li className="flex items-center gap-2">
                 <PhoneCall className="w-4 h-4 text-sky-400 shrink-0" aria-hidden="true" />
-                <span>फोन: +९७७-०२१-XXXXXX (कोशी प्रदेश)</span>
+                <span>{t.footer?.phone || "Phone: +977-021-460XXX"}</span>
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-amber-400 shrink-0" aria-hidden="true" />
-                <span>इमेल: info.dic@koshi.gov.np</span>
+                <span>{t.footer?.email || "Email: info.dic@koshi.gov.np"}</span>
               </li>
             </ul>
           </div>
         </div>
 
         <div className="pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-          <p>{t.footer_copy}</p>
-          <p>{t.footer_accessibility_note}</p>
+          <p>{t.footer?.copy || "© 2082/083 Disability Information Center (DIC). All Rights Reserved."}</p>
+          <p>{t.footer?.a11yNote || "WCAG 2.2 AA compliant digital portal."}</p>
         </div>
       </div>
     </footer>

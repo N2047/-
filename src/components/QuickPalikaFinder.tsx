@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { KOSHI_DISTRICTS } from "@/lib/koshiGeography";
 import { translations, Language } from "@/lib/translations";
+import { useLanguage } from "@/lib/languageContext";
 import { 
   Search, 
   MapPin, 
@@ -26,10 +27,12 @@ import { useAccessibility } from "@/lib/accessibilityContext";
 import UnifiedAuthModal from "@/components/auth/UnifiedAuthModal";
 
 interface QuickPalikaFinderProps {
-  lang: Language;
+  lang?: Language;
 }
 
-export default function QuickPalikaFinder({ lang }: QuickPalikaFinderProps) {
+export default function QuickPalikaFinder({ lang: propLang }: QuickPalikaFinderProps) {
+  const { lang: contextLang } = useLanguage();
+  const lang = propLang || contextLang;
   const [selectedDistrictId, setSelectedDistrictId] = useState<string>("");
   const [selectedPalikaId, setSelectedPalikaId] = useState<string>("");
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -62,6 +65,17 @@ export default function QuickPalikaFinder({ lang }: QuickPalikaFinderProps) {
     (isEmployee && user?.account_status === "approved" && selectedPalikaId === assignedPalikaId)
   );
 
+  const getLocalizedPalikaType = (type: string) => {
+    if (lang === "ne") return type;
+    switch (type) {
+      case "महानगरपालिका": return "Metropolitan City";
+      case "उपमहानगरपालिका": return "Sub-Metropolitan City";
+      case "नगरपालिका": return "Municipality";
+      case "गाउँपालिका": return "Rural Municipality";
+      default: return type;
+    }
+  };
+
   return (
     <section aria-labelledby="quick-finder-heading" className="py-8 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -75,13 +89,15 @@ export default function QuickPalikaFinder({ lang }: QuickPalikaFinderProps) {
               </div>
               <div>
                 <span className="text-xs font-bold uppercase tracking-wider text-emerald-300">
-                  🏛️ तपाईंको कार्यक्षेत्र (Assigned Local Government)
+                  {lang === "ne" ? "🏛️ तपाईंको कार्यक्षेत्र (Assigned Local Government)" : "🏛️ Your Assigned Local Government"}
                 </span>
                 <h3 className="text-lg sm:text-xl font-black text-white">
-                  {assignedPalikaName} — वार्षिक प्रतिवेदन प्रविष्टि
+                  {assignedPalikaName} — {lang === "ne" ? "वार्षिक प्रतिवेदन प्रविष्टि" : "Annual Report Entry"}
                 </h3>
                 <p className="text-xs text-emerald-100">
-                  आ.व. २०८२/०८३ को कार्यसम्पादन तथ्यांक भर्नुहोस्, ड्राफ्ट सुरक्षित गर्नुहोस् वा पेश गर्नुहोस्।
+                  {lang === "ne" 
+                    ? "आ.व. २०८२/०८३ को कार्यसम्पादन तथ्यांक भर्नुहोस्, ड्राफ्ट सुरक्षित गर्नुहोस् वा पेश गर्नुहोस्।" 
+                    : "Fill FY 2082/083 performance data, save drafts, or submit."}
                 </p>
               </div>
             </div>
@@ -89,7 +105,7 @@ export default function QuickPalikaFinder({ lang }: QuickPalikaFinderProps) {
               href={`/local-reporting/palika/${assignedPalikaId}`}
               className="px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-sm flex items-center gap-2 shadow-md shrink-0 transition-transform transform hover:-translate-y-0.5 cursor-pointer"
             >
-              <span>मेरो पालिकाको प्रतिवेदन खोल्नुहोस्</span>
+              <span>{lang === "ne" ? "मेरो पालिकाको प्रतिवेदन खोल्नुहोस्" : "Open My Palika Report"}</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
@@ -104,16 +120,16 @@ export default function QuickPalikaFinder({ lang }: QuickPalikaFinderProps) {
           <div className="flex flex-wrap items-center justify-between gap-3 mb-6 relative z-10">
             <span className="inline-flex items-center gap-1.5 px-3.5 py-1 bg-amber-400/20 text-amber-300 rounded-full text-xs font-bold uppercase tracking-wider border border-amber-400/30">
               <MapPin className="w-3.5 h-3.5" aria-hidden="true" />
-              कोशी प्रदेशका १४ जिल्ला र १३७ स्थानीय तह
+              {t.quick_finder_badge}
             </span>
           </div>
 
           <div className="max-w-3xl mb-6 relative z-10">
             <h2 id="quick-finder-heading" className="text-2xl sm:text-3xl font-black tracking-tight">
-              स्थानीय सरकार वार्षिक प्रतिवेदन खोजी तथा प्रविष्टि
+              {t.quick_finder_title}
             </h2>
             <p className="text-sm sm:text-base text-blue-100 mt-2">
-              जिल्ला छनौट गरी सम्बन्धित स्थानीय तहको वार्षिक कार्यसम्पादन प्रतिवेदन वा सार्वजनिक प्रोफाइल हेर्नुहोस्।
+              {t.quick_finder_desc}
             </p>
           </div>
 
@@ -125,7 +141,7 @@ export default function QuickPalikaFinder({ lang }: QuickPalikaFinderProps) {
             {/* 1. District Select */}
             <div>
               <label htmlFor="district-select" className="block text-xs font-bold text-amber-300 mb-1.5">
-                १. जिल्ला छनौट गर्नुहोस्
+                {t.quick_step_1}
               </label>
               <select
                 id="district-select"
@@ -137,7 +153,9 @@ export default function QuickPalikaFinder({ lang }: QuickPalikaFinderProps) {
                   if (val) {
                     const dist = KOSHI_DISTRICTS.find((d) => d.id === val);
                     if (dist) {
-                      const msg = `${dist.name_ne} जिल्लाका ${dist.local_governments.length} स्थानीय तह उपलब्ध छन्।`;
+                      const msg = lang === "ne"
+                        ? `${dist.name_ne} जिल्लाका ${dist.local_governments.length} स्थानीय तह उपलब्ध छन्।`
+                        : `${dist.name_en} District has ${dist.local_governments.length} local governments available.`;
                       announceLive(msg);
                       speakText(msg);
                     }
@@ -148,7 +166,7 @@ export default function QuickPalikaFinder({ lang }: QuickPalikaFinderProps) {
                 <option value="">{t.select_district}</option>
                 {KOSHI_DISTRICTS.map((district) => (
                   <option key={district.id} value={district.id}>
-                    {lang === "ne" ? district.name_ne : district.name_en} ({district.local_governments.length} स्थानीय तह)
+                    {lang === "ne" ? district.name_ne : district.name_en} ({district.local_governments.length} {t.palika_count_suffix})
                   </option>
                 ))}
               </select>
@@ -157,7 +175,7 @@ export default function QuickPalikaFinder({ lang }: QuickPalikaFinderProps) {
             {/* 2. Palika Select */}
             <div>
               <label htmlFor="palika-select" className="block text-xs font-bold text-amber-300 mb-1.5">
-                २. स्थानीय तह छनौट गर्नुहोस्
+                {t.quick_step_2}
               </label>
               <select
                 id="palika-select"
@@ -169,7 +187,7 @@ export default function QuickPalikaFinder({ lang }: QuickPalikaFinderProps) {
                   if (val) {
                     const p = palikas.find((item) => item.id === val);
                     if (p) {
-                      const msg = `${p.name_ne} स्थानीय तह छानियो।`;
+                      const msg = lang === "ne" ? `${p.name_ne} स्थानीय तह छानियो।` : `Selected ${p.name_en} local government.`;
                       announceLive(msg);
                       speakText(msg);
                     }
@@ -182,11 +200,11 @@ export default function QuickPalikaFinder({ lang }: QuickPalikaFinderProps) {
                 }`}
               >
                 <option value="">
-                  {selectedDistrictId ? t.select_palika : "-- पहिले जिल्ला छान्नुहोस् --"}
+                  {selectedDistrictId ? t.select_palika : (lang === "ne" ? "-- पहिले जिल्ला छान्नुहोस् --" : "-- Select District First --")}
                 </option>
                 {palikas.map((palika) => (
                   <option key={palika.id} value={palika.id}>
-                    {lang === "ne" ? palika.name_ne : palika.name_en} ({palika.type})
+                    {lang === "ne" ? palika.name_ne : palika.name_en} ({getLocalizedPalikaType(palika.type)})
                   </option>
                 ))}
               </select>
@@ -195,7 +213,6 @@ export default function QuickPalikaFinder({ lang }: QuickPalikaFinderProps) {
             {/* 3. Action Buttons: Form Fill (Secure) + Profile */}
             <div className="flex flex-col sm:flex-row gap-2 items-end">
               {/* Show yellow "प्रतिवेदन फारम" ONLY for Super Admin OR Employee of this assigned palika */}
-              {/* STRICTLY HIDDEN for Normal Users (सामान्य युजर्स) to prevent unauthorized editing */}
               {canAccessForm && (
                 <Link
                   href={selectedPalikaId ? `/local-reporting/palika/${selectedPalikaId}` : "#"}
@@ -207,7 +224,7 @@ export default function QuickPalikaFinder({ lang }: QuickPalikaFinderProps) {
                   }`}
                 >
                   <Lock className="w-3.5 h-3.5 shrink-0" />
-                  <span>प्रतिवेदन फारम</span>
+                  <span>{lang === "ne" ? "प्रतिवेदन फारम" : "Reporting Form"}</span>
                   <ArrowRight className="w-4 h-4 shrink-0" aria-hidden="true" />
                 </Link>
               )}
@@ -223,10 +240,14 @@ export default function QuickPalikaFinder({ lang }: QuickPalikaFinderProps) {
                     ? "bg-blue-600/30 hover:bg-blue-600/50 text-white border-blue-400/40 hover:border-blue-300 shadow-md cursor-pointer"
                     : "bg-white/5 text-slate-500 border-white/5 cursor-not-allowed pointer-events-none"
                 }`}
-                title="पालिका प्रतिवेदन हेर्नुहोस् (खुल्ला विवरण)"
+                title={lang === "ne" ? "पालिका प्रतिवेदन हेर्नुहोस् (खुल्ला विवरण)" : "View palika public report"}
               >
                 <Building className="w-4 h-4 shrink-0 text-amber-300" />
-                <span>{canAccessForm ? "प्रतिवेदन" : "📄 पालिका प्रतिवेदन हेर्नुहोस्"}</span>
+                <span>
+                  {canAccessForm 
+                    ? (lang === "ne" ? "प्रतिवेदन" : "Report") 
+                    : (lang === "ne" ? "📄 पालिका प्रतिवेदन हेर्नुहोस्" : "📄 View Palika Report")}
+                </span>
                 {!canAccessForm && <ArrowRight className="w-4 h-4 shrink-0 text-amber-300 ml-1" />}
               </Link>
             </div>
@@ -236,7 +257,7 @@ export default function QuickPalikaFinder({ lang }: QuickPalikaFinderProps) {
           {currentDistrict && (
             <div className="mt-4 pt-4 border-t border-white/10 relative z-10">
               <p className="text-xs font-semibold text-slate-300 mb-2">
-                {currentDistrict.name_ne} जिल्लाका स्थानीय तहहरू:
+                {lang === "ne" ? `${currentDistrict.name_ne} जिल्लाका स्थानीय तहहरू:` : `Local governments in ${currentDistrict.name_en} District:`}
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {palikas.map((p) => (
@@ -250,7 +271,7 @@ export default function QuickPalikaFinder({ lang }: QuickPalikaFinderProps) {
                         : "bg-white/5 text-slate-200 border-white/10 hover:bg-white/15"
                     }`}
                   >
-                    {p.name_ne}
+                    {lang === "ne" ? p.name_ne : p.name_en}
                   </button>
                 ))}
               </div>
@@ -262,7 +283,10 @@ export default function QuickPalikaFinder({ lang }: QuickPalikaFinderProps) {
             <div className="flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
               <span>
-                <strong>रोल-आधारित सुरक्षा:</strong> स्वीकृत कर्मचारीले आफ्नो स्थानीय तहको प्रतिवेदन भर्न पाउनेछन्। मुख्य प्रशासकलाई सबै १३७ पालिकाको पूर्ण निरीक्षण र स्वीकृत/पुनरावलोकन अधिकार।
+                <strong>{lang === "ne" ? "रोल-आधारित सुरक्षा:" : "Role-Based Access:"}</strong>{" "}
+                {lang === "ne" 
+                  ? "स्वीकृत कर्मचारीले आफ्नो स्थानीय तहको प्रतिवेदन भर्न पाउनेछन्। मुख्य प्रशासकलाई सबै १३७ पालिकाको पूर्ण निरीक्षण र स्वीकृत/पुनरावलोकन अधिकार।"
+                  : "Authorized staff can fill reports for their assigned palika. Super Admin has full oversight and review rights for all 137 palikas."}
               </span>
             </div>
 
@@ -272,7 +296,7 @@ export default function QuickPalikaFinder({ lang }: QuickPalikaFinderProps) {
                 href={`/local-reporting/palika/${assignedPalikaId}`}
                 className="inline-flex items-center gap-1 text-amber-300 hover:text-amber-200 font-bold underline shrink-0"
               >
-                <span>👉 मेरो पालिका ({assignedPalikaName}) को फारम भर्नुहोस्</span>
+                <span>{lang === "ne" ? `👉 मेरो पालिका (${assignedPalikaName}) को फारम भर्नुहोस्` : `👉 Fill Form for My Palika (${assignedPalikaName})`}</span>
               </Link>
             )}
 
@@ -282,7 +306,7 @@ export default function QuickPalikaFinder({ lang }: QuickPalikaFinderProps) {
                 onClick={() => openAuth("signin")}
                 className="text-amber-300 hover:text-amber-200 underline font-semibold cursor-pointer shrink-0"
               >
-                🔐 Sign Up / Sign In
+                🔐 {t.common.signInRegister}
               </button>
             )}
           </div>

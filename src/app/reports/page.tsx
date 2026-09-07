@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { KOSHI_DISTRICTS } from "@/lib/koshiGeography";
 import { translations, Language } from "@/lib/translations";
+import { useLanguage } from "@/lib/languageContext";
 import { 
   getCompiledPalikaReports, 
   calculateCompiledGrandTotals, 
@@ -70,7 +71,7 @@ export type ReportSubject =
   | 'comparison';
 
 export default function ReportsPage() {
-  const [lang, setLang] = useState<Language>("ne");
+  const { lang, setLang } = useLanguage();
   const [activeSubject, setActiveSubject] = useState<ReportSubject>("overall");
   const [selectedDistrictId, setSelectedDistrictId] = useState<string>("all");
   const [selectedFiscalYear, setSelectedFiscalYear] = useState<string>("2082_083");
@@ -145,83 +146,83 @@ export default function ReportsPage() {
   const subjectTabs = [
     { 
       id: 'overall' as ReportSubject, 
-      label: '१. समग्र प्रतिवेदन', 
+      label: lang === 'en' ? '1. Comprehensive Report' : '१. समग्र प्रतिवेदन', 
       icon: BarChart3, 
-      short: 'समग्र सारांश',
-      desc: 'कोशी प्रदेशको समग्र तथ्यांक तथा स्थिति',
-      badge: '३२,४५० पहिचान'
+      short: lang === 'en' ? 'Overall Summary' : 'समग्र सारांश',
+      desc: lang === 'en' ? 'Overall statistics and status of Koshi Province' : 'कोशी प्रदेशको समग्र तथ्यांक तथा स्थिति',
+      badge: lang === 'en' ? '32,450 Identified' : '३२,४५० पहिचान'
     },
     { 
       id: 'services' as ReportSubject, 
-      label: '२. सेवासुविधाहरू', 
+      label: lang === 'en' ? '2. Services & Facilities' : '२. सेवासुविधाहरू', 
       icon: HeartPulse, 
-      short: 'सेवा प्रवाह',
-      desc: 'परामर्श, थेरापी, उपचार र स्वास्थ्य बीमा',
-      badge: '२२,८६० लाभान्वित'
+      short: lang === 'en' ? 'Service Delivery' : 'सेवा प्रवाह',
+      desc: lang === 'en' ? 'Counseling, therapy, treatment & health insurance' : 'परामर्श, थेरापी, उपचार र स्वास्थ्य बीमा',
+      badge: lang === 'en' ? '22,860 Benefited' : '२२,८६० लाभान्वित'
     },
     { 
       id: 'social_security' as ReportSubject, 
-      label: '३. सामाजिक सुरक्षा', 
+      label: lang === 'en' ? '3. Social Security' : '३. सामाजिक सुरक्षा', 
       icon: ShieldCheck, 
-      short: 'सुरक्षा भत्ता',
-      desc: 'रातो/निलो कार्ड भत्ता, परिचयपत्र र वर्ग मिलान',
-      badge: '१३,९७० भत्ता प्राप्त'
+      short: lang === 'en' ? 'Security Allowance' : 'सुरक्षा भत्ता',
+      desc: lang === 'en' ? 'Red/Blue card allowance, ID cards & category alignment' : 'रातो/निलो कार्ड भत्ता, परिचयपत्र र वर्ग मिलान',
+      badge: lang === 'en' ? '13,970 Receiving Allowance' : '१३,९७० भत्ता प्राप्त'
     },
     { 
       id: 'employment' as ReportSubject, 
-      label: '४. रोजगार तथा उद्यम', 
+      label: lang === 'en' ? '4. Employment & Enterprise' : '४. रोजगार तथा उद्यम', 
       icon: Briefcase, 
-      short: 'रोजगार/सीप',
-      desc: 'सीप तालिम, रोजगारी, समूह र बिउपुँजी परिचालन',
-      badge: '२,७६० कार्यरत'
+      short: lang === 'en' ? 'Jobs / Skills' : 'रोजगार/सीप',
+      desc: lang === 'en' ? 'Skills training, employment, groups & seed capital mobilization' : 'सीप तालिम, रोजगारी, समूह र बिउपुँजी परिचालन',
+      badge: lang === 'en' ? '2,760 Working' : '२,७६० कार्यरत'
     },
     { 
       id: 'education' as ReportSubject, 
-      label: '५. शिक्षा र बालबालिका', 
+      label: lang === 'en' ? '5. Education & Children' : '५. शिक्षा र बालबालिका', 
       icon: GraduationCap, 
-      short: 'शिक्षा/बालबालिका',
-      desc: 'भर्ना, छात्रवृत्ति, घरमै शिक्षा र बाल क्लब',
-      badge: '४,१२० अध्ययनरत'
+      short: lang === 'en' ? 'Education / Children' : 'शिक्षा/बालबालिका',
+      desc: lang === 'en' ? 'Enrollment, scholarships, home-based education & child clubs' : 'भर्ना, छात्रवृत्ति, घरमै शिक्षा र बाल क्लब',
+      badge: lang === 'en' ? '4,120 Enrolled' : '४,१२० अध्ययनरत'
     },
     { 
       id: 'home_visits' as ReportSubject, 
-      label: '६. गृहभेट तथ्यांक', 
+      label: lang === 'en' ? '6. Home Visit Data' : '६. गृहभेट तथ्यांक', 
       icon: Home, 
-      short: 'गृहभेट सेवा',
-      desc: 'सहजकर्ताद्वारा घरमै पुगी गरिएको प्रत्यक्ष सेवा',
-      badge: '८,४२० गृहभेट'
+      short: lang === 'en' ? 'Home Visits' : 'गृहभेट सेवा',
+      desc: lang === 'en' ? 'Door-to-door direct services provided by facilitators' : 'सहजकर्ताद्वारा घरमै पुगी गरिएको प्रत्यक्ष सेवा',
+      badge: lang === 'en' ? '8,420 Home Visits' : '८,४२० गृहभेट'
     },
     { 
       id: 'assistive_devices' as ReportSubject, 
-      label: '७. सहायक सामग्री', 
+      label: lang === 'en' ? '7. Assistive Devices' : '७. सहायक सामग्री', 
       icon: PackageCheck, 
-      short: 'सामग्री वितरण',
-      desc: 'ह्वीलचेयर, सेतो छडी, श्रवण यन्त्र वितरण',
-      badge: '२,९४० थान'
+      short: lang === 'en' ? 'Device Distribution' : 'सामग्री वितरण',
+      desc: lang === 'en' ? 'Distribution of wheelchairs, white canes, hearing aids' : 'ह्वीलचेयर, सेतो छडी, श्रवण यन्त्र वितरण',
+      badge: lang === 'en' ? '2,940 Units' : '२,९४० थान'
     },
     { 
       id: 'demographics' as ReportSubject, 
-      label: '८. लैङ्गिक तथा प्रकारगत', 
+      label: lang === 'en' ? '8. Gender & Categorical' : '८. लैङ्गिक तथा प्रकारगत', 
       icon: Users, 
-      short: '१० प्रकार वर्गीकरण',
-      desc: '१० प्रकारका अपाङ्गता तथा कार्ड रंग विवरण',
-      badge: '१० प्रकारगत'
+      short: lang === 'en' ? '10 Types Classification' : '१० प्रकार वर्गीकरण',
+      desc: lang === 'en' ? '10 disability categories and card color breakdown' : '१० प्रकारका अपाङ्गता तथा कार्ड रंग विवरण',
+      badge: lang === 'en' ? '10 Types' : '१० प्रकारगत'
     },
     { 
       id: 'budget_governance' as ReportSubject, 
-      label: '९. संस्थागत र बजेट', 
+      label: lang === 'en' ? '9. Institutional & Budget' : '९. संस्थागत र बजेट', 
       icon: Coins, 
-      short: 'बजेट/सुशासन',
-      desc: 'पालिका बजेट, खर्च, DPO अनुदान र नीति प्रबन्ध',
-      badge: 'रु. १६.४ करोड बजेट'
+      short: lang === 'en' ? 'Budget / Governance' : 'बजेट/सुशासन',
+      desc: lang === 'en' ? 'Palika budget, expenditure, DPO grants & policy framework' : 'पालिका बजेट, खर्च, DPO अनुदान र नीति प्रबन्ध',
+      badge: lang === 'en' ? 'NPR 16.4 Cr Budget' : 'रु. १६.४ करोड बजेट'
     },
     { 
       id: 'comparison' as ReportSubject, 
-      label: '१०. स्थानीय तहगत तुलना', 
+      label: lang === 'en' ? '10. Local Body Comparison' : '१०. स्थानीय तहगत तुलना', 
       icon: GitCompare, 
-      short: 'पालिका तुलना',
-      desc: 'पालिकाहरूबीच बहु-सूचक तुलनात्मक विश्लेषण',
-      badge: '१३७ पालिका'
+      short: lang === 'en' ? 'Palika Comparison' : 'पालिका तुलना',
+      desc: lang === 'en' ? 'Multi-indicator comparative analysis across palikas' : 'पालिकाहरूबीच बहु-सूचक तुलनात्मक विश्लेषण',
+      badge: lang === 'en' ? '137 Palikas' : '१३७ पालिका'
     },
   ];
 
@@ -235,10 +236,15 @@ export default function ReportsPage() {
 
   // Current District Label
   const currentDistrictName = useMemo(() => {
-    if (selectedDistrictId === "all") return "कोशी प्रदेश समग्र (१४ वटै जिल्ला)";
+    if (selectedDistrictId === "all") {
+      return lang === 'en' ? "Koshi Province Overall (All 14 Districts)" : "कोशी प्रदेश समग्र (१४ वटै जिल्ला)";
+    }
     const d = KOSHI_DISTRICTS.find((dist) => dist.id === selectedDistrictId);
-    return d ? `${d.name_ne} जिल्ला (${d.local_governments.length} स्थानीय तह)` : "कोशी प्रदेश";
-  }, [selectedDistrictId]);
+    if (!d) return lang === 'en' ? "Koshi Province" : "कोशी प्रदेश";
+    return lang === 'en'
+      ? `${d.name_en} District (${d.local_governments.length} Local Bodies)`
+      : `${d.name_ne} जिल्ला (${d.local_governments.length} स्थानीय तह)`;
+  }, [selectedDistrictId, lang]);
 
   // Scaled Data for District / Province
   const scale = (val: number) => Math.round(val * filterMultiplier);
@@ -496,7 +502,7 @@ export default function ReportsPage() {
             className="flex-1 py-2.5 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-black flex items-center justify-center gap-2 text-slate-700 dark:text-slate-300 hover:text-blue-900 hover:bg-white/60 dark:hover:bg-slate-700 transition-all"
           >
             <Building2 className="w-4 h-4 text-blue-600 shrink-0" />
-            <span>१. पालिका प्रतिवेदन (स्थानीय तहगत)</span>
+            <span>{lang === 'en' ? '1. Palika Report (Local Body)' : '१. पालिका प्रतिवेदन (स्थानीय तहगत)'}</span>
           </Link>
           <Link
             href="/reports"
@@ -504,7 +510,7 @@ export default function ReportsPage() {
             aria-current="page"
           >
             <BarChart3 className="w-4 h-4 text-amber-300 shrink-0" />
-            <span>२. समग्र प्रतिवेदन (सबै १३७ पालिका कम्पाइल)</span>
+            <span>{lang === 'en' ? '2. Comprehensive Report (All 137 Palikas)' : '२. समग्र प्रतिवेदन (सबै १३७ पालिका कम्पाइल)'}</span>
           </Link>
         </div>
 
@@ -515,18 +521,20 @@ export default function ReportsPage() {
               <div className="flex flex-wrap items-center gap-2 mb-2">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-100 dark:bg-emerald-950/80 text-emerald-900 dark:text-emerald-300 rounded-full text-xs font-black uppercase tracking-wider border border-emerald-200 dark:border-emerald-800">
                   <BarChart3 className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400" aria-hidden="true" />
-                  कोशी प्रदेश एकीकृत डिजिटल केन्द्र
+                  {lang === 'en' ? 'Koshi Province Integrated Digital Center' : 'कोशी प्रदेश एकीकृत डिजिटल केन्द्र'}
                 </span>
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-amber-100 dark:bg-amber-950/80 text-amber-900 dark:text-amber-300 rounded-full text-xs font-bold border border-amber-200 dark:border-amber-800">
                   <Activity className="w-3 h-3 text-amber-600 dark:text-amber-400" />
-                  १४ जिल्लाका १३७ वटै स्थानीय तहको एकीकृत तथ्याङ्क
+                  {lang === 'en' ? 'Integrated Data of 137 Local Governments across 14 Districts' : '१४ जिल्लाका १३७ वटै स्थानीय तहको एकीकृत तथ्याङ्क'}
                 </span>
               </div>
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
-                अपाङ्गता सम्बन्धी समग्र प्रतिवेदन (कोशी प्रदेश)
+                {lang === 'en' ? 'Disability Comprehensive Report (Koshi Province)' : 'अपाङ्गता सम्बन्धी समग्र प्रतिवेदन (कोशी प्रदेश)'}
               </h1>
               <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 mt-2 max-w-3xl leading-relaxed">
-                कोशी प्रदेशका १४ जिल्लाका १३७ वटै स्थानीय तहको एकीकृत कम्पाइल प्रतिवेदन, जिल्लागत विवरण र १० वटा मुख्य विषयगत परिसूचकहरूको विस्तृत विश्लेषण।
+                {lang === 'en'
+                  ? 'Integrated compiled report of all 137 local bodies across 14 districts of Koshi Province, district-wise breakdowns, and detailed thematic analytics across 10 key indicators.'
+                  : 'कोशी प्रदेशका १४ जिल्लाका १३७ वटै स्थानीय तहको एकीकृत कम्पाइल प्रतिवेदन, जिल्लागत विवरण र १० वटा मुख्य विषयगत परिसूचकहरूको विस्तृत विश्लेषण।'}
               </p>
             </div>
 
@@ -536,28 +544,28 @@ export default function ReportsPage() {
                 type="button"
                 onClick={() => exportCompiledPalikasToExcel(filteredCompiledPalikas, currentDistrictName)}
                 className="px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-black flex items-center gap-2 shadow-md cursor-pointer transition-all hover:-translate-y-0.5"
-                title="सबै १३७ स्थानीय तहको कम्पाइल डाटा Excel मा डाउनलोड गर्नुहोस्"
+                title={lang === 'en' ? 'Download all 137 local bodies compiled data in Excel' : 'सबै १३७ स्थानीय तहको कम्पाइल डाटा Excel मा डाउनलोड गर्नुहोस्'}
               >
                 <FileSpreadsheet className="w-4 h-4 text-emerald-200" />
-                <span>📥 १३७ पालिका कम्पाइल Excel डाउनलोड</span>
+                <span>{lang === 'en' ? '📥 Download 137 Palikas Excel' : '📥 १३७ पालिका कम्पाइल Excel डाउनलोड'}</span>
               </button>
               <button
                 type="button"
                 onClick={handleExportFullReportExcel}
                 className="px-3.5 py-2.5 rounded-xl bg-blue-900 hover:bg-blue-800 text-white text-xs font-bold flex items-center gap-2 shadow-sm cursor-pointer transition-all"
-                title="१० वटै विषयगत सिटसहित Excel डाउनलोड गर्नुहोस्"
+                title={lang === 'en' ? 'Download 10 thematic sheets in Excel' : '१० वटै विषयगत सिटसहित Excel डाउनलोड गर्नुहोस्'}
               >
                 <FileSpreadsheet className="w-4 h-4 text-blue-200" />
-                <span>१० विषयगत Excel</span>
+                <span>{lang === 'en' ? '10 Thematic Excel' : '१० विषयगत Excel'}</span>
               </button>
               <button
                 type="button"
                 onClick={() => window.print()}
                 className="px-3.5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white text-xs font-bold flex items-center gap-2 shadow-sm cursor-pointer transition-all"
-                title="प्रिन्ट गर्नुहोस् वा PDF मा सेभ गर्नुहोस्"
+                title={lang === 'en' ? 'Print or Save as PDF' : 'प्रिन्ट गर्नुहोस् वा PDF मा सेभ गर्नुहोस्'}
               >
                 <Printer className="w-4 h-4 text-slate-300" />
-                <span>प्रिन्ट</span>
+                <span>{lang === 'en' ? 'Print' : 'प्रिन्ट'}</span>
               </button>
             </div>
           </div>
@@ -567,7 +575,7 @@ export default function ReportsPage() {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3.5 bg-white dark:bg-slate-900 rounded-2xl border-2 border-emerald-600/40 shadow-sm mb-6">
           <div className="flex items-center gap-2">
             <span className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider bg-emerald-100 dark:bg-emerald-950 px-3 py-1 rounded-lg border border-emerald-300 dark:border-emerald-800">
-              📊 समग्र प्रतिवेदन दृश्य छनौट:
+              {lang === 'en' ? '📊 Select Report View:' : '📊 समग्र प्रतिवेदन दृश्य छनौट:'}
             </span>
           </div>
 
@@ -582,9 +590,9 @@ export default function ReportsPage() {
               }`}
             >
               <FileSpreadsheet className="w-4 h-4 text-amber-300" />
-              <span>सबै १३७ स्थानीय तहको कम्पाइल प्रतिवेदन</span>
+              <span>{lang === 'en' ? 'All 137 Palikas Compiled Report' : 'सबै १३७ स्थानीय तहको कम्पाइल प्रतिवेदन'}</span>
               <span className="px-2 py-0.5 rounded-full text-[10px] bg-emerald-950 text-emerald-100">
-                तालिका दृश्य
+                {lang === 'en' ? 'Table View' : 'तालिका दृश्य'}
               </span>
             </button>
 
@@ -598,9 +606,9 @@ export default function ReportsPage() {
               }`}
             >
               <BarChart3 className="w-4 h-4 text-amber-300" />
-              <span>१० विषयगत समग्र विश्लेषण</span>
+              <span>{lang === 'en' ? '10 Thematic Overall Analytics' : '१० विषयगत समग्र विश्लेषण'}</span>
               <span className="px-2 py-0.5 rounded-full text-[10px] bg-blue-950 text-blue-200">
-                ग्राफिक्स दृश्य
+                {lang === 'en' ? 'Visuals & Charts' : 'ग्राफिक्स दृश्य'}
               </span>
             </button>
           </div>
@@ -618,13 +626,15 @@ export default function ReportsPage() {
                 <div>
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-100 dark:bg-emerald-950 text-emerald-900 dark:text-emerald-300 rounded-full text-xs font-black uppercase tracking-wider border border-emerald-300 dark:border-emerald-800 mb-1.5">
                     <Building2 className="w-3.5 h-3.5" />
-                    कोशी प्रदेशका सबै १३७ स्थानीय तह
+                    {lang === 'en' ? 'All 137 Local Governments of Koshi' : 'कोशी प्रदेशका सबै १३७ स्थानीय तह'}
                   </span>
                   <h2 id="compiled-palikas-heading" className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
-                    स्थानीय तहहरूको एकीकृत कम्पाइल प्रतिवेदन तालिका
+                    {lang === 'en' ? 'Local Governments Master Compiled Report Table' : 'स्थानीय तहहरूको एकीकृत कम्पाइल प्रतिवेदन तालिका'}
                   </h2>
                   <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-                    १४ वटै जिल्लाका महानगर, उपमहानगर, नगर र गाउँपालिकाको वार्षिक तथ्याङ्क तथा कार्यसम्पादन
+                    {lang === 'en'
+                      ? 'Annual statistics and performance indicators across all 14 districts (Metropolitan, Sub-metro, Municipalities & Rural Municipalities)'
+                      : '१४ वटै जिल्लाका महानगर, उपमहानगर, नगर र गाउँपालिकाको वार्षिक तथ्याङ्क तथा कार्यसम्पादन'}
                   </p>
                 </div>
 
@@ -634,10 +644,10 @@ export default function ReportsPage() {
                     type="button"
                     onClick={() => exportCompiledPalikasToExcel(filteredCompiledPalikas, currentDistrictName)}
                     className="px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-black flex items-center gap-2 shadow-md cursor-pointer transition-all hover:-translate-y-0.5"
-                    title="सबै १३७ पालिकाको कम्पाइल डाटा Excel मा डाउनलोड गर्नुहोस्"
+                    title={lang === 'en' ? 'Download all 137 local bodies compiled data in Excel' : 'सबै १३७ पालिकाको कम्पाइल डाटा Excel मा डाउनलोड गर्नुहोस्'}
                   >
                     <FileSpreadsheet className="w-4 h-4 text-emerald-200" />
-                    <span>📥 १३७ पालिका कम्पाइल Excel (.xlsx) डाउनलोड</span>
+                    <span>{lang === 'en' ? '📥 Download 137 Palikas Excel (.xlsx)' : '📥 १३७ पालिका कम्पाइल Excel (.xlsx) डाउनलोड'}</span>
                   </button>
                   <button
                     type="button"
@@ -645,7 +655,7 @@ export default function ReportsPage() {
                     className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold flex items-center gap-2 border border-slate-700 cursor-pointer"
                   >
                     <Printer className="w-4 h-4 text-slate-300" />
-                    <span>प्रिन्ट</span>
+                    <span>{lang === 'en' ? 'Print' : 'प्रिन्ट'}</span>
                   </button>
                 </div>
               </div>
@@ -655,7 +665,7 @@ export default function ReportsPage() {
                 {/* District Filter */}
                 <div>
                   <label htmlFor="compiled-district-filter" className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-                    १. जिल्ला छनौट ({KOSHI_DISTRICTS.length} जिल्ला)
+                    {lang === 'en' ? `1. Select District (${KOSHI_DISTRICTS.length} Districts)` : `१. जिल्ला छनौट (${KOSHI_DISTRICTS.length} जिल्ला)`}
                   </label>
                   <select
                     id="compiled-district-filter"
@@ -663,10 +673,12 @@ export default function ReportsPage() {
                     onChange={(e) => setSelectedDistrictId(e.target.value)}
                     className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-emerald-600 cursor-pointer"
                   >
-                    <option value="all">कोशी प्रदेश समग्र (१४ वटै जिल्ला - १३७ स्थानीय तह)</option>
+                    <option value="all">
+                      {lang === 'en' ? 'Koshi Province Overall (14 Districts - 137 Local Bodies)' : 'कोशी प्रदेश समग्र (१४ वटै जिल्ला - १३७ स्थानीय तह)'}
+                    </option>
                     {KOSHI_DISTRICTS.map((d, i) => (
                       <option key={d.id} value={d.id}>
-                        {i + 1}. {d.name_ne} जिल्ला ({d.local_governments.length} स्थानीय तह)
+                        {i + 1}. {lang === 'en' ? d.name_en : d.name_ne} {lang === 'en' ? 'District' : 'जिल्ला'} ({d.local_governments.length} {lang === 'en' ? 'Local Bodies' : 'स्थानीय तह'})
                       </option>
                     ))}
                   </select>
@@ -675,7 +687,7 @@ export default function ReportsPage() {
                 {/* Municipality Type Filter */}
                 <div>
                   <label htmlFor="compiled-type-filter" className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-                    २. स्थानीय तहको प्रकार
+                    {lang === 'en' ? '2. Local Government Type' : '२. स्थानीय तहको प्रकार'}
                   </label>
                   <select
                     id="compiled-type-filter"
@@ -683,25 +695,27 @@ export default function ReportsPage() {
                     onChange={(e) => setCompiledTypeFilter(e.target.value)}
                     className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-emerald-600 cursor-pointer"
                   >
-                    <option value="all">सबै प्रकार (महानगर, उपमहानगर, नगर, गाउँ)</option>
-                    <option value="महानगरपालिका">महानगरपालिका</option>
-                    <option value="उपमहानगरपालिका">उपमहानगरपालिका</option>
-                    <option value="नगरपालिका">नगरपालिका</option>
-                    <option value="गाउँपालिका">गाउँपालिका</option>
+                    <option value="all">
+                      {lang === 'en' ? 'All Types (Metropolitan, Sub-metro, Urban, Rural)' : 'सबै प्रकार (महानगर, उपमहानगर, नगर, गाउँ)'}
+                    </option>
+                    <option value="महानगरपालिका">{lang === 'en' ? 'Metropolitan City' : 'महानगरपालिका'}</option>
+                    <option value="उपमहानगरपालिका">{lang === 'en' ? 'Sub-metropolitan City' : 'उपमहानगरपालिका'}</option>
+                    <option value="नगरपालिका">{lang === 'en' ? 'Municipality' : 'नगरपालिका'}</option>
+                    <option value="गाउँपालिका">{lang === 'en' ? 'Rural Municipality' : 'गाउँपालिका'}</option>
                   </select>
                 </div>
 
                 {/* Search by Palika Name */}
                 <div>
                   <label htmlFor="compiled-search-input" className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-                    ३. पालिकाको नामबाट खोजी
+                    {lang === 'en' ? '3. Search by Palika Name' : '३. पालिकाको नामबाट खोजी'}
                   </label>
                   <div className="relative">
                     <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
                     <input
                       id="compiled-search-input"
                       type="search"
-                      placeholder="पालिका वा जिल्लाको नाम..."
+                      placeholder={lang === 'en' ? 'Search municipality or district name...' : 'पालिका वा जिल्लाको नाम...'}
                       value={compiledPalikaSearch}
                       onChange={(e) => setCompiledPalikaSearch(e.target.value)}
                       className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl pl-9 pr-3 py-2 text-xs font-semibold text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-emerald-600"
@@ -722,7 +736,7 @@ export default function ReportsPage() {
                       className="w-full py-2 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold flex items-center justify-center gap-1.5 border border-slate-300 dark:border-slate-700 transition-colors cursor-pointer"
                     >
                       <RotateCcw className="w-3.5 h-3.5" />
-                      <span>फिल्टर हटाउनुहोस्</span>
+                      <span>{lang === 'en' ? 'Reset Filters' : 'फिल्टर हटाउनुहोस्'}</span>
                     </button>
                   )}
                 </div>
@@ -1419,16 +1433,16 @@ export default function ReportsPage() {
                   <div>
                     <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
                       <FileSpreadsheet className="w-5 h-5 text-emerald-600" />
-                      <span>स्थानीय तहहरूको सम्पूर्ण ५५+ तथ्यांक कम्पाइल तालिका</span>
+                      <span>{lang === 'en' ? 'Local Governments Master 55+ Indicators Compiled Table' : 'स्थानीय तहहरूको सम्पूर्ण ५५+ तथ्यांक कम्पाइल तालिका'}</span>
                     </h3>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                      तलको स्तम्भ समूह छनौट गरेर फारममा भरिने सम्पूर्ण विषयगत अंकहरू हेर्नुहोस्
+                      {lang === 'en' ? 'Select column group below to inspect all thematic indicators collected across local bodies' : 'तलको स्तम्भ समूह छनौट गरेर फारममा भरिने सम्पूर्ण विषयगत अंकहरू हेर्नुहोस्'}
                     </p>
                   </div>
 
                   <div className="flex items-center gap-3">
                     <div className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                      प्रति पृष्ठ:
+                      {lang === 'en' ? 'Per Page:' : 'प्रति पृष्ठ:'}
                     </div>
                     <div className="flex items-center bg-white dark:bg-slate-700 p-0.5 rounded-xl border border-slate-200 dark:border-slate-600">
                       {[25, 50, 137].map((sz) => (
@@ -1445,7 +1459,7 @@ export default function ReportsPage() {
                               : "text-slate-600 dark:text-slate-300 hover:text-slate-900"
                           }`}
                         >
-                          {sz === 137 ? "सबै १३७" : `${sz}`}
+                          {sz === 137 ? (lang === 'en' ? 'All 137' : 'सबै १३७') : `${sz}`}
                         </button>
                       ))}
                     </div>
@@ -1455,19 +1469,19 @@ export default function ReportsPage() {
                 {/* THEMATIC COLUMN SET SELECTOR TABS */}
                 <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
                   <span className="text-xs font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap mr-1">
-                    स्तम्भ समूह:
+                    {lang === 'en' ? 'Columns:' : 'स्तम्भ समूह:'}
                   </span>
                   {[
-                    { id: "summary", label: "🌟 १. मुख्य एकीकृत सारांश" },
-                    { id: "demographics", label: "👥 २. जनसांख्यिकी (Q1-Q9)" },
-                    { id: "cards", label: "🪪 ३. परिचयपत्र ४ वर्ग (Q35)" },
-                    { id: "disability_types", label: "🩺 ४. १० प्रकार (Q34)" },
-                    { id: "ssa", label: "🛡️ ५. भत्ता & बीमा (Q24-27)" },
-                    { id: "services", label: "🤝 ६. सेवा & पुनर्स्थापना (Q10-13)" },
-                    { id: "education", label: "🎓 ७. शिक्षा & बाल (Q14-20)" },
-                    { id: "livelihood", label: "💼 ८. सीप, रोजगार & कोष (Q21-29)" },
-                    { id: "budget_infra", label: "💰 ९. बजेट & पूर्वाधार (Q30-42)" },
-                    { id: "all_columns", label: "🌐 १०. सम्पूर्ण सबै स्तम्भहरू (५५+)" },
+                    { id: "summary", label: lang === 'en' ? "🌟 1. Integrated Summary" : "🌟 १. मुख्य एकीकृत सारांश" },
+                    { id: "demographics", label: lang === 'en' ? "👥 2. Demographics (Q1-9)" : "👥 २. जनसांख्यिकी (Q1-Q9)" },
+                    { id: "cards", label: lang === 'en' ? "🪪 3. 4 Card Categories (Q35)" : "🪪 ३. परिचयपत्र ४ वर्ग (Q35)" },
+                    { id: "disability_types", label: lang === 'en' ? "🩺 4. 10 Types (Q34)" : "🩺 ४. १० प्रकार (Q34)" },
+                    { id: "ssa", label: lang === 'en' ? "🛡️ 5. Allowance & Insurance (Q24-27)" : "🛡️ ५. भत्ता & बीमा (Q24-27)" },
+                    { id: "services", label: lang === 'en' ? "🤝 6. Services & Rehab (Q10-13)" : "🤝 ६. सेवा & पुनर्स्थापना (Q10-13)" },
+                    { id: "education", label: lang === 'en' ? "🎓 7. Education & Children (Q14-20)" : "🎓 ७. शिक्षा & बाल (Q14-20)" },
+                    { id: "livelihood", label: lang === 'en' ? "💼 8. Livelihood & Fund (Q21-29)" : "💼 ८. सीप, रोजगार & कोष (Q21-29)" },
+                    { id: "budget_infra", label: lang === 'en' ? "💰 9. Budget & Infra (Q30-42)" : "💰 ९. बजेट & पूर्वाधार (Q30-42)" },
+                    { id: "all_columns", label: lang === 'en' ? "🌐 10. All Columns (55+)" : "🌐 १०. सम्पूर्ण सबै स्तम्भहरू (५५+)" },
                   ].map((tab) => (
                     <button
                       key={tab.id}
@@ -1490,10 +1504,10 @@ export default function ReportsPage() {
                 <table className="min-w-full text-xs text-left border-collapse">
                   <thead className="bg-blue-950 text-white font-bold sticky top-0 z-20 shadow-xs">
                     <tr>
-                      <th scope="col" className="p-3 text-center w-12 border-b border-blue-900 sticky left-0 bg-blue-950 z-30">सि.नं.</th>
-                      <th scope="col" className="p-3 min-w-[200px] border-b border-blue-900 sticky left-12 bg-blue-950 z-30">स्थानीय तहको नाम</th>
-                      <th scope="col" className="p-3 border-b border-blue-900">जिल्ला</th>
-                      <th scope="col" className="p-3 text-center border-b border-blue-900">वडा</th>
+                      <th scope="col" className="p-3 text-center w-12 border-b border-blue-900 sticky left-0 bg-blue-950 z-30">{lang === 'en' ? 'S.N.' : 'सि.नं.'}</th>
+                      <th scope="col" className="p-3 min-w-[200px] border-b border-blue-900 sticky left-12 bg-blue-950 z-30">{lang === 'en' ? 'Local Government Name' : 'स्थानीय तहको नाम'}</th>
+                      <th scope="col" className="p-3 border-b border-blue-900">{lang === 'en' ? 'District' : 'जिल्ला'}</th>
+                      <th scope="col" className="p-3 text-center border-b border-blue-900">{lang === 'en' ? 'Wards' : 'वडा'}</th>
 
                       {/* Dynamic Columns based on compiledColumnSet */}
                       {(compiledColumnSet === "summary" || compiledColumnSet === "all_columns") && (
@@ -1626,7 +1640,7 @@ export default function ReportsPage() {
                     {paginatedPalikas.length === 0 ? (
                       <tr>
                         <td colSpan={18} className="p-8 text-center text-slate-500">
-                          कुनै पनि स्थानीय तह फेला परेन। कृपया फिल्टर वा सर्च सच्याउनुहोस्।
+                          {lang === 'en' ? 'No local governments matched your filters. Please try resetting filters or searching with different keywords.' : 'कुनै पनि स्थानीय तह फेला परेन। कृपया फिल्टर वा सर्च सच्याउनुहोस्।'}
                         </td>
                       </tr>
                     ) : (
@@ -1642,7 +1656,7 @@ export default function ReportsPage() {
                             </td>
                             <td className="p-3 font-bold text-slate-900 dark:text-white sticky left-12 bg-white dark:bg-slate-900 group-hover:bg-blue-50/70 dark:group-hover:bg-slate-800/60 z-10">
                               <div className="flex items-center gap-1.5">
-                                <span>{p.name_ne}</span>
+                                <span>{lang === 'en' ? p.name_en : p.name_ne}</span>
                                 <span className={`text-[10px] font-semibold px-1.5 py-0.2 rounded-md ${
                                   p.type === "महानगरपालिका" 
                                     ? "bg-purple-100 text-purple-900" 
@@ -1652,13 +1666,15 @@ export default function ReportsPage() {
                                     ? "bg-emerald-100 text-emerald-900"
                                     : "bg-slate-100 text-slate-700"
                                 }`}>
-                                  {p.type === "महानगरपालिका" ? "म.न.पा." : p.type === "उपमहानगरपालिका" ? "उप.म.न.पा." : p.type === "नगरपालिका" ? "न.पा." : "गा.पा."}
+                                  {lang === 'en'
+                                    ? (p.type === "महानगरपालिका" ? "Metro" : p.type === "उपमहानगरपालिका" ? "Sub-metro" : p.type === "नगरपालिका" ? "Mun" : "Rural Mun")
+                                    : (p.type === "महानगरपालिका" ? "म.न.पा." : p.type === "उपमहानगरपालिका" ? "उप.म.न.पा." : p.type === "नगरपालिका" ? "न.पा." : "गा.पा.")}
                                 </span>
                               </div>
-                              <span className="text-[10px] text-slate-400 font-normal block">{p.name_en}</span>
+                              <span className="text-[10px] text-slate-400 font-normal block">{lang === 'en' ? p.name_ne : p.name_en}</span>
                             </td>
                             <td className="p-3 text-slate-600 dark:text-slate-400 font-medium">
-                              {p.districtName_ne}
+                              {lang === 'en' ? p.districtName_en : p.districtName_ne}
                             </td>
                             <td className="p-3 text-center font-mono text-slate-500">
                               {p.total_wards}
@@ -1803,7 +1819,7 @@ export default function ReportsPage() {
                                   ? "bg-emerald-100 text-emerald-800"
                                   : "bg-amber-100 text-amber-800"
                               }`}>
-                                {p.submissionStatus === 'submitted' ? 'पेश' : 'मस्यौदा'}
+                                {p.submissionStatus === 'submitted' ? (lang === 'en' ? 'Submitted' : 'पेश') : (lang === 'en' ? 'Draft' : 'मस्यौदा')}
                               </span>
                             </td>
 
@@ -1811,10 +1827,10 @@ export default function ReportsPage() {
                               <Link
                                 href={`/local-reporting/palika/${p.id}/profile`}
                                 className="px-2.5 py-1.5 rounded-lg bg-blue-900 hover:bg-blue-800 text-white font-bold text-[11px] inline-flex items-center gap-1 shadow-xs transition-colors"
-                                title={`${p.name_ne} को व्यक्तिगत प्रतिवेदन हेर्नुहोस्`}
+                                title={lang === 'en' ? `View individual report for ${p.name_en}` : `${p.name_ne} को व्यक्तिगत प्रतिवेदन हेर्नुहोस्`}
                               >
                                 <FileText className="w-3 h-3 text-amber-400" />
-                                <span>प्रतिवेदन</span>
+                                <span>{lang === 'en' ? 'Report' : 'प्रतिवेदन'}</span>
                                 <ArrowRight className="w-3 h-3 text-blue-200" />
                               </Link>
                             </td>
@@ -1828,7 +1844,7 @@ export default function ReportsPage() {
                   <tfoot className="bg-slate-900 text-white font-black sticky bottom-0 z-20 shadow-md">
                     <tr>
                       <td colSpan={4} className="p-3 text-center font-bold uppercase tracking-wider text-amber-400 sticky left-0 bg-slate-900 z-30">
-                        जम्मा कुल योगफल ({filteredCompiledPalikas.length} स्थानीय तह)
+                        {lang === 'en' ? `Grand Total Sum (${filteredCompiledPalikas.length} Local Bodies)` : `जम्मा कुल योगफल (${filteredCompiledPalikas.length} स्थानीय तह)`}
                       </td>
 
                       {(compiledColumnSet === "summary" || compiledColumnSet === "all_columns") && (
@@ -1967,7 +1983,11 @@ export default function ReportsPage() {
               {totalTablePages > 1 && (
                 <div className="p-4 bg-slate-50 dark:bg-slate-800/60 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
                   <div className="text-xs text-slate-600 dark:text-slate-400 font-medium">
-                    देखाउँदै: <strong>{(tablePage - 1) * tablePageSize + 1}</strong> देखि <strong>{Math.min(tablePage * tablePageSize, filteredCompiledPalikas.length)}</strong> सम्म (कुल <strong>{filteredCompiledPalikas.length}</strong> स्थानीय तह मध्ये)
+                    {lang === 'en' ? (
+                      <>Showing: <strong>{(tablePage - 1) * tablePageSize + 1}</strong> to <strong>{Math.min(tablePage * tablePageSize, filteredCompiledPalikas.length)}</strong> (of <strong>{filteredCompiledPalikas.length}</strong> local bodies)</>
+                    ) : (
+                      <>देखाउँदै: <strong>{(tablePage - 1) * tablePageSize + 1}</strong> देखि <strong>{Math.min(tablePage * tablePageSize, filteredCompiledPalikas.length)}</strong> सम्म (कुल <strong>{filteredCompiledPalikas.length}</strong> स्थानीय तह मध्ये)</>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-1.5">
@@ -1977,7 +1997,7 @@ export default function ReportsPage() {
                       onClick={() => setTablePage((p) => Math.max(1, p - 1))}
                       className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-xs font-bold text-slate-700 dark:text-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 cursor-pointer shadow-2xs"
                     >
-                      ◀ अघिल्लो पृष्ठ
+                      {lang === 'en' ? '◀ Previous' : '◀ अघिल्लो पृष्ठ'}
                     </button>
 
                     <div className="flex items-center gap-1">
@@ -2003,7 +2023,7 @@ export default function ReportsPage() {
                       onClick={() => setTablePage((p) => Math.min(totalTablePages, p + 1))}
                       className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-xs font-bold text-slate-700 dark:text-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 cursor-pointer shadow-2xs"
                     >
-                      अर्को पृष्ठ ▶
+                      {lang === 'en' ? 'Next ▶' : 'अर्को पृष्ठ ▶'}
                     </button>
                   </div>
                 </div>
@@ -2021,13 +2041,13 @@ export default function ReportsPage() {
 
         {/* Global Filter Bar */}
         <section aria-labelledby="report-filter-heading" className="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-xs mb-6">
-          <h2 id="report-filter-heading" className="sr-only">रिपोर्ट फिल्टरहरू</h2>
+          <h2 id="report-filter-heading" className="sr-only">{lang === 'en' ? 'Report Filters' : 'रिपोर्ट फिल्टरहरू'}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
             
             {/* District Filter */}
             <div>
               <label htmlFor="report-district" className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-                जिल्ला छनौट
+                {lang === 'en' ? 'Select District' : 'जिल्ला छनौट'}
               </label>
               <select
                 id="report-district"
@@ -2035,10 +2055,12 @@ export default function ReportsPage() {
                 onChange={(e) => setSelectedDistrictId(e.target.value)}
                 className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-600 cursor-pointer"
               >
-                <option value="all">कोशी प्रदेश समग्र (१४ वटै जिल्ला - १३७ स्थानीय तह)</option>
+                <option value="all">
+                  {lang === 'en' ? 'Koshi Province Overall (14 Districts - 137 Local Bodies)' : 'कोशी प्रदेश समग्र (१४ वटै जिल्ला - १३७ स्थानीय तह)'}
+                </option>
                 {KOSHI_DISTRICTS.map((d, i) => (
                   <option key={d.id} value={d.id}>
-                    {i + 1}. {d.name_ne} जिल्ला ({d.local_governments.length} स्थानीय तह)
+                    {i + 1}. {lang === 'en' ? d.name_en : d.name_ne} {lang === 'en' ? 'District' : 'जिल्ला'} ({d.local_governments.length} {lang === 'en' ? 'Local Bodies' : 'स्थानीय तह'})
                   </option>
                 ))}
               </select>
@@ -2047,7 +2069,7 @@ export default function ReportsPage() {
             {/* Fiscal Year Filter */}
             <div>
               <label htmlFor="report-fy" className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-                आर्थिक वर्ष
+                {lang === 'en' ? 'Fiscal Year' : 'आर्थिक वर्ष'}
               </label>
               <select
                 id="report-fy"
@@ -2055,8 +2077,8 @@ export default function ReportsPage() {
                 onChange={(e) => setSelectedFiscalYear(e.target.value)}
                 className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-600 cursor-pointer"
               >
-                <option value="2082_083">२०८२/०८३ (हालको आ.व. - चालु)</option>
-                <option value="2081_082">२०८१/०८२ (अघिल्लो आ.व. - अन्तिम)</option>
+                <option value="2082_083">{lang === 'en' ? 'FY 2082/083 (Current FY - Ongoing)' : '२०८२/०८३ (हालको आ.व. - चालु)'}</option>
+                <option value="2081_082">{lang === 'en' ? 'FY 2081/082 (Previous FY - Final)' : '२०८१/०८२ (अघिल्लो आ.व. - अन्तिम)'}</option>
               </select>
             </div>
 
@@ -2073,7 +2095,7 @@ export default function ReportsPage() {
                 aria-pressed={viewTableMode}
               >
                 <TableIcon className="w-4 h-4 text-amber-400" />
-                <span>{viewTableMode ? "ग्राफिक्स / कार्ड दृश्यमा फर्कनुहोस्" : "पहुँचयुक्त डाटा तालिका (Table View)"}</span>
+                <span>{viewTableMode ? (lang === 'en' ? 'Back to Graphics / Card View' : 'ग्राफिक्स / कार्ड दृश्यमा फर्कनुहोस्') : (lang === 'en' ? 'Accessible Table View' : 'पहुँचयुक्त डाटा तालिका (Table View)')}</span>
               </button>
             </div>
 

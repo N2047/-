@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/lib/authContext";
 import { AccessibilityProvider } from "@/lib/accessibilityContext";
+import { LanguageProvider } from "@/lib/languageContext";
 import DicChatbot from "@/components/chat/DicChatbot";
 
 export const metadata: Metadata = {
@@ -23,6 +24,10 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               try {
+                var lang = localStorage.getItem("dic_language_preference");
+                if (lang === "en" || lang === "ne") {
+                  document.documentElement.lang = lang;
+                }
                 var s = localStorage.getItem("dic_accessibility_settings");
                 if (s) {
                   var p = JSON.parse(s);
@@ -46,12 +51,14 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased min-h-screen flex flex-col" suppressHydrationWarning>
-        <AuthProvider>
-          <AccessibilityProvider>
-            {children}
-            <DicChatbot />
-          </AccessibilityProvider>
-        </AuthProvider>
+        <LanguageProvider>
+          <AuthProvider>
+            <AccessibilityProvider>
+              {children}
+              <DicChatbot />
+            </AccessibilityProvider>
+          </AuthProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

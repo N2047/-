@@ -47,8 +47,10 @@ export default function NewsEditorModal({
   // Section 1: Headline & Classification
   const [category, setCategory] = useState<NewsArticle['category']>("सूचना");
   const [titleNe, setTitleNe] = useState("");
+  const [titleEn, setTitleEn] = useState("");
   const [publishedDateBs, setPublishedDateBs] = useState("२०८२/०५/२१");
   const [author, setAuthor] = useState("अपाङ्गता सूचना केन्द्र, विराटनगर");
+  const [authorEn, setAuthorEn] = useState("");
 
   // Section 2: Media (Image or Video - Optional)
   const [mediaType, setMediaType] = useState<"none" | "image" | "video">("none");
@@ -57,7 +59,9 @@ export default function NewsEditorModal({
 
   // Section 3: Text Content Below Media
   const [summaryNe, setSummaryNe] = useState("");
+  const [summaryEn, setSummaryEn] = useState("");
   const [contentNe, setContentNe] = useState("");
+  const [contentEn, setContentEn] = useState("");
   const [tagsStr, setTagsStr] = useState("");
   const [attachmentName, setAttachmentName] = useState("");
   const [attachmentSize, setAttachmentSize] = useState("");
@@ -74,8 +78,10 @@ export default function NewsEditorModal({
       if (articleToEdit) {
         setCategory(articleToEdit.category);
         setTitleNe(articleToEdit.title_ne);
+        setTitleEn(articleToEdit.title_en || "");
         setPublishedDateBs(articleToEdit.published_date_bs || "२०८२/०५/२१");
         setAuthor(articleToEdit.author || "अपाङ्गता सूचना केन्द्र, विराटनगर");
+        setAuthorEn(articleToEdit.author_en || "");
         
         // Media setup
         setImageUrl(articleToEdit.image_url || "");
@@ -89,7 +95,9 @@ export default function NewsEditorModal({
         }
 
         setSummaryNe(articleToEdit.summary_ne);
+        setSummaryEn(articleToEdit.summary_en || "");
         setContentNe(articleToEdit.content_ne);
+        setContentEn(articleToEdit.content_en || "");
         setTagsStr(articleToEdit.tags?.join(", ") || "");
         setAttachmentName(articleToEdit.attachment_name || "");
         setAttachmentSize(articleToEdit.attachment_size || "");
@@ -97,13 +105,17 @@ export default function NewsEditorModal({
         // Reset to default for new article
         setCategory("सूचना");
         setTitleNe("");
+        setTitleEn("");
         setPublishedDateBs("२०८२/०५/२१");
         setAuthor("अपाङ्गता सूचना केन्द्र, विराटनगर");
+        setAuthorEn("Disability Information Center, Biratnagar");
         setMediaType("none");
         setImageUrl("");
         setVideoUrl("");
         setSummaryNe("");
+        setSummaryEn("");
         setContentNe("");
+        setContentEn("");
         setTagsStr("सूचना, अपाङ्गता, कोशी प्रदेश");
         setAttachmentName("");
         setAttachmentSize("");
@@ -147,13 +159,17 @@ export default function NewsEditorModal({
     const payload = {
       category,
       title_ne: titleNe.trim(),
+      title_en: titleEn.trim() || undefined,
       published_date_bs: publishedDateBs.trim(),
       author: author.trim(),
+      author_en: authorEn.trim() || undefined,
       // Media is optional
       image_url: mediaType === "image" && imageUrl.trim() ? imageUrl.trim() : undefined,
       video_url: mediaType === "video" && videoUrl.trim() ? videoUrl.trim() : undefined,
       summary_ne: summaryNe.trim(),
+      summary_en: summaryEn.trim() || undefined,
       content_ne: contentNe.trim(),
+      content_en: contentEn.trim() || undefined,
       tags,
       attachment_name: attachmentName.trim() || undefined,
       attachment_size: attachmentSize.trim() || undefined,
@@ -278,7 +294,7 @@ export default function NewsEditorModal({
             {/* Headline / Title */}
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                मुख्य हेडलाइन / शीर्षक <span className="text-rose-600">*</span>
+                मुख्य हेडलाइन / शीर्षक (नेपाली) <span className="text-rose-600">*</span>
               </label>
               <input
                 type="text"
@@ -287,6 +303,21 @@ export default function NewsEditorModal({
                 onChange={(e) => setTitleNe(e.target.value)}
                 required
                 className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-bold focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
+              />
+            </div>
+
+            {/* English Headline */}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center justify-between">
+                <span>अंग्रेजी शीर्षक (English Headline)</span>
+                <span className="text-[11px] font-normal text-blue-600 dark:text-blue-400">English Mode को लागि</span>
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. Disability Assistance Facilitator Annual Report Submissions Open for FY 2082/083"
+                value={titleEn}
+                onChange={(e) => setTitleEn(e.target.value)}
+                className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2 text-sm focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
               />
             </div>
 
@@ -327,7 +358,7 @@ export default function NewsEditorModal({
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1">
                   <Building2 className="w-3.5 h-3.5 text-slate-400" />
-                  प्रकाशक निकाय
+                  प्रकाशक निकाय (Publisher)
                 </label>
                 <input
                   type="text"
@@ -534,7 +565,7 @@ export default function NewsEditorModal({
             {/* Summary */}
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                संक्षिप्त सारांश (Short Summary) <span className="text-rose-600">*</span>
+                संक्षिप्त सारांश (नेपाली सारांश) <span className="text-rose-600">*</span>
               </label>
               <textarea
                 rows={2}
@@ -546,18 +577,51 @@ export default function NewsEditorModal({
               />
             </div>
 
+            {/* English Summary */}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center justify-between">
+                <span>अंग्रेजी संक्षिप्त सारांश (English Summary)</span>
+                <span className="text-[11px] font-normal text-blue-600 dark:text-blue-400">English Mode को लागि</span>
+              </label>
+              <textarea
+                rows={2}
+                placeholder="Brief summary in English for international / English mode readers..."
+                value={summaryEn}
+                onChange={(e) => setSummaryEn(e.target.value)}
+                className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-600 focus:outline-hidden resize-none"
+              />
+            </div>
+
             {/* Full Detailed Text */}
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1">
                 <FileText className="w-3.5 h-3.5 text-slate-400" />
-                विस्तृत व्यहोरा / पूर्ण विवरण (Full Content Body) <span className="text-rose-600">*</span>
+                विस्तृत व्यहोरा / पूर्ण विवरण (नेपालीमा) <span className="text-rose-600">*</span>
               </label>
               <textarea
-                rows={6}
+                rows={5}
                 placeholder="सम्पूर्ण विवरण, बुँदाहरू वा निर्णयको पूर्ण व्यहोरा यहाँ प्रविष्टि गर्नुहोस्..."
                 value={contentNe}
                 onChange={(e) => setContentNe(e.target.value)}
                 required
+                className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
+              />
+            </div>
+
+            {/* English Full Content */}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center justify-between">
+                <span className="flex items-center gap-1">
+                  <FileText className="w-3.5 h-3.5 text-blue-600" />
+                  अंग्रेजी विस्तृत व्यहोरा (Full Content in English)
+                </span>
+                <span className="text-[11px] font-normal text-blue-600 dark:text-blue-400">English Mode को लागि</span>
+              </label>
+              <textarea
+                rows={5}
+                placeholder="Full article details and notice instructions in English..."
+                value={contentEn}
+                onChange={(e) => setContentEn(e.target.value)}
                 className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
               />
             </div>

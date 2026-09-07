@@ -25,6 +25,7 @@ import {
   ChevronDown 
 } from "lucide-react";
 import { translations, Language } from "@/lib/translations";
+import { useLanguage } from "@/lib/languageContext";
 import { useAuth } from "@/lib/authContext";
 import { useAccessibility } from "@/lib/accessibilityContext";
 import UnifiedAuthModal from "@/components/auth/UnifiedAuthModal";
@@ -32,11 +33,11 @@ import AccessibilityPanel from "@/components/accessibility/AccessibilityPanel";
 import LiveAnnouncer from "@/components/accessibility/LiveAnnouncer";
 
 interface HeaderProps {
-  lang: Language;
-  onLanguageChange: (lang: Language) => void;
+  lang?: Language;
+  onLanguageChange?: (lang: Language) => void;
 }
 
-export default function Header({ lang, onLanguageChange }: HeaderProps) {
+export default function Header({ lang: propLang, onLanguageChange }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [reportsDropdownOpen, setReportsDropdownOpen] = useState(false);
@@ -55,16 +56,25 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const { lang: contextLang, setLang } = useLanguage();
+  const activeLang = propLang || contextLang || "ne";
+  const t = translations[activeLang] || translations.ne;
+
+  const handleLanguageSwitch = (newLang: Language) => {
+    setLang(newLang);
+    if (onLanguageChange) {
+      onLanguageChange(newLang);
+    }
+  };
+
   const { user, isAuthenticated, logout } = useAuth();
   const { 
     isPanelOpen, 
     setIsPanelOpen, 
     audioPin, 
     darkMode, 
-    toggleDarkMode, 
-    fontSize 
+    toggleDarkMode 
   } = useAccessibility();
-  const t = translations[lang];
 
   return (
     <>
@@ -75,27 +85,27 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
         </a>
 
         {/* Top Accessibility & Authentication Bar */}
-        <aside aria-label="Accessibility and security controls" className="bg-slate-900 text-slate-100 text-xs px-4 py-1.5">
+        <aside aria-label={activeLang === 'ne' ? "पहुँच तथा सुरक्षा नियन्त्रण" : "Accessibility and security controls"} className="bg-slate-900 text-slate-100 text-xs px-4 py-1.5">
           <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center space-x-2">
-              <span className="font-semibold text-amber-400">नेपाल सरकार / कोशी प्रदेश सरकार</span>
+              <span className="font-semibold text-amber-400">{t.common.nepalGov}</span>
               <span className="hidden sm:inline text-slate-400">|</span>
-              <span className="hidden sm:inline text-slate-300">अपाङ्गता सूचना केन्द्र (DIC)</span>
+              <span className="hidden sm:inline text-slate-300">{t.common.dicCenter}</span>
             </div>
 
-            <div className="flex items-center space-x-2.5" role="toolbar" aria-label="पहुँच तथा सुरक्षा नियन्त्रण">
+            <div className="flex items-center space-x-2.5" role="toolbar" aria-label={t.common.accessibility}>
               {/* Main Accessibility Trigger Button in Top Bar */}
               <button
                 type="button"
                 onClick={() => setIsPanelOpen(true)}
                 className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-[11px] shadow-xs cursor-pointer transition-all focus:ring-2 focus:ring-white"
-                aria-label="पहुँचयुक्तता सेटिङ्स प्यानल खोल्नुहोस् (Alt+A)"
-                title="पहुँचयुक्तता सेटिङ्स (Alt+A)"
+                aria-label={activeLang === 'ne' ? "पहुँचयुक्तता सेटिङ्स प्यानल खोल्नुहोस् (Alt+A)" : "Open Accessibility Settings Panel (Alt+A)"}
+                title={activeLang === 'ne' ? "पहुँचयुक्तता सेटिङ्स (Alt+A)" : "Accessibility Settings (Alt+A)"}
               >
                 <span className="text-xs" aria-hidden="true">♿</span>
-                <span>पहुँचयुक्तता</span>
+                <span>{t.common.accessibility}</span>
                 {audioPin && (
-                  <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" title="अडियो पिन सक्रिय" />
+                  <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" title="Audio Pin Active" />
                 )}
               </button>
 
@@ -108,18 +118,18 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
                     ? "bg-amber-400 text-slate-950 hover:bg-amber-300 shadow-xs"
                     : "bg-slate-800 text-slate-200 hover:text-amber-300 hover:bg-slate-700 border border-slate-700"
                 }`}
-                aria-label={darkMode ? "डार्क मोड सक्रिय छ, लाइट मोडमा जान क्लिक गर्नुहोस्" : "लाइट मोड सक्रिय छ, डार्क मोडमा जान क्लिक गर्नुहोस्"}
-                title={darkMode ? "डार्क मोड: अन" : "डार्क मोड: अफ"}
+                aria-label={darkMode ? (activeLang === 'ne' ? "डार्क मोड सक्रिय छ, लाइट मोडमा जान क्लिक गर्नुहोस्" : "Dark mode active, click for light mode") : (activeLang === 'ne' ? "लाइट मोड सक्रिय छ, डार्क मोडमा जान क्लिक गर्नुहोस्" : "Light mode active, click for dark mode")}
+                title={darkMode ? t.common.darkModeOn : t.common.darkModeOff}
               >
                 {darkMode ? (
                   <>
                     <Sun className="w-3.5 h-3.5 text-slate-950 fill-amber-500" />
-                    <span className="hidden sm:inline">डार्क: अन</span>
+                    <span className="hidden sm:inline">{t.common.darkModeOn}</span>
                   </>
                 ) : (
                   <>
                     <Moon className="w-3.5 h-3.5 text-slate-300" />
-                    <span className="hidden sm:inline">डार्क मोड</span>
+                    <span className="hidden sm:inline">{t.common.darkMode}</span>
                   </>
                 )}
               </button>
@@ -133,11 +143,11 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
                   </div>
                   <span className="text-[10px] px-2 py-0.5 rounded font-bold hidden sm:inline-flex items-center gap-1 bg-blue-900/90 text-blue-100 border border-blue-700">
                     {user.role === "super_admin" || user.role === "provincial_admin" ? (
-                      <>👑 Super Admin</>
+                      <>{t.common.superAdminRole}</>
                     ) : user.role === "employee" || user.role === "palika_staff" ? (
-                      <>🏛️ {user.palika_name || "कर्मचारी"}</>
+                      <>🏛️ {user.palika_name || (activeLang === 'ne' ? "कर्मचारी" : "Staff")}</>
                     ) : (
-                      <>👤 नागरिक</>
+                      <>{t.common.citizenRole}</>
                     )}
                   </span>
                   {/* Shortcut for Super Admin or Employee */}
@@ -147,26 +157,26 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
                       className="text-[10px] bg-amber-400 text-slate-950 hover:bg-amber-300 font-extrabold px-1.5 py-0.5 rounded shadow-xs"
                       title="Admin Dashboard"
                     >
-                      एडमिन
+                      {activeLang === 'ne' ? "एडमिन" : "Admin"}
                     </Link>
                   )}
                   {(user.role === "employee" || user.role === "palika_staff") && user.palika_id && (
                     <Link
                       href={`/local-reporting/palika/${user.palika_id}`}
                       className="text-[10px] bg-emerald-500 hover:bg-emerald-400 text-white font-extrabold px-1.5 py-0.5 rounded shadow-xs"
-                      title="मेरो स्थानीय तहको प्रतिवेदन"
+                      title={activeLang === 'ne' ? "मेरो स्थानीय तहको प्रतिवेदन" : "My Municipality Report"}
                     >
-                      प्रतिवेदन
+                      {activeLang === 'ne' ? "प्रतिवेदन" : "Report"}
                     </Link>
                   )}
                   <button
                     type="button"
                     onClick={logout}
                     className="text-[11px] text-rose-300 hover:text-white flex items-center gap-0.5 cursor-pointer ml-1 font-semibold"
-                    title="लगआउट गर्नुहोस्"
+                    title={t.common.logout}
                   >
                     <LogOut className="w-3 h-3" />
-                    <span className="hidden sm:inline">लगआउट</span>
+                    <span className="hidden sm:inline">{t.common.logout}</span>
                   </button>
                 </div>
               ) : (
@@ -177,32 +187,34 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
                   className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-gradient-to-r from-blue-700 to-indigo-800 hover:from-blue-600 hover:to-indigo-700 text-white text-[11px] font-extrabold transition-all shadow-sm cursor-pointer border border-blue-500/50 hover:border-amber-400 focus:ring-2 focus:ring-amber-400"
                 >
                   <Lock className="w-3.5 h-3.5 text-amber-300" />
-                  <span>🔐 लगइन / दर्ता</span>
+                  <span>{t.common.signInRegister}</span>
                 </button>
               )}
 
-              {/* Language Switcher */}
-              <div className="flex items-center bg-slate-800 rounded p-0.5">
+              {/* Global Language Switcher */}
+              <div className="flex items-center bg-slate-800 rounded p-0.5" role="group" aria-label="Language selector">
                 <Globe className="w-3 h-3 text-slate-400 ml-1 mr-0.5" aria-hidden="true" />
                 <button
                   type="button"
-                  onClick={() => onLanguageChange("ne")}
-                  className={`px-2 py-0.5 rounded text-[11px] font-medium ${
-                    lang === "ne" ? "bg-blue-600 text-white font-bold" : "text-slate-300 hover:text-white"
+                  id="lang-switcher-ne"
+                  onClick={() => handleLanguageSwitch("ne")}
+                  className={`px-2 py-0.5 rounded text-[11px] font-bold transition-all cursor-pointer ${
+                    activeLang === "ne" ? "bg-blue-600 text-white shadow-xs" : "text-slate-300 hover:text-white"
                   }`}
-                  aria-pressed={lang === "ne"}
+                  aria-pressed={activeLang === "ne"}
                 >
-                  नेपा
+                  नेपाली
                 </button>
                 <button
                   type="button"
-                  onClick={() => onLanguageChange("en")}
-                  className={`px-2 py-0.5 rounded text-[11px] font-medium ${
-                    lang === "en" ? "bg-blue-600 text-white font-bold" : "text-slate-300 hover:text-white"
+                  id="lang-switcher-en"
+                  onClick={() => handleLanguageSwitch("en")}
+                  className={`px-2 py-0.5 rounded text-[11px] font-bold transition-all cursor-pointer ${
+                    activeLang === "en" ? "bg-blue-600 text-white shadow-xs" : "text-slate-300 hover:text-white"
                   }`}
-                  aria-pressed={lang === "en"}
+                  aria-pressed={activeLang === "en"}
                 >
-                  EN
+                  English
                 </button>
               </div>
             </div>
@@ -213,10 +225,10 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-3 sm:gap-6">
           {/* Left: Nepal Government Emblem */}
           <div className="flex items-center shrink-0">
-            <Link href="/" title="नेपाल सरकार निसान छाप" className="block focus:outline-hidden focus:ring-2 focus:ring-red-500 rounded-lg">
+            <Link href="/" title={t.common.nepalGov} className="block focus:outline-hidden focus:ring-2 focus:ring-red-500 rounded-lg">
               <img
                 src="/images/emblem-nepal.svg"
-                alt="नेपाल सरकार निसान छाप"
+                alt={t.common.nepalGov}
                 className="h-12 sm:h-16 w-auto object-contain drop-shadow-xs hover:scale-105 transition-transform"
                 loading="eager"
               />
@@ -227,7 +239,7 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
           <Link
             href="/"
             className="flex flex-col sm:flex-row items-center text-center sm:text-left gap-2.5 sm:gap-4 group cursor-pointer mx-auto"
-            aria-label="अपाङ्गता सूचना केन्द्र गृहपृष्ठ"
+            aria-label={t.app_name}
           >
             <div
               className="w-11 h-11 sm:w-14 sm:h-14 bg-gradient-to-br from-red-700 via-blue-900 to-indigo-950 text-white rounded-2xl flex items-center justify-center font-black text-lg sm:text-2xl shadow-lg border-2 border-amber-400 shrink-0 group-hover:scale-105 transition-transform"
@@ -251,12 +263,12 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
               href="https://www.nfdn.org.np"
               target="_blank"
               rel="noopener noreferrer"
-              title="राष्ट्रिय अपाङ्ग महासंघ नेपाल (NFD-N)"
+              title="National Federation of the Disabled Nepal (NFD-N)"
               className="block focus:outline-hidden focus:ring-2 focus:ring-blue-500 rounded-lg"
             >
               <img
                 src="/images/nfdn-logo.png"
-                alt="राष्ट्रिय अपाङ्ग महासंघ नेपाल (NFD-N) लोगो"
+                alt="NFD-N Logo"
                 className="h-11 sm:h-15 w-auto object-contain drop-shadow-xs hover:scale-105 transition-transform"
                 loading="eager"
               />
@@ -269,7 +281,7 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="p-1.5 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 focus:ring-2 focus:ring-blue-600 cursor-pointer"
                 aria-expanded={mobileMenuOpen}
-                aria-label="मुख्य मेनु खोल्नुहोस् वा बन्द गर्नुहोस्"
+                aria-label={mobileMenuOpen ? t.common.close : "Menu"}
               >
                 {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
@@ -278,10 +290,10 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
         </div>
 
         {/* Desktop Main Navigation Bar */}
-        <nav aria-label="मुख्य नेभिगेसन" className="hidden lg:block bg-blue-900 dark:bg-slate-950 text-white border-t border-blue-950 dark:border-slate-800 shadow-inner">
+        <nav aria-label={t.common.home} className="hidden lg:block bg-blue-900 dark:bg-slate-950 text-white border-t border-blue-950 dark:border-slate-800 shadow-inner">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
             <ul className="flex items-center space-x-1" role="menubar">
-              {/* १. गृहपृष्ठ */}
+              {/* १. Home */}
               <li role="none">
                 <Link
                   href="/"
@@ -296,7 +308,7 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
                 </Link>
               </li>
 
-              {/* २. हाम्रो बारेमा */}
+              {/* २. About Us */}
               <li role="none">
                 <Link
                   href="/about"
@@ -312,7 +324,7 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
                 </Link>
               </li>
 
-              {/* ३. विद्यमान कानुनको दस्तावेज */}
+              {/* ३. Legal Documents */}
               <li role="none">
                 <Link
                   href="/laws"
@@ -328,7 +340,7 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
                 </Link>
               </li>
 
-              {/* ४. प्रतिवेदन (Dropdown) */}
+              {/* ४. Reports Dropdown */}
               <li
                 ref={reportsDropdownRef}
                 className="relative group"
@@ -359,7 +371,7 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
                     reportsDropdownOpen ? "block" : "hidden group-hover:block"
                   }`}
                   role="menu"
-                  aria-label="प्रतिवेदन उप-मेनु"
+                  aria-label={t.nav_reports}
                 >
                   <Link
                     href="/local-reporting"
@@ -374,10 +386,10 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
                     <Building2 className="w-4 h-4 text-blue-700 dark:text-blue-400 shrink-0 mt-0.5 group-hover/item:scale-110 transition-transform" />
                     <div>
                       <span className="text-xs font-bold text-slate-900 dark:text-slate-100 group-hover/item:text-blue-700 dark:group-hover/item:text-amber-400 block">
-                        १. पालिका प्रतिवेदन
+                        {t.nav_palika_report}
                       </span>
                       <span className="text-[10px] text-slate-500 dark:text-slate-400 block">
-                        १३७ वटै स्थानीय तहका प्रोफाइल तथा वस्तुस्थिति विवरण
+                        {activeLang === 'ne' ? "१३७ वटै स्थानीय तहका प्रोफाइल तथा वस्तुस्थिति विवरण" : "Profiles and performance of all 137 local bodies"}
                       </span>
                     </div>
                   </Link>
@@ -397,17 +409,17 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
                     <BarChart3 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5 group-hover/item:scale-110 transition-transform" />
                     <div>
                       <span className="text-xs font-bold text-slate-900 dark:text-slate-100 group-hover/item:text-emerald-700 dark:group-hover/item:text-amber-400 block">
-                        २. समग्र प्रतिवेदन
+                        {t.nav_overall_report}
                       </span>
                       <span className="text-[10px] text-slate-500 dark:text-slate-400 block">
-                        कोशी प्रदेश स्तरीय विषयगत तथा तुलनात्मक तथ्याङ्क
+                        {activeLang === 'ne' ? "कोशी प्रदेश स्तरीय विषयगत तथा तुलनात्मक तथ्याङ्क" : "Province-wide thematic and comparative analytics"}
                       </span>
                     </div>
                   </Link>
                 </div>
               </li>
 
-              {/* ५. सूचना/समाचार */}
+              {/* ५. News & Notices */}
               <li role="none">
                 <Link
                   href="/news"
@@ -423,7 +435,7 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
                 </Link>
               </li>
 
-              {/* ६. सम्पर्क */}
+              {/* ६. Contact */}
               <li role="none">
                 <Link
                   href="/contact"
@@ -439,7 +451,7 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
                 </Link>
               </li>
 
-              {/* ७. खोजी */}
+              {/* ७. Search */}
               <li role="none">
                 <Link
                   href="/search"
@@ -455,7 +467,7 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
                 </Link>
               </li>
 
-              {/* ८. Admin Panel Button (सधैँ देखिने Admin Panel बटन) */}
+              {/* ८. Admin Panel Button */}
               <li role="none">
                 <Link
                   href="/admin"
@@ -465,26 +477,26 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
                       ? "text-amber-300 border-amber-400 bg-amber-500/20 shadow-xs ring-1 ring-amber-400"
                       : "text-amber-300 hover:text-amber-200 bg-amber-950/70 hover:bg-amber-900/80 border-amber-400/60 hover:border-amber-300"
                   }`}
-                  aria-label="Admin Panel"
-                  title="मुख्य प्रशासकीय प्यानल (Super Admin Dashboard)"
+                  aria-label={t.common.adminPanel}
+                  title={t.common.adminPanel}
                 >
                   <ShieldCheck className="w-3.5 h-3.5 mr-1 text-amber-400 shrink-0" aria-hidden="true" />
-                  <span>👑 Admin Panel</span>
+                  <span>{t.common.adminPanel}</span>
                 </Link>
               </li>
             </ul>
 
-            {/* लगइन / लगआउट Right Section */}
+            {/* Login / Logout Right Section */}
             <div className="flex items-center text-xs">
               {isAuthenticated && user ? (
                 <button
                   type="button"
                   onClick={logout}
                   className="bg-blue-800/80 hover:bg-rose-800 text-rose-200 hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all border border-blue-700/60 hover:border-rose-600 flex items-center gap-1.5 cursor-pointer shadow-xs"
-                  title="प्रणालीबाट लगआउट गर्नुहोस्"
+                  title={t.common.logout}
                 >
                   <LogOut className="w-3.5 h-3.5" />
-                  <span>लगआउट</span>
+                  <span>{t.common.logout}</span>
                 </button>
               ) : (
                 <button
@@ -493,7 +505,7 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
                   className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-3.5 py-1.5 rounded-lg text-xs flex items-center gap-1.5 cursor-pointer shadow-sm transition-all focus:ring-2 focus:ring-white"
                 >
                   <Lock className="w-3.5 h-3.5" />
-                  <span>🔐 लगइन / दर्ता</span>
+                  <span>{t.common.signInRegister}</span>
                 </button>
               )}
             </div>
@@ -502,7 +514,7 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
 
         {/* Mobile Drawer Navigation */}
         {mobileMenuOpen && (
-          <nav aria-label="मोबाइल मुख्य नेभिगेसन" className="lg:hidden bg-blue-950 dark:bg-slate-950 text-white border-t border-blue-900 dark:border-slate-800 px-4 py-3 shadow-xl space-y-3">
+          <nav aria-label="Mobile Navigation" className="lg:hidden bg-blue-950 dark:bg-slate-950 text-white border-t border-blue-900 dark:border-slate-800 px-4 py-3 shadow-xl space-y-3">
             {/* Mobile Accessibility & Dark Mode Buttons */}
             <div className="grid grid-cols-2 gap-2">
               <button
@@ -514,7 +526,7 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
                 className="py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-950 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 shadow-md cursor-pointer"
               >
                 <span className="text-base" aria-hidden="true">♿</span>
-                <span>पहुँचयुक्तता</span>
+                <span>{t.common.accessibility}</span>
               </button>
               <button
                 type="button"
@@ -526,7 +538,7 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
                 }`}
               >
                 {darkMode ? <Sun className="w-4 h-4 text-slate-950 fill-amber-500" /> : <Moon className="w-4 h-4 text-slate-300" />}
-                <span>{darkMode ? "डार्क: अन" : "डार्क: अफ"}</span>
+                <span>{darkMode ? t.common.darkModeOn : t.common.darkModeOff}</span>
               </button>
             </div>
 
@@ -535,7 +547,7 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
               {isAuthenticated && user ? (
                 <div className="flex items-center justify-between w-full">
                   <div className="text-xs text-slate-300">
-                    अवस्था: <span className="text-emerald-400 font-bold">सक्रिय लगइन</span>
+                    {user.name} ({user.role === "super_admin" ? "Super Admin" : "User"})
                   </div>
                   <button
                     type="button"
@@ -543,7 +555,7 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
                     className="px-3 py-1.5 bg-rose-900 hover:bg-rose-800 text-rose-200 rounded text-xs font-bold cursor-pointer flex items-center gap-1"
                   >
                     <LogOut className="w-3.5 h-3.5" />
-                    <span>लगआउट</span>
+                    <span>{t.common.logout}</span>
                   </button>
                 </div>
               ) : (
@@ -556,12 +568,12 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
                   className="w-full py-2.5 bg-gradient-to-r from-blue-700 to-indigo-800 text-white rounded-lg text-xs font-black flex items-center justify-center gap-1.5 shadow-md"
                 >
                   <Lock className="w-3.5 h-3.5 text-amber-300" />
-                  <span>🔐 लगइन / दर्ता</span>
+                  <span>{t.common.signInRegister}</span>
                 </button>
               )}
             </div>
 
-            {/* Mobile Nav Links in Exact Requested Order */}
+            {/* Mobile Nav Links */}
             <ul className="space-y-1">
               <li>
                 <Link
@@ -620,7 +632,7 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
                       className="flex items-center gap-2 px-3 py-2 rounded text-xs font-semibold text-blue-100 hover:text-white hover:bg-blue-800"
                     >
                       <Building2 className="w-3.5 h-3.5 text-blue-300" />
-                      <span>१. पालिका प्रतिवेदन</span>
+                      <span>{t.nav_palika_report}</span>
                     </Link>
                     <Link
                       href="/reports"
@@ -628,7 +640,7 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
                       className="flex items-center gap-2 px-3 py-2 rounded text-xs font-semibold text-blue-100 hover:text-white hover:bg-blue-800"
                     >
                       <BarChart3 className="w-3.5 h-3.5 text-emerald-300" />
-                      <span>२. समग्र प्रतिवेदन</span>
+                      <span>{t.nav_overall_report}</span>
                     </Link>
                   </div>
                 )}
@@ -670,7 +682,6 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
                   <span>{t.nav_search}</span>
                 </Link>
               </li>
-              {/* Admin Panel Button (सधैँ देखिने Admin Panel लिङ्क) */}
               <li>
                 <Link
                   href="/admin"
@@ -678,10 +689,10 @@ export default function Header({ lang, onLanguageChange }: HeaderProps) {
                   className={`flex items-center px-3 py-2.5 rounded-md text-sm font-black border border-amber-400/60 shadow-xs ${
                     pathname.startsWith("/admin") ? "bg-amber-950/90 text-amber-300 ring-1 ring-amber-400" : "bg-amber-950/60 hover:bg-amber-900/80 text-amber-300"
                   }`}
-                  aria-label="Admin Panel"
+                  aria-label={t.common.adminPanel}
                 >
                   <ShieldCheck className="w-4 h-4 mr-2 text-amber-400" aria-hidden="true" />
-                  <span>👑 Admin Panel</span>
+                  <span>{t.common.adminPanel}</span>
                 </Link>
               </li>
             </ul>

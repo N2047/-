@@ -3,7 +3,8 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { translations, Language } from "@/lib/translations";
+import { translations } from "@/lib/translations";
+import { useLanguage } from "@/lib/languageContext";
 import { KOSHI_DISTRICTS } from "@/lib/koshiGeography";
 import { 
   getProvinceContacts, 
@@ -35,7 +36,8 @@ import {
 import GovernmentGrievanceForm from "@/components/grievance/GovernmentGrievanceForm";
 
 export default function ContactPage() {
-  const [lang, setLang] = useState<Language>("ne");
+  const { lang, setLang } = useLanguage();
+  const t = translations[lang];
   const { announceLive, speakText, audioPin } = useAccessibility();
 
   // Province and Local Contacts State
@@ -176,18 +178,18 @@ export default function ContactPage() {
               <div className="flex items-center gap-2 mb-2">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-100 dark:bg-blue-950 text-blue-900 dark:text-blue-300 rounded-full text-xs font-black uppercase tracking-wider border border-blue-200 dark:border-blue-800">
                   <PhoneCall className="w-3.5 h-3.5 text-blue-700 dark:text-blue-400" />
-                  सम्पर्क निर्देशिका (Contact Directory)
+                  {t.contact.badge}
                 </span>
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-emerald-100 dark:bg-emerald-950 text-emerald-900 dark:text-emerald-300 rounded-full text-xs font-bold border border-emerald-200 dark:border-emerald-800">
                   <ShieldCheck className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
-                  १४ जिल्ला र १३७ स्थानीय तह
+                  {lang === "ne" ? "१४ जिल्ला र १३७ स्थानीय तह" : "14 Districts & 137 Local Governments"}
                 </span>
               </div>
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
-                सम्पर्क निर्देशिका तथा सहायता कक्ष (Contact Directory)
+                {t.contact.title}
               </h1>
               <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 mt-2 max-w-3xl leading-relaxed">
-                सामाजिक विकास मन्त्रालय, राष्ट्रिय अपाङ्ग महासंघ र कोशी प्रदेशका सम्पूर्ण १३७ स्थानीय तहका अपाङ्गता सहायता सहजकर्ता, सामाजिक शाखा र उपप्रमुखहरूको आधिकारिक सम्पर्क विवरण।
+                {t.contact.description}
               </p>
             </div>
           </div>
@@ -204,7 +206,7 @@ export default function ContactPage() {
             className="a11y-card bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between transition-all"
             tabIndex={0}
             onFocus={() => {
-              if (audioPin) speakText("सामाजिक विकास मन्त्रालय, कोशी प्रदेश सम्पर्क विवरण।");
+              if (audioPin) speakText(lang === "ne" ? "सामाजिक विकास मन्त्रालय, कोशी प्रदेश सम्पर्क विवरण।" : "Ministry of Social Development, Koshi Province contact details.");
             }}
           >
             <div>
@@ -213,39 +215,39 @@ export default function ContactPage() {
                   <Building2 className="w-6 h-6" />
                 </div>
                 <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-900">
-                  खण्ड १: प्रदेश मन्त्रालय
+                  {lang === "ne" ? "खण्ड १: प्रदेश मन्त्रालय" : "Section 1: Provincial Ministry"}
                 </span>
               </div>
 
               <h2 id="ministry-contact-heading" className="text-lg sm:text-xl font-black text-slate-900 dark:text-white leading-snug">
-                {ministryContact.organization_name_ne}
+                {lang === "ne" ? ministryContact.organization_name_ne : (ministryContact.organization_name_en || ministryContact.organization_name_ne)}
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                अपाङ्गता सूचना तथा तथ्यांक व्यवस्थापन केन्द्र (DIC) मुख्य प्रशासनिक निकाय
+                {lang === "ne" ? "अपाङ्गता सूचना तथा तथ्यांक व्यवस्थापन केन्द्र (DIC) मुख्य प्रशासनिक निकाय" : "Disability Information Center (DIC) Core Administrative Agency"}
               </p>
 
               {/* Fields */}
               <div className="mt-5 space-y-3 text-xs">
                 <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60">
                   <span className="font-bold text-slate-500 dark:text-slate-400 block mb-0.5">
-                    सम्पर्क व्यक्ति:
+                    {lang === "ne" ? "सम्पर्क व्यक्ति:" : "Contact Person:"}
                   </span>
                   <div className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5">
                     <User className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                    <span>{ministryContact.contact_person_name ? ministryContact.contact_person_name : "[सम्पर्क व्यक्तिको नाम उपलब्ध हुन बाँकी]"}</span>
+                    <span>{ministryContact.contact_person_name ? ministryContact.contact_person_name : (lang === "ne" ? "[सम्पर्क व्यक्तिको नाम उपलब्ध हुन बाँकी]" : "[Name to be updated]")}</span>
                   </div>
                 </div>
 
                 <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60">
                   <span className="font-bold text-slate-500 dark:text-slate-400 block mb-0.5">
-                    सम्पर्क व्यक्तिको मोबाइल नं.:
+                    {lang === "ne" ? "सम्पर्क व्यक्तिको मोबाइल नं.:" : "Mobile Number:"}
                   </span>
                   {ministryContact.contact_person_mobile ? (
                     <div className="flex items-center justify-between mt-1">
                       <a 
                         href={`tel:${ministryContact.contact_person_mobile}`}
                         className="font-bold text-base text-blue-700 dark:text-blue-400 hover:underline flex items-center gap-1.5 font-mono"
-                        aria-label={`सम्पर्क व्यक्तिको मोबाइल ${ministryContact.contact_person_mobile} मा कल गर्नुहोस्`}
+                        aria-label={`Call mobile ${ministryContact.contact_person_mobile}`}
                       >
                         <Phone className="w-4 h-4 text-emerald-600" />
                         <span>{ministryContact.contact_person_mobile}</span>
@@ -255,12 +257,12 @@ export default function ContactPage() {
                         className="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1 shadow-xs"
                       >
                         <PhoneCall className="w-3.5 h-3.5" />
-                        <span>कल गर्नुहोस्</span>
+                        <span>{lang === "ne" ? "कल गर्नुहोस्" : "Call"}</span>
                       </a>
                     </div>
                   ) : (
                     <div className="text-slate-400 dark:text-slate-500 font-medium">
-                      [मोबाइल नम्बर उपलब्ध हुन बाँकी]
+                      {lang === "ne" ? "[मोबाइल नम्बर उपलब्ध हुन बाँकी]" : "[Mobile number to be updated]"}
                     </div>
                   )}
                 </div>
@@ -268,7 +270,7 @@ export default function ContactPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
                   <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
                     <PhoneCall className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span>फोन: {ministryContact.office_phone || "०२१-४६२८००"}</span>
+                    <span>{lang === "ne" ? `फोन: ${ministryContact.office_phone || "०२१-४६२८००"}` : `Phone: ${ministryContact.office_phone || "021-462800"}`}</span>
                   </div>
                   <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
                     <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
@@ -281,9 +283,9 @@ export default function ContactPage() {
             <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
               <span className="flex items-center gap-1">
                 <MapPin className="w-3.5 h-3.5" />
-                <span>{ministryContact.address_ne || "विराटनगर-१०, मोरङ"}</span>
+                <span>{lang === "ne" ? (ministryContact.address_ne || "विराटनगर-१०, मोरङ") : "Biratnagar-10, Morang"}</span>
               </span>
-              <span className="text-[11px]">अद्यावधिक: {ministryContact.updated_at || "२०८२/०५/०१"}</span>
+              <span className="text-[11px]">{lang === "ne" ? `अद्यावधिक: ${ministryContact.updated_at || "२०८२/०५/०१"}` : `Updated: ${ministryContact.updated_at || "2025/08/17"}`}</span>
             </div>
           </section>
 
@@ -293,7 +295,7 @@ export default function ContactPage() {
             className="a11y-card bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between transition-all"
             tabIndex={0}
             onFocus={() => {
-              if (audioPin) speakText("राष्ट्रिय अपाङ्ग महासंघ नेपाल, कोशी प्रदेश सम्पर्क विवरण।");
+              if (audioPin) speakText(lang === "ne" ? "राष्ट्रिय अपाङ्ग महासंघ नेपाल, कोशी प्रदेश सम्पर्क विवरण।" : "National Federation of the Disabled Nepal, Koshi Province contact details.");
             }}
           >
             <div>
@@ -302,15 +304,15 @@ export default function ContactPage() {
                   <ShieldCheck className="w-6 h-6" />
                 </div>
                 <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-900">
-                  खण्ड २: महासंघ प्रदेश कार्यालय
+                  {lang === "ne" ? "खण्ड २: महासंघ प्रदेश कार्यालय" : "Section 2: Federation (NFDN)"}
                 </span>
               </div>
 
               <h2 id="nfdn-contact-heading" className="text-lg sm:text-xl font-black text-slate-900 dark:text-white leading-snug">
-                {nfdnContact.organization_name_ne}
+                {lang === "ne" ? nfdnContact.organization_name_ne : (nfdnContact.organization_name_en || nfdnContact.organization_name_ne)}
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                अपाङ्गता अधिकार, पैरवी तथा नागरिक सरोकार प्रदेश समन्वय समिति
+                {lang === "ne" ? "अपाङ्गता अधिकार, पैरवी तथा नागरिक सरोकार प्रदेश समन्वय समिति" : "Disability Rights, Advocacy & Coordination Committee"}
               </p>
 
               {/* Fields */}
@@ -389,20 +391,24 @@ export default function ContactPage() {
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950 px-2.5 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-800">
-                    खण्ड ३
+                    {lang === "ne" ? "खण्ड ३" : "Section 3"}
                   </span>
                 </div>
                 <h2 id="local-contact-heading" className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
-                  स्थानीय तहमा सम्पर्क गर्नको लागि
+                  {lang === "ne" ? "स्थानीय तहमा सम्पर्क गर्नको लागि" : "Local Government Contact Directory"}
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                  पहिले जिल्ला छनौट गर्नुहोस् र त्यसपछि स्थानीय तह चयन गरी आधिकारिक सम्पर्क विवरण प्राप्त गर्नुहोस्।
+                  {lang === "ne" 
+                    ? "पहिले जिल्ला छनौट गर्नुहोस् र त्यसपछि स्थानीय तह चयन गरी आधिकारिक सम्पर्क विवरण प्राप्त गर्नुहोस्।"
+                    : "Select a district first, then choose your local government to view official contact details."}
                 </p>
               </div>
 
               {/* Quick Search Input */}
               <div className="w-full sm:w-80 relative">
-                <label htmlFor="contact-search" className="sr-only">सम्पर्क खोज्नुहोस्</label>
+                <label htmlFor="contact-search" className="sr-only">
+                  {lang === "ne" ? "सम्पर्क खोज्नुहोस्" : "Search Contacts"}
+                </label>
                 <div className="relative">
                   <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" aria-hidden="true" />
                   <input
@@ -410,7 +416,7 @@ export default function ContactPage() {
                     type="search"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="जिल्ला, पालिका, नाम वा नम्बर खोज्नुहोस्..."
+                    placeholder={lang === "ne" ? "जिल्ला, पालिका, नाम वा नम्बर खोज्नुहोस्..." : "Search district, municipality, name or phone..."}
                     className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-medium text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
                   />
                 </div>
@@ -422,14 +428,14 @@ export default function ContactPage() {
               <div className="mb-6 p-4 rounded-2xl bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs font-bold text-blue-900 dark:text-blue-300">
-                    खोज नतिजा: {searchResults.length} वटा स्थानीय तह फेला पर्यो
+                    {lang === "ne" ? `खोज नतिजा: ${searchResults.length} वटा स्थानीय तह फेला पर्यो` : `Search Results: ${searchResults.length} local governments found`}
                   </span>
                   <button
                     type="button"
                     onClick={() => setSearchQuery("")}
-                    className="text-xs text-slate-500 hover:text-slate-800 dark:hover:text-white font-semibold"
+                    className="text-xs text-slate-500 hover:text-slate-800 dark:hover:text-white font-semibold cursor-pointer"
                   >
-                    बन्द गर्नुहोस्
+                    {lang === "ne" ? "बन्द गर्नुहोस्" : "Close"}
                   </button>
                 </div>
 

@@ -1,7 +1,10 @@
 export type Language = 'ne' | 'en';
 
+export type TranslationKey = string;
+
 export const translations = {
   ne: {
+    // Legacy flat keys for backward compatibility
     app_name: "अपाङ्गता सूचना केन्द्र",
     app_sub_name: "Disability Information Center (DIC)",
     tagline: "अपाङ्गता सम्बन्धी सूचना, कानुन, तथ्यांक तथा प्रतिवेदनको एकीकृत डिजिटल केन्द्र",
@@ -25,44 +28,317 @@ export const translations = {
     nav_news: "सूचना/समाचार",
     nav_contact: "सम्पर्क",
     nav_search: "खोजी",
-    nav_admin: "एडमिन",
+    nav_admin: "👑 Admin Panel",
     
     // Hero
     hero_title: "अपाङ्गता सूचना केन्द्र",
     hero_subtitle: "“अपाङ्गता सम्बन्धी कानुन, सूचना, तथ्यांक र प्रतिवेदनको एकीकृत डिजिटल केन्द्र”",
+    hero_desc: "कोशी प्रदेशका १४ जिल्लाका १३७ स्थानीय तहबाट वार्षिक प्रतिवेदन संकलन, संघीय तथा प्रदेश कानुनको डिजिटल भण्डार र विस्तृत विषयगत विश्लेषण।",
     hero_btn_laws: "कानुन हेर्नुहोस्",
-    hero_btn_reporting: "प्रतिवेदन हेर्नुहोस्",
-    hero_btn_reports: "रिपोर्ट हेर्नुहोस्",
-    
+    hero_btn_reporting: "१. पालिका प्रतिवेदन",
+    hero_btn_reports: "२. समग्र प्रतिवेदन",
+    hero_reporting_sub: "स्थानिय तहगत प्रतिवेदन",
+    hero_reports_sub: "सबै १३७ पालिका कम्पाइल",
+    hero_banner_tag: "नेपालको एकीकृत अपाङ्गता सूचना तथा तथ्यांक व्यवस्थापन प्रणाली",
+    hero_classification: "📊 प्रतिवेदन वर्गीकरण:",
+    hero_classification_palika: "🏛️ १. पालिका प्रतिवेदन (प्रत्येक वा छानिएको स्थानीय तह)",
+    hero_classification_overall: "📈 २. समग्र प्रतिवेदन (सबै १३७ पालिकाको एकीकृत कम्पाइल)",
+
     // Stats Cards
+    stats_heading: "प्रणालीको हालको तथ्यांक सारांश",
+    stats_subheading: "कोशी प्रदेशका स्थानीय तह र कानुनी संग्रहको वास्तविक अवस्था",
+    stats_fiscal_year: "आ.व. २०८२/०८३ अद्यावधिक",
     stats_total_laws: "कुल कानुनी दस्तावेज",
+    stats_total_laws_sub: "ऐन, नियमावली, कार्यविधि तथा निर्देशिका",
     stats_federal_laws: "संघीय कानुन",
+    stats_federal_laws_sub: "संघीय सरकार मातहतका कानुनी दस्तावेज",
     stats_provincial_laws: "प्रदेश कानुन",
+    stats_provincial_laws_sub: "कोशी तथा अन्य प्रदेश सरकारका कानुन",
     stats_total_palikas: "कुल स्थानीय तह",
+    stats_total_palikas_sub: "कोशी प्रदेशका १४ जिल्लाका सम्पूर्ण स्थानीय तह",
     stats_submitted_reports: "प्रतिवेदन पेश गरेका स्थानीय तह",
+    stats_submitted_reports_sub: "आर्थिक वर्ष २०८२/०८३ वार्षिक प्रतिवेदन प्राप्त",
     stats_pending_reports: "प्रतिवेदन बाँकी स्थानीय तह",
+    stats_pending_reports_sub: "प्रविष्टि बाँकी रहेका स्थानीय तह",
     stats_published_news: "प्रकाशित सूचना/समाचार",
-    
-    // Sections
+    stats_published_news_sub: "सूचना, परिपत्र तथा कार्यक्रम घोषणाहरू",
+
+    // Pillars
     section_pillars: "प्रणालीका मुख्य स्तम्भहरू",
+    section_pillars_sub: "अपाङ्गता क्षेत्रमा नीतिगत स्पष्टता, स्थानीय तहको जवाफदेहिता र प्रमाणमा आधारित निर्णय निर्माण",
     pillar_laws_title: "कानुन तथा नीति डिजिटल भण्डार",
     pillar_laws_desc: "नेपाल सरकार तथा प्रदेश सरकारका अपाङ्गता सम्बन्धी सम्पूर्ण ऐन, नियमावली, कार्यविधि र निर्देशिकाहरू।",
+    pillar_laws_b1: "संघीय ऐन, नियमावली, कार्यविधि र निर्देशिका",
+    pillar_laws_b2: "कोशी सहित सबै ७ प्रदेशका कानुनहरू",
+    pillar_laws_b3: "PDF पूर्वावलोकन तथा तुरुन्त डाउनलोड",
+    pillar_laws_btn: "कानुनी दस्तावेज खोल्नुहोस्",
     pillar_reporting_title: "स्थानीय सरकार वार्षिक प्रतिवेदन प्रणाली",
     pillar_reporting_desc: "कोशी प्रदेशका १४ जिल्लाका १३७ वटै स्थानीय तहबाट वार्षिक कार्यसम्पादन तथा प्रगतिको अनलाइन प्रविष्टि।",
+    pillar_reporting_b1: "आर्थिक वर्ष २०८२/०८३ वार्षिक प्रतिवेदन (४४ प्रश्न)",
+    pillar_reporting_b2: "अनुसूची १.१ (गृहभेट) र १.२ (सहायक सामग्री)",
+    pillar_reporting_b3: "महिला+पुरुष स्वचालित हिसाब तथा Save Draft",
+    pillar_reporting_btn: "प्रतिवेदन प्रणालीमा प्रवेश गर्नुहोस्",
+    pillar_reporting_badge: "मुख्य प्रणाली",
     pillar_analytics_title: "विषयगत तथ्यांक तथा प्रतिवेदन",
     pillar_analytics_desc: "लाभग्राही, गृहभेट, सहायक सामग्री तथा लैङ्गिक विवरणको विस्तृत विश्लेषण र डाउनलोड योग्य प्रतिवेदन।",
-    
-    // Quick Actions
-    quick_district_select: "जिल्ला छनौट गरी पालिका खोज्नुहोस्",
+    pillar_analytics_b1: "विषयगत छुट्टाछुट्टै चार्ट तथा Accessible तालिकाहरू",
+    pillar_analytics_b2: "कोशी प्रदेश समग्र र जिल्लागत तुलना",
+    pillar_analytics_b3: "Excel (मूल ढाँचा) तथा PDF रिपोर्ट डाउनलोड",
+    pillar_analytics_btn: "तथ्यांक विश्लेषण हेर्नुहोस्",
+
+    // Quick Finder
+    quick_finder_badge: "कोशी प्रदेशका १४ जिल्ला र १३७ स्थानीय तह",
+    quick_finder_title: "स्थानीय सरकार वार्षिक प्रतिवेदन खोजी तथा प्रविष्टि",
+    quick_finder_desc: "जिल्ला छनौट गरी सम्बन्धित स्थानीय तहको वार्षिक कार्यसम्पादन प्रतिवेदन वा सार्वजनिक प्रोफाइल हेर्नुहोस्।",
+    quick_step_1: "१. जिल्ला छनौट गर्नुहोस्",
+    quick_step_2: "२. स्थानीय तह छनौट गर्नुहोस्",
+    quick_step_3: "३. प्रतिवेदन तथा प्रोफाइल खोल्नुहोस्",
     select_district: "-- जिल्ला चयन गर्नुहोस् --",
     select_palika: "-- स्थानीय तह छनौट गर्नुहोस् --",
     go_to_palika: "पालिका प्रोफाइल खोल्नुहोस्",
-    
+    enter_reporting_btn: "प्रतिवेदन प्रविष्टि पोर्टल",
+    palika_count_suffix: "स्थानीय तह",
+
+    // Common
+    common: {
+      home: "गृहपृष्ठ",
+      about: "हाम्रो बारेमा",
+      contact: "सम्पर्क",
+      search: "खोज्नुहोस्",
+      login: "लगइन",
+      register: "दर्ता",
+      logout: "लगआउट",
+      readMore: "विस्तृत पढ्नुहोस्",
+      loading: "लोड हुँदैछ...",
+      submit: "पेश गर्नुहोस्",
+      cancel: "रद्द गर्नुहोस्",
+      save: "सुरक्षित गर्नुहोस्",
+      close: "बन्द गर्नुहोस्",
+      back: "पछाडि फर्कनुहोस्",
+      delete: "हटाउनुहोस्",
+      edit: "सम्पादन गर्नुहोस्",
+      add: "नयाँ थप्नुहोस्",
+      view: "हेर्नुहोस्",
+      download: "डाउनलोड",
+      filter: "फिल्टर",
+      all: "सबै",
+      yes: "हो",
+      no: "होइन",
+      status: "स्थिति",
+      action: "कार्य",
+      date: "मिति",
+      author: "लेखक / स्रोत",
+      category: "श्रेणी",
+      notice: "सूचना",
+      news: "समाचार",
+      program: "कार्यक्रम",
+      achievement: "उपलब्धि",
+      announcement: "घोषणा",
+      nepalGov: "नेपाल सरकार / कोशी प्रदेश सरकार",
+      dicCenter: "अपाङ्गता सूचना केन्द्र (DIC)",
+      accessibility: "पहुँचयुक्तता",
+      darkMode: "डार्क मोड",
+      lightMode: "लाइट मोड",
+      darkModeOn: "डार्क: अन",
+      darkModeOff: "डार्क: अफ",
+      adminPanel: "👑 Admin Panel",
+      signInRegister: "🔐 लगइन / दर्ता",
+      superAdminRole: "👑 Super Admin",
+      citizenRole: "👤 नागरिक",
+      staffRole: "🏛️ कर्मचारी",
+      notAvailable: "अनुवाद उपलब्ध छैन"
+    },
+
+    // News & Notices Section
+    news: {
+      badge: "सूचना तथा समाचार पोर्टल",
+      title: "सूचना, समाचार तथा महत्वपूर्ण परिपत्रहरू",
+      description: "अपाङ्गता क्षेत्र, स्थानीय तहका गतिविधि, सरकारी निर्णय, नीतिगत परिपत्र तथा तालिम सम्बन्धी ताजा सूचनाहरू।",
+      searchPlaceholder: "सूचना वा समाचार खोजी गर्नुहोस्...",
+      all: "सबै",
+      notice: "सूचना",
+      news: "समाचार",
+      program: "कार्यक्रम",
+      achievement: "उपलब्धि",
+      announcement: "घोषणा",
+      publishedNews: "हालसालै प्रकाशित सूचना तथा समाचारहरू",
+      readMore: "विस्तृत पढ्नुहोस्",
+      dateLabel: "वि.सं.",
+      filterHeading: "समाचार खोजी तथा फिल्टर",
+      noResults: "कुनै सूचना वा समाचार फेला परेन।",
+      noResultsDesc: "कृपया खोजी शब्द वा श्रेणी परिवर्तन गरी पुनः प्रयास गर्नुहोस्।",
+      resetFilter: "सबै फिल्टर हटाउनुहोस्",
+      circularFile: "संलग्न आधिकारिक परिपत्र / सूचना (PDF)",
+      downloadFile: "परिपत्र डाउनलोड गर्नुहोस्",
+      videoTitle: "भिडियो सामाग्री:",
+      editBtn: "✏️ सम्पादन",
+      deleteBtn: "हटाउनुहोस्",
+      addBtn: "नयाँ सूचना / समाचार थप गर्नुहोस् (+ Add)",
+      adminModeBanner: "सुपर एडमिन सम्पादन तथा व्यवस्थापन मोड (Super Admin Mode)",
+      adminModeDesc: "तपाईंले कुनै पनि सूचना वा समाचारमा रहेको सम्पादन बटन थिचेर शीर्षक, तस्बिर, भिडियो, विवरण वा मिति सच्याउन सक्नुहुन्छ तथा नयाँ थप्न वा हटाउन सक्नुहुन्छ।",
+      notAvailableEn: "English translation not available"
+    },
+
+    // Laws & Regulations
+    laws: {
+      badge: "कानुनी संग्रह तथा डिजिटल भण्डार",
+      title: "विद्यमान कानुनहरूको दस्तावेज",
+      description: "नेपाल सरकार तथा प्रदेश सरकार मातहत अपाङ्गता सम्बन्धी सम्पूर्ण ऐन, नियमावली, कार्यविधि, निर्देशिका तथा परिपत्रहरू।",
+      searchPlaceholder: "कानुनको नाम वा कुञ्जीशब्द खोजी गर्नुहोस्...",
+      federalTab: "संघीय कानुन (Federal)",
+      provincialTab: "प्रदेश कानुन (Provincial)",
+      allLevelTab: "सबै तह",
+      categoryAll: "सबै श्रेणी",
+      act: "ऐन (Acts)",
+      rule: "नियमावली (Regulations)",
+      procedure: "कार्यविधि (Procedures)",
+      directive: "निर्देशिका (Directives)",
+      guideline: "मार्गदर्शन (Guidelines)",
+      circular: "परिपत्र (Circulars)",
+      publicationDate: "प्रकाशन मिति:",
+      authority: "जारी गर्ने निकाय:",
+      amendment: "संशोधन सहित",
+      downloadPdf: "PDF डाउनलोड",
+      previewPdf: "पूर्वावलोकन",
+      noLawsFound: "कुनै कानुनी दस्तावेज फेला परेन।"
+    },
+
+    // Reports & Analytics
+    reports: {
+      badge: "विश्लेषणात्मक ड्यासबोर्ड तथा प्रतिवेदन",
+      title: "कोशी प्रदेश स्तरीय समग्र प्रतिवेदन तथा तथ्यांक",
+      description: "१३७ स्थानीय तहबाट संकलित अपाङ्गता परिचयपत्र, गृहभेट, सहायक सामग्री र बजेट सम्बन्धी एकीकृत विश्लेषणात्मक विवरण।",
+      tabOverview: "समग्र झलक",
+      tabCompiled: "१३७ पालिका तालिकाहरू",
+      tabCharts: "चार्ट तथा ग्राफहरू",
+      downloadExcel: "Excel डाउनलोड (.xlsx)",
+      downloadPdf: "PDF प्रतिवेदन",
+      singlePalikaNote: "कुनै एक निश्चित स्थानीय तहको मात्र प्रतिवेदन हेर्न वा भर्न",
+      singlePalikaLink: "पालिका प्रतिवेदन पोर्टलमा जानुहोस्",
+      cardIdentified: "पहिचान भएका PwD",
+      cardHomeVisits: "सम्पन्न गृहभेट संख्या",
+      cardDevices: "वितरण गरिएका सहायक सामग्री",
+      cardBudget: "विनियोजित बजेट (रु)"
+    },
+
+    // Local Reporting
+    reporting: {
+      badge: "स्थानीय तह वार्षिक कार्यसम्पादन पोर्टल",
+      title: "कोशी प्रदेश स्थानीय सरकार प्रतिवेदन प्रणाली",
+      description: "१४ जिल्लाका १३७ स्थानीय तहका अपाङ्गता सहायता सहजकर्ता तथा कर्मचारीहरूका लागि वार्षिक प्रतिवेदन अनलाइन प्रविष्टि तथा अद्यावधिक पोर्टल।",
+      selectPalikaGuide: "प्रतिवेदन भर्नका लागि कृपया आफ्नो स्थानीय तह छनौट गर्नुहोस् वा सिधै लगइन गर्नुहोस्।"
+    },
+
+    // Contact & Grievance
+    contact: {
+      badge: "सम्पर्क तथा नागरिक सहायता",
+      title: "सम्पर्क तथा सहायता कक्ष",
+      description: "कोशी प्रदेश अपाङ्गता सूचना केन्द्र, प्राविधिक शाखा, सहजकर्ता सहयोग कक्ष तथा प्रत्यक्ष गुनासो/सोधपुछ सेवा।",
+      officeLocation: "कार्यालय ठेगाना",
+      officeAddress: "विराटनगर, मोरङ, कोशी प्रदेश, नेपाल",
+      phoneLabel: "टेलिफोन नम्बर",
+      emailLabel: "इमेल ठेगाना",
+      grievanceTitle: "गुनासो तथा सोधपुछ फारम",
+      grievanceDesc: "अपाङ्गता अधिकार, सेवा सुविधा वा प्रणाली सम्बन्धी कुनै पनि जिज्ञासा वा गुनासो यहाँ पठाउनुहोस्।",
+      formName: "तपाईंको पूरा नाम *",
+      formPhone: "मोबाइल नम्बर *",
+      formEmail: "इमेल ठेगाना (ऐच्छिक)",
+      formDistrict: "जिल्ला *",
+      formSubject: "विषय *",
+      formMessage: "गुनासो वा जिज्ञासाको विवरण *",
+      submitGrievance: "गुनासो / जिज्ञासा पेश गर्नुहोस्",
+      trackingNotice: "फारम पेश गरेपछि तपाईंलाई ट्र्याकिङ कोड प्रदान गरिनेछ।"
+    },
+
+    // Search Page
+    search: {
+      badge: "एकीकृत खोजी इन्जिन",
+      title: "पोर्टल खोजी प्रणाली",
+      description: "कानुन, स्थानीय तह प्रतिवेदन, सूचना, समाचार तथा सम्पर्क विवरणहरू एकै ठाउँबाट खोज्नुहोस्।",
+      placeholder: "कुञ्जीशब्द प्रविष्ट गर्नुहोस् (उदा. ऐन, फिदिम, ह्वीलचेयर, बजेट)...",
+      searchBtn: "खोजी गर्नुहोस्",
+      tabAll: "सबै नतिजा",
+      tabLaws: "कानुन",
+      tabNews: "सूचना/समाचार",
+      tabPalikas: "स्थानीय तह",
+      resultsFound: "नतिजाहरू फेला परे",
+      noResultsFound: "खोजी अनुसार कुनै सामग्री भेटिएन।"
+    },
+
+    // About Page
+    about: {
+      badge: "संस्थागत परिचय",
+      title: "अपाङ्गता सूचना केन्द्र (DIC) को बारेमा",
+      description: "कोशी प्रदेश तथा नेपालमा अपाङ्गता सम्बन्धी कानुन, नीति, तथ्यांक र स्थानीय तह कार्यसम्पादनको एकीकृत डिजिटल भण्डार।",
+      visionTitle: "हाम्रो दृष्टिकोण (Vision)",
+      visionDesc: "सूचनाको हक, प्रमाणमा आधारित नीति निर्माण र समावेशी समाज निर्माणका लागि अपाङ्गता क्षेत्रको विश्वसनीय र पहुँचयुक्त डिजिटल पूर्वाधार।",
+      missionTitle: "हाम्रो लक्ष्य (Mission)",
+      missionDesc: "स्थानीय तहदेखि प्रदेश सरकारसम्म अपाङ्गता सवालको कार्यसम्पादन पारदर्शिता, तथ्यांक संकलन र कानुनी सचेतना अभिवृद्धि गर्ने।",
+      pillarsTitle: "मूल सिद्धान्तहरू",
+      p1: "पूर्ण पहुँचयुक्तता (WCAG 2.2 AA)",
+      p2: "पारदर्शी तथ्यांक तथा उत्तरदायित्व",
+      p3: "स्थानीय सरकार सहकार्य"
+    },
+
+    // Authentication Modal
+    auth: {
+      title: "अपाङ्गता सूचना केन्द्र प्रवेश",
+      subtitle: "स्थानीय तह सहजकर्ता, कर्मचारी वा प्रशासक लगइन",
+      tabLogin: "कर्मचारी / एडमिन लगइन (Sign In)",
+      tabSignup: "नयाँ खाता दर्ता (Sign Up)",
+      emailLabel: "इमेल ठेगाना (Gmail / Email) *",
+      emailPlaceholder: "उदा. facilitator@gmail.com",
+      passwordLabel: "गोप्य पासवर्ड (Password) *",
+      passwordPlaceholder: "तपाईंको पासवर्ड...",
+      loginBtn: "🔐 लगइन गर्नुहोस्",
+      quickLoginTitle: "परीक्षणका लागि द्रुत लगइन (1-Click Demo Logins):",
+      superAdminDemo: "👑 मुख्य प्रशासक (Super Admin)",
+      phidimStaffDemo: "🏛️ फिदिम पालिका कर्मचारी (Phidim Staff)",
+      dharanStaffDemo: "🏢 धरान पालिका कर्मचारी (Dharan Staff)"
+    },
+
+    // Accessibility Panel
+    a11y: {
+      panelTitle: "पहुँचयुक्तता सेटिङ्स (Accessibility Settings)",
+      panelSubtitle: "WCAG 2.2 AA मापदण्ड अनुसार दृश्य तथा पठन सुविधाहरू अनुकूल बनाउनुहोस्",
+      fontSizeTitle: "फन्ट आकार (Text Size)",
+      normalFont: "सामान्य (100%)",
+      largeFont: "ठूलो (150%)",
+      extraLargeFont: "अति ठूलो (180%)",
+      colorContrastTitle: "रङ तथा कन्ट्रास्ट (Contrast)",
+      defaultTheme: "पूर्वनिर्धारित",
+      highContrastTheme: "उच्च कन्ट्रास्ट (High Contrast)",
+      darkModeTheme: "डार्क मोड (Dark Mode)",
+      resetAll: "सेटिङ्स रिसेट गर्नुहोस्",
+      closePanel: "बन्द गर्नुहोस्"
+    },
+
+    // Chatbot
+    chatbot: {
+      badge: "AI सहायक",
+      title: "अपाङ्गता सूचना केन्द्र AI सहायक",
+      greeting: "नमस्कार! म अपाङ्गता सूचना केन्द्रको AI सहायक हुँ। म तपाईंलाई कानुन, स्थानीय तह प्रतिवेदन, परिचयपत्र वा सम्पर्क सम्बन्धी जानकारी दिन सक्छु। के सहयोग गरौं?",
+      placeholder: "यहाँ आफ्नो प्रश्न लेख्नुहोस्...",
+      askPrompt: "AI सहायकसँग सोध्नुहोस्",
+      sendBtn: "पठाउनुहोस्"
+    },
+
     // Footer
-    footer_copy: "© २०८२/०८३ अपाङ्गता सूचना केन्द्र (DIC) । सर्वाधिकार सुरक्षित।",
-    footer_accessibility_note: "यो प्रणाली WCAG 2.2 AA पहुँचयुक्तता मापदण्ड अनुसार विकसित गरिएको हो।"
+    footer: {
+      brandDesc: "नेपाल सरकार तथा प्रदेश सरकार मातहत अपाङ्गता सवालका कानुन, नीति, स्थानीय तह वार्षिक कार्यसम्पादन र तथ्यांक व्यवस्थापनको एकीकृत पोर्टल।",
+      wcagBadge: "WCAG 2.2 AA मापदण्डअनुसार पहुँचयुक्त बनाउन विकास भइरहेको प्रणाली",
+      quickLinksTitle: "प्रमुख मोड्युलहरू",
+      contactSupportTitle: "सम्पर्क तथा सहयोग",
+      helpDeskName: "अपाङ्गता सहायता सहजकर्ता सहयोग कक्ष",
+      phone: "फोन: +९७७-०२१-४६०XXX (कोशी प्रदेश)",
+      email: "इमेल: info.dic@koshi.gov.np",
+      copy: "© २०८२/०८३ अपाङ्गता सूचना केन्द्र (DIC) । सर्वाधिकार सुरक्षित।",
+      a11yNote: "यो प्रणाली WCAG 2.2 AA पहुँचयुक्तता मापदण्ड अनुसार विकसित गरिएको हो।"
+    }
   },
+
   en: {
+    // Legacy flat keys for backward compatibility
     app_name: "Disability Information Center",
     app_sub_name: "अपाङ्गता सूचना केन्द्र (DIC)",
     tagline: "Integrated Digital Hub for Disability Information, Laws, Data & Reports",
@@ -80,47 +356,318 @@ export const translations = {
     nav_about: "About Us",
     nav_laws: "Legal Documents",
     nav_reports: "Reports",
-    nav_local_reporting: "1. Municipality Report",
-    nav_palika_report: "1. Municipality Report",
+    nav_local_reporting: "1. Palika Report",
+    nav_palika_report: "1. Palika Report",
     nav_overall_report: "2. Comprehensive Report",
     nav_news: "News & Notices",
     nav_contact: "Contact",
     nav_search: "Search",
-    nav_admin: "Admin",
+    nav_admin: "👑 Admin Panel",
     
     // Hero
     hero_title: "Disability Information Center",
     hero_subtitle: "“Integrated Digital Hub for Disability Information, Laws, Data & Reports”",
+    hero_desc: "Annual reporting collection from 137 local governments across 14 districts of Koshi Province, federal and provincial legal repository, and detailed thematic analytics.",
     hero_btn_laws: "Explore Laws",
-    hero_btn_reporting: "Local Reporting",
-    hero_btn_reports: "View Reports",
-    
+    hero_btn_reporting: "1. Palika Report",
+    hero_btn_reports: "2. Comprehensive Report",
+    hero_reporting_sub: "Individual Local Government Reports",
+    hero_reports_sub: "All 137 Palikas Compiled",
+    hero_banner_tag: "Nepal's Integrated Disability Information and Data Management System",
+    hero_classification: "📊 Report Classification:",
+    hero_classification_palika: "🏛️ 1. Palika Report (Individual or Selected Palika)",
+    hero_classification_overall: "📈 2. Comprehensive Report (All 137 Palikas Compiled)",
+
     // Stats Cards
+    stats_heading: "Current System Data Summary",
+    stats_subheading: "Real-time status of local governments and legal repository in Koshi Province",
+    stats_fiscal_year: "FY 2082/083 Updated",
     stats_total_laws: "Total Legal Documents",
+    stats_total_laws_sub: "Acts, Regulations, Procedures & Directives",
     stats_federal_laws: "Federal Laws",
+    stats_federal_laws_sub: "Legal documents enacted by Federal Government",
     stats_provincial_laws: "Provincial Laws",
+    stats_provincial_laws_sub: "Laws enacted by Koshi and other Provinces",
     stats_total_palikas: "Total Local Governments",
+    stats_total_palikas_sub: "All local bodies across 14 districts of Koshi",
     stats_submitted_reports: "Reports Submitted",
-    stats_pending_reports: "Reports Pending",
+    stats_submitted_reports_sub: "Annual Reports Received for FY 2082/083",
+    stats_pending_reports: "Pending Reports",
+    stats_pending_reports_sub: "Local governments with submissions pending",
     stats_published_news: "Published News & Notices",
-    
-    // Sections
-    section_pillars: "Core Pillars of the Platform",
-    pillar_laws_title: "Digital Law & Policy Repository",
-    pillar_laws_desc: "All acts, regulations, guidelines, and directives concerning disability from federal and provincial governments.",
-    pillar_reporting_title: "Local Government Annual Reporting",
-    pillar_reporting_desc: "Direct online reporting for facilitators across all 137 local units of 14 districts in Koshi Province.",
-    pillar_analytics_title: "Subject-Wise Reports & Analytics",
-    pillar_analytics_desc: "Detailed statistical dashboards on beneficiaries, home visits, assistive devices, and downloadable reports.",
-    
-    // Quick Actions
-    quick_district_select: "Select District to find Local Government",
+    stats_published_news_sub: "Circulars, notices & program announcements",
+
+    // Pillars
+    section_pillars: "Key Pillars of the System",
+    section_pillars_sub: "Policy clarity, local government accountability, and evidence-based decision making",
+    pillar_laws_title: "Laws & Policies Digital Repository",
+    pillar_laws_desc: "All Acts, Regulations, Procedures, and Directives relating to disability rights in Nepal.",
+    pillar_laws_b1: "Federal Acts, Rules, Procedures and Directives",
+    pillar_laws_b2: "Provincial laws covering all 7 provinces",
+    pillar_laws_b3: "Instant PDF preview and high-speed downloads",
+    pillar_laws_btn: "Open Legal Repository",
+    pillar_reporting_title: "Local Government Annual Reporting System",
+    pillar_reporting_desc: "Online entry and review of annual disability performance across 137 local bodies.",
+    pillar_reporting_b1: "FY 2082/083 Annual Report (44 core questions)",
+    pillar_reporting_b2: "Annex 1.1 (Home Visits) & Annex 1.2 (Assistive Devices)",
+    pillar_reporting_b3: "Auto-calculated gender totals & Save Draft functionality",
+    pillar_reporting_btn: "Enter Reporting Portal",
+    pillar_reporting_badge: "Core System",
+    pillar_analytics_title: "Thematic Statistics & Analytics",
+    pillar_analytics_desc: "Detailed demographic analysis, home visits, assistive devices, and downloadable reports.",
+    pillar_analytics_b1: "Individual thematic charts and accessible tables",
+    pillar_analytics_b2: "Koshi Province overall and district comparisons",
+    pillar_analytics_b3: "Excel (Original Template) and PDF report downloads",
+    pillar_analytics_btn: "Explore Analytics",
+
+    // Quick Finder
+    quick_finder_badge: "14 Districts & 137 Local Governments of Koshi Province",
+    quick_finder_title: "Local Government Report Search & Entry",
+    quick_finder_desc: "Select a district to view annual performance reports and public profiles of local governments.",
+    quick_step_1: "1. Select District",
+    quick_step_2: "2. Select Local Government",
+    quick_step_3: "3. Open Report & Profile",
     select_district: "-- Select District --",
     select_palika: "-- Select Local Government --",
     go_to_palika: "Open Palika Profile",
-    
+    enter_reporting_btn: "Reporting Entry Portal",
+    palika_count_suffix: "Local Bodies",
+
+    // Common
+    common: {
+      home: "Home",
+      about: "About Us",
+      contact: "Contact",
+      search: "Search",
+      login: "Login",
+      register: "Register",
+      logout: "Logout",
+      readMore: "Read More",
+      loading: "Loading...",
+      submit: "Submit",
+      cancel: "Cancel",
+      save: "Save",
+      close: "Close",
+      back: "Back",
+      delete: "Delete",
+      edit: "Edit",
+      add: "Add New",
+      view: "View",
+      download: "Download",
+      filter: "Filter",
+      all: "All",
+      yes: "Yes",
+      no: "No",
+      status: "Status",
+      action: "Action",
+      date: "Date",
+      author: "Author / Source",
+      category: "Category",
+      notice: "Notice",
+      news: "News",
+      program: "Programs",
+      achievement: "Achievements",
+      announcement: "Announcements",
+      nepalGov: "Government of Nepal / Koshi Province",
+      dicCenter: "Disability Information Center (DIC)",
+      accessibility: "Accessibility",
+      darkMode: "Dark Mode",
+      lightMode: "Light Mode",
+      darkModeOn: "Dark: On",
+      darkModeOff: "Dark: Off",
+      adminPanel: "👑 Admin Panel",
+      signInRegister: "🔐 Sign In / Register",
+      superAdminRole: "👑 Super Admin",
+      citizenRole: "👤 Citizen",
+      staffRole: "🏛️ Staff",
+      notAvailable: "Translation not available"
+    },
+
+    // News & Notices Section
+    news: {
+      badge: "Notices & News Portal",
+      title: "Notices, News and Important Circulars",
+      description: "Latest information on disability issues, local government activities, government decisions, policy circulars and training.",
+      searchPlaceholder: "Search notices or news...",
+      all: "All",
+      notice: "Notice",
+      news: "News",
+      program: "Programs",
+      achievement: "Achievements",
+      announcement: "Announcements",
+      publishedNews: "Recently Published Notices and News",
+      readMore: "Read More",
+      dateLabel: "B.S.",
+      filterHeading: "Search & Filter News",
+      noResults: "No notices or news articles found.",
+      noResultsDesc: "Please try adjusting your search terms or category filters.",
+      resetFilter: "Reset All Filters",
+      circularFile: "Attached Official Circular / Notice (PDF)",
+      downloadFile: "Download Circular",
+      videoTitle: "Video Content:",
+      editBtn: "✏️ Edit",
+      deleteBtn: "Delete",
+      addBtn: "Add New Notice / News (+ Add)",
+      adminModeBanner: "Super Admin Editing and Management Mode",
+      adminModeDesc: "You can edit titles, images, videos, descriptions or dates on any article, or add new articles and delete outdated ones.",
+      notAvailableEn: "English translation not available"
+    },
+
+    // Laws & Regulations
+    laws: {
+      badge: "Legal Repository & Digital Archive",
+      title: "Repository of Legal Documents",
+      description: "All Acts, Regulations, Procedures, Directives and Circulars concerning disability rights under the Government of Nepal and Provincial Governments.",
+      searchPlaceholder: "Search by law title or keywords...",
+      federalTab: "Federal Laws",
+      provincialTab: "Provincial Laws",
+      allLevelTab: "All Levels",
+      categoryAll: "All Categories",
+      act: "Acts",
+      rule: "Regulations",
+      procedure: "Procedures",
+      directive: "Directives",
+      guideline: "Guidelines",
+      circular: "Circulars",
+      publicationDate: "Publication Date:",
+      authority: "Issuing Authority:",
+      amendment: "Amended",
+      downloadPdf: "Download PDF",
+      previewPdf: "Preview",
+      noLawsFound: "No legal documents found matching your criteria."
+    },
+
+    // Reports & Analytics
+    reports: {
+      badge: "Analytical Dashboard & Reports",
+      title: "Koshi Province Comprehensive Reports & Analytics",
+      description: "Consolidated analytical data on disability cards, home visits, assistive devices, and budget performance across 137 local bodies.",
+      tabOverview: "Overview",
+      tabCompiled: "137 Palikas Table",
+      tabCharts: "Charts & Graphs",
+      downloadExcel: "Download Excel (.xlsx)",
+      downloadPdf: "PDF Report",
+      singlePalikaNote: "To view or submit a report for a specific municipality",
+      singlePalikaLink: "Go to Municipality Reporting Portal",
+      cardIdentified: "Identified Persons with Disabilities",
+      cardHomeVisits: "Completed Home Visits",
+      cardDevices: "Assistive Devices Distributed",
+      cardBudget: "Allocated Budget (NPR)"
+    },
+
+    // Local Reporting
+    reporting: {
+      badge: "Local Government Annual Performance Portal",
+      title: "Koshi Province Local Government Reporting System",
+      description: "Online submission and reporting portal for disability facilitators and municipal focal persons across 137 local bodies.",
+      selectPalikaGuide: "Please select your municipality from the list or sign in directly to submit reports."
+    },
+
+    // Contact & Grievance
+    contact: {
+      badge: "Contact & Citizen Support",
+      title: "Contact & Assistance Desk",
+      description: "Koshi Province Disability Information Center, Technical Division, Facilitator Helpdesk and Citizen Inquiries.",
+      officeLocation: "Office Location",
+      officeAddress: "Biratnagar, Morang, Koshi Province, Nepal",
+      phoneLabel: "Phone Number",
+      emailLabel: "Email Address",
+      grievanceTitle: "Inquiry & Grievance Form",
+      grievanceDesc: "Send any questions, inquiries, or feedback regarding disability rights, services, or portal usage.",
+      formName: "Full Name *",
+      formPhone: "Mobile Number *",
+      formEmail: "Email Address (Optional)",
+      formDistrict: "District *",
+      formSubject: "Subject *",
+      formMessage: "Inquiry / Grievance Details *",
+      submitGrievance: "Submit Inquiry / Grievance",
+      trackingNotice: "A reference tracking code will be provided upon submission."
+    },
+
+    // Search Page
+    search: {
+      badge: "Integrated Search Engine",
+      title: "Portal Search System",
+      description: "Search across laws, local government reports, notices, news, and official contacts from one place.",
+      placeholder: "Enter search keywords (e.g. Act, Phidim, wheelchair, budget)...",
+      searchBtn: "Search",
+      tabAll: "All Results",
+      tabLaws: "Laws",
+      tabNews: "Notices / News",
+      tabPalikas: "Local Governments",
+      resultsFound: "Results Found",
+      noResultsFound: "No content matched your search keywords."
+    },
+
+    // About Page
+    about: {
+      badge: "Institutional Profile",
+      title: "About Disability Information Center (DIC)",
+      description: "Integrated digital hub for disability laws, policies, data and local government performance in Koshi Province and Nepal.",
+      visionTitle: "Our Vision",
+      visionDesc: "A credible and fully accessible digital infrastructure empowering disability rights, evidence-based policy making, and an inclusive society.",
+      missionTitle: "Our Mission",
+      missionDesc: "To ensure transparency, accurate data compilation, and legal awareness on disability matters from the grassroots to provincial levels.",
+      pillarsTitle: "Core Principles",
+      p1: "Full Accessibility (WCAG 2.2 AA)",
+      p2: "Transparent Data & Accountability",
+      p3: "Local Government Partnership"
+    },
+
+    // Authentication Modal
+    auth: {
+      title: "Disability Information Center Portal",
+      subtitle: "Sign in for Municipal Facilitators, Staff and Administrators",
+      tabLogin: "Staff / Admin Sign In",
+      tabSignup: "New User Registration (Sign Up)",
+      emailLabel: "Email Address (Gmail / Email) *",
+      emailPlaceholder: "e.g. facilitator@gmail.com",
+      passwordLabel: "Password *",
+      passwordPlaceholder: "Enter your password...",
+      loginBtn: "🔐 Sign In",
+      quickLoginTitle: "1-Click Demo Logins for Testing:",
+      superAdminDemo: "👑 Super Administrator",
+      phidimStaffDemo: "🏛️ Phidim Municipality Staff",
+      dharanStaffDemo: "🏢 Dharan Municipality Staff"
+    },
+
+    // Accessibility Panel
+    a11y: {
+      panelTitle: "Accessibility Settings",
+      panelSubtitle: "Customize visual and reading preferences in compliance with WCAG 2.2 AA standards",
+      fontSizeTitle: "Text Size",
+      normalFont: "Normal (100%)",
+      largeFont: "Large (150%)",
+      extraLargeFont: "Extra Large (180%)",
+      colorContrastTitle: "Color & Contrast",
+      defaultTheme: "Default",
+      highContrastTheme: "High Contrast",
+      darkModeTheme: "Dark Mode",
+      resetAll: "Reset Settings",
+      closePanel: "Close"
+    },
+
+    // Chatbot
+    chatbot: {
+      badge: "AI Assistant",
+      title: "Disability Information Center AI Assistant",
+      greeting: "Hello! I am the DIC AI Assistant. I can help you with disability laws, local government reports, ID cards, or contact information. How may I assist you today?",
+      placeholder: "Type your question here...",
+      askPrompt: "Ask AI Assistant",
+      sendBtn: "Send"
+    },
+
     // Footer
-    footer_copy: "© 2026 Disability Information Center (DIC). All rights reserved.",
-    footer_accessibility_note: "Built in strict compliance with WCAG 2.2 AA accessibility principles."
+    footer: {
+      brandDesc: "Integrated portal for disability laws, policies, local government performance, and data management under the Government of Nepal and Provincial Government.",
+      wcagBadge: "System designed and developed under WCAG 2.2 AA Accessibility Standards",
+      quickLinksTitle: "Key Modules",
+      contactSupportTitle: "Contact & Support",
+      helpDeskName: "Disability Facilitator Support Desk",
+      phone: "Phone: +977-021-460XXX (Koshi Province)",
+      email: "Email: info.dic@koshi.gov.np",
+      copy: "© 2082/083 Disability Information Center (DIC). All Rights Reserved.",
+      a11yNote: "This system is developed following WCAG 2.2 AA accessibility guidelines."
+    }
   }
 };

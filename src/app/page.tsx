@@ -1,42 +1,27 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useRef, useEffect } from "react";
 import Link from "next/link";
 import Header from "@/components/Header";
 import StatsCards from "@/components/StatsCards";
 import QuickPalikaFinder from "@/components/QuickPalikaFinder";
 import Footer from "@/components/Footer";
-import { translations, Language } from "@/lib/translations";
+import { translations } from "@/lib/translations";
+import { useLanguage } from "@/lib/languageContext";
 import { 
   FileText, 
   Building2, 
   BarChart3, 
   ArrowRight, 
   CheckCircle2, 
-  BookOpen, 
   Award, 
   Scale, 
-  Layers, 
-  DownloadCloud,
-  FileCheck2,
-  ChevronDown
+  FileCheck2
 } from "lucide-react";
 
 export default function HomePage() {
-  const [lang, setLang] = useState<Language>("ne");
-  const [heroReportsOpen, setHeroReportsOpen] = useState(false);
-  const heroReportsRef = useRef<HTMLDivElement>(null);
+  const { lang, setLang } = useLanguage();
   const t = translations[lang];
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (heroReportsRef.current && !heroReportsRef.current.contains(event.target as Node)) {
-        setHeroReportsOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   return (
     <div className="flex-1 flex flex-col">
@@ -51,7 +36,7 @@ export default function HomePage() {
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-800/60 border border-blue-400/40 rounded-full text-xs font-semibold text-amber-300 mb-6 backdrop-blur-xs">
               <Award className="w-4 h-4 text-amber-400" aria-hidden="true" />
-              <span>नेपालको एकीकृत अपाङ्गता सूचना तथा तथ्यांक व्यवस्थापन प्रणाली</span>
+              <span>{t.hero_banner_tag}</span>
             </div>
 
             <h1 id="hero-title" className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white max-w-4xl mx-auto leading-tight sm:leading-none">
@@ -61,7 +46,7 @@ export default function HomePage() {
               {t.hero_subtitle}
             </p>
             <p className="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto mt-3">
-              कोशी प्रदेशका १४ जिल्लाका १३७ स्थानीय तहबाट वार्षिक प्रतिवेदन संकलन, संघीय तथा प्रदेश कानुनको डिजिटल भण्डार र विस्तृत विषयगत विश्लेषण।
+              {t.hero_desc}
             </p>
 
             {/* Action Buttons: कानुन, १. पालिका प्रतिवेदन, २. समग्र प्रतिवेदन */}
@@ -78,12 +63,12 @@ export default function HomePage() {
               <Link
                 href="/local-reporting"
                 className="px-5 sm:px-6 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm sm:text-base shadow-lg shadow-blue-600/25 flex items-center gap-2 border border-blue-400/40 transition-all transform hover:-translate-y-0.5 cursor-pointer"
-                title="प्रत्येक पालिका वा सेलेक्ट गरिएको पालिकाको प्रतिवेदन हेर्नुहोस्"
+                title={lang === "ne" ? "प्रत्येक पालिका वा सेलेक्ट गरिएको पालिकाको प्रतिवेदन हेर्नुहोस्" : "View local government report"}
               >
                 <Building2 className="w-5 h-5 text-amber-300" aria-hidden="true" />
                 <div className="text-left">
-                  <span>१. पालिका प्रतिवेदन</span>
-                  <span className="block text-[10px] text-blue-200 font-normal">स्थानिय तहगत प्रतिवेदन</span>
+                  <span>{t.hero_btn_reporting}</span>
+                  <span className="block text-[10px] text-blue-200 font-normal">{t.hero_reporting_sub}</span>
                 </div>
               </Link>
 
@@ -91,25 +76,25 @@ export default function HomePage() {
               <Link
                 href="/reports"
                 className="px-5 sm:px-6 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm sm:text-base shadow-lg shadow-emerald-600/25 flex items-center gap-2 border border-emerald-400/40 transition-all transform hover:-translate-y-0.5 cursor-pointer"
-                title="सबै १३७ स्थानीय तहको एकीकृत कम्पाइल प्रतिवेदन तथा विषयगत विश्लेषण"
+                title={lang === "ne" ? "सबै १३७ स्थानीय तहको एकीकृत कम्पाइल प्रतिवेदन तथा विषयगत विश्लेषण" : "Compiled report of all 137 palikas"}
               >
                 <BarChart3 className="w-5 h-5 text-amber-300" aria-hidden="true" />
                 <div className="text-left">
-                  <span>२. समग्र प्रतिवेदन</span>
-                  <span className="block text-[10px] text-emerald-200 font-normal">सबै १३७ पालिका कम्पाइल</span>
+                  <span>{t.hero_btn_reports}</span>
+                  <span className="block text-[10px] text-emerald-200 font-normal">{t.hero_reports_sub}</span>
                 </div>
               </Link>
             </div>
 
             {/* Sub-Banner Quick Indicator */}
             <div className="mt-5 inline-flex flex-wrap items-center justify-center gap-2 px-4 py-2 bg-slate-800/80 border border-slate-700/80 rounded-2xl text-xs text-slate-300">
-              <span className="font-bold text-amber-400">📊 प्रतिवेदन वर्गीकरण:</span>
+              <span className="font-bold text-amber-400">{t.hero_classification}</span>
               <Link href="/local-reporting" className="hover:text-amber-300 underline font-medium">
-                🏛️ १. पालिका प्रतिवेदन (प्रतेक वा छानिएको स्थानीय तह)
+                {t.hero_classification_palika}
               </Link>
               <span className="text-slate-500">|</span>
               <Link href="/reports" className="hover:text-amber-300 underline font-medium">
-                📈 २. समग्र प्रतिवेदन (सबै १३७ पालिकाको एकीकृत कम्पाइल)
+                {t.hero_classification_overall}
               </Link>
             </div>
           </div>
@@ -119,14 +104,14 @@ export default function HomePage() {
         <StatsCards lang={lang} />
 
         {/* THREE CORE PILLARS SECTION */}
-        <section aria-labelledby="pillars-heading" className="py-16 bg-white">
+        <section aria-labelledby="pillars-heading" className="py-16 bg-white dark:bg-slate-900 transition-colors">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-3xl mx-auto mb-12">
-              <h2 id="pillars-heading" className="text-2xl sm:text-3xl font-black text-slate-900">
+              <h2 id="pillars-heading" className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
                 {t.section_pillars}
               </h2>
-              <p className="text-base text-slate-600 mt-2">
-                अपाङ्गता क्षेत्रमा नीतिगत स्पष्टता, स्थानीय तहको जवाफदेहिता र प्रमाणमा आधारित निर्णय निर्माण
+              <p className="text-base text-slate-600 dark:text-slate-300 mt-2">
+                {t.section_pillars_sub}
               </p>
             </div>
 
@@ -134,7 +119,7 @@ export default function HomePage() {
               {/* Pillar 1: Law Repository */}
               <div className="a11y-card rounded-2xl border border-slate-200 dark:border-slate-800 p-7 bg-slate-50/50 dark:bg-slate-800/40 hover:bg-white dark:hover:bg-slate-800 hover:shadow-xl transition-all flex flex-col justify-between group">
                 <div>
-                  <div className="w-14 h-14 rounded-2xl bg-blue-100 text-blue-800 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                  <div className="w-14 h-14 rounded-2xl bg-blue-100 dark:bg-blue-900/60 text-blue-800 dark:text-blue-300 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
                     <Scale className="w-7 h-7" aria-hidden="true" />
                   </div>
                   <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">
@@ -146,23 +131,23 @@ export default function HomePage() {
                   <ul className="space-y-2 text-xs text-slate-700 dark:text-slate-300 mb-6 font-medium">
                     <li className="flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                      <span>संघीय ऐन, नियमावली, कार्यविधि र निर्देशिका</span>
+                      <span>{t.pillar_laws_b1}</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                      <span>कोशी सहित सबै ७ प्रदेशका कानुनहरू</span>
+                      <span>{t.pillar_laws_b2}</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                      <span>PDF पूर्वावलोकन तथा तुरुन्त डाउनलोड</span>
+                      <span>{t.pillar_laws_b3}</span>
                     </li>
                   </ul>
                 </div>
                 <Link
                   href="/laws"
-                  className="inline-flex items-center text-sm font-bold text-blue-700 hover:text-blue-900 gap-1.5"
+                  className="inline-flex items-center text-sm font-bold text-blue-700 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 gap-1.5"
                 >
-                  <span>कानुनी दस्तावेज खोल्नुहोस्</span>
+                  <span>{t.pillar_laws_btn}</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
@@ -170,7 +155,7 @@ export default function HomePage() {
               {/* Pillar 2: Local Reporting System */}
               <div className="a11y-card rounded-2xl border-2 border-blue-600/30 dark:border-blue-500/40 p-7 bg-blue-50/30 dark:bg-blue-950/20 hover:bg-white dark:hover:bg-slate-800 hover:shadow-xl transition-all flex flex-col justify-between group relative overflow-hidden">
                 <div className="absolute top-3 right-3 bg-blue-600 text-white text-[11px] font-bold px-2 py-0.5 rounded-full">
-                  मुख्य प्रणाली
+                  {t.pillar_reporting_badge}
                 </div>
                 <div>
                   <div className="w-14 h-14 rounded-2xl bg-blue-600 text-white flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shadow-md">
@@ -185,23 +170,23 @@ export default function HomePage() {
                   <ul className="space-y-2 text-xs text-slate-700 dark:text-slate-300 mb-6 font-medium">
                     <li className="flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                      <span>आर्थिक वर्ष २०८२/०८३ वार्षिक प्रतिवेदन (४४ प्रश्न)</span>
+                      <span>{t.pillar_reporting_b1}</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                      <span>अनुसूची १.१ (गृहभेट) र १.२ (सहायक सामग्री)</span>
+                      <span>{t.pillar_reporting_b2}</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                      <span>महिला+पुरुष स्वचालित हिसाब तथा Save Draft</span>
+                      <span>{t.pillar_reporting_b3}</span>
                     </li>
                   </ul>
                 </div>
                 <Link
                   href="/local-reporting"
-                  className="inline-flex items-center text-sm font-bold text-blue-700 hover:text-blue-900 gap-1.5"
+                  className="inline-flex items-center text-sm font-bold text-blue-700 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 gap-1.5"
                 >
-                  <span>प्रतिवेदन प्रणालीमा प्रवेश गर्नुहोस्</span>
+                  <span>{t.pillar_reporting_btn}</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
@@ -209,35 +194,35 @@ export default function HomePage() {
               {/* Pillar 3: Subject-Wise Reports & Analytics */}
               <div className="a11y-card rounded-2xl border border-slate-200 dark:border-slate-800 p-7 bg-slate-50/50 dark:bg-slate-800/40 hover:bg-white dark:hover:bg-slate-800 hover:shadow-xl transition-all flex flex-col justify-between group">
                 <div>
-                  <div className="w-14 h-14 rounded-2xl bg-purple-100 text-purple-800 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                  <div className="w-14 h-14 rounded-2xl bg-purple-100 dark:bg-purple-900/60 text-purple-800 dark:text-purple-300 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
                     <BarChart3 className="w-7 h-7" aria-hidden="true" />
                   </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-3">
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">
                     {t.pillar_analytics_title}
                   </h3>
-                  <p className="text-sm text-slate-600 leading-relaxed mb-4">
+                  <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
                     {t.pillar_analytics_desc}
                   </p>
-                  <ul className="space-y-2 text-xs text-slate-700 mb-6 font-medium">
+                  <ul className="space-y-2 text-xs text-slate-700 dark:text-slate-300 mb-6 font-medium">
                     <li className="flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                      <span>विषयगत छुट्टाछुट्टै चार्ट तथा Accessible तालिकाहरू</span>
+                      <span>{t.pillar_analytics_b1}</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                      <span>कोशी प्रदेश समग्र र जिल्लागत तुलना</span>
+                      <span>{t.pillar_analytics_b2}</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                      <span>Excel (मूल ढाँचा) तथा PDF रिपोर्ट डाउनलोड</span>
+                      <span>{t.pillar_analytics_b3}</span>
                     </li>
                   </ul>
                 </div>
                 <Link
                   href="/reports"
-                  className="inline-flex items-center text-sm font-bold text-purple-700 hover:text-purple-900 gap-1.5"
+                  className="inline-flex items-center text-sm font-bold text-purple-700 dark:text-purple-400 hover:text-purple-900 dark:hover:text-purple-300 gap-1.5"
                 >
-                  <span>तथ्यांक विश्लेषण हेर्नुहोस्</span>
+                  <span>{t.pillar_analytics_btn}</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>

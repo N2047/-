@@ -12,7 +12,8 @@ import {
   LawCategory, 
   GovLevel 
 } from "@/lib/lawsData";
-import { translations, Language } from "@/lib/translations";
+import { translations } from "@/lib/translations";
+import { useLanguage } from "@/lib/languageContext";
 import { 
   Scale, 
   Search, 
@@ -20,17 +21,11 @@ import {
   FileText, 
   Download, 
   Eye, 
-  Filter, 
-  Calendar, 
-  Globe2, 
-  ShieldAlert,
-  Layers,
-  ArrowRight,
-  BookOpen
+  Globe2
 } from "lucide-react";
 
 export default function LawsPage() {
-  const [lang, setLang] = useState<Language>("ne");
+  const { lang, setLang } = useLanguage();
   const [activeTab, setActiveTab] = useState<GovLevel>("federal");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedProvince, setSelectedProvince] = useState<string>("all");
@@ -38,6 +33,35 @@ export default function LawsPage() {
   const [selectedDoc, setSelectedDoc] = useState<LawDocument | null>(null);
 
   const t = translations[lang];
+
+  const getLocalizedCategoryName = (catId: LawCategory) => {
+    if (lang === "ne") {
+      switch (catId) {
+        case "act": return "ऐन";
+        case "rule": return "नियमावली";
+        case "procedure": return "कार्यविधि";
+        case "directive": return "निर्देशिका";
+        case "guideline": return "मार्गदर्शन";
+        case "circular": return "परिपत्र";
+        default: return catId;
+      }
+    }
+    switch (catId) {
+      case "act": return "Act";
+      case "rule": return "Regulation";
+      case "procedure": return "Procedure";
+      case "directive": return "Directive";
+      case "guideline": return "Guideline";
+      case "circular": return "Circular";
+      default: return catId;
+    }
+  };
+
+  const getLocalizedProvinceName = (provId?: string) => {
+    const p = NEPAL_PROVINCES.find(pr => pr.id === provId);
+    if (!p) return lang === "ne" ? "प्रदेश सरकार" : "Provincial Government";
+    return lang === "ne" ? p.name_ne : p.name_en;
+  };
 
   // Filtered documents
   const filteredDocs = useMemo(() => {
@@ -71,7 +95,7 @@ export default function LawsPage() {
   }, [activeTab, selectedCategory, selectedProvince, searchQuery]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50">
+    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 transition-colors">
       <Header lang={lang} onLanguageChange={setLang} />
 
       {/* MODAL FOR LAW VIEW & PDF PREVIEW */}
@@ -80,33 +104,37 @@ export default function LawsPage() {
       <main id="main-content" tabIndex={-1} className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 focus:outline-hidden">
         
         {/* Page Hero Header */}
-        <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-xs mb-8">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-xs mb-8">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-100 text-blue-900 rounded-full text-xs font-bold uppercase tracking-wider mb-2 border border-blue-200">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-100 dark:bg-blue-900/60 text-blue-900 dark:text-blue-300 rounded-full text-xs font-bold uppercase tracking-wider mb-2 border border-blue-200 dark:border-blue-800">
                 <Scale className="w-3.5 h-3.5" aria-hidden="true" />
-                डिजिटल कानुन भण्डार
+                {t.laws.badge}
               </span>
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-                विद्यमान कानुनहरूको दस्तावेज (Laws & Policies Repository)
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                {t.laws.title}
               </h1>
-              <p className="text-sm sm:text-base text-slate-600 mt-2 max-w-3xl leading-relaxed">
-                नेपाल सरकार तथा प्रदेश सरकार मातहत अपाङ्गता भएका व्यक्तिको हक, अधिकार, संरक्षण तथा समावेशिता सम्बन्धी सम्पूर्ण ऐन, नियमावली, कार्यविधि, निर्देशिका, मार्गदर्शन र परिपत्रहरूको आधिकारिक संग्रह।
+              <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 mt-2 max-w-3xl leading-relaxed">
+                {t.laws.description}
               </p>
             </div>
 
-            <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
+            <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 rounded-xl p-4 text-center">
               <div>
-                <span className="text-xs font-semibold text-blue-700 block">कुल कानुनी दस्तावेज</span>
-                <span className="text-3xl font-black text-blue-950">{LEGAL_DOCUMENTS.length}</span>
-                <span className="text-[11px] text-blue-600 block">PDF ढाँचामा उपलब्ध</span>
+                <span className="text-xs font-semibold text-blue-700 dark:text-blue-300 block">
+                  {lang === 'en' ? 'Total Documents' : 'कुल दस्तावेजहरू'}
+                </span>
+                <span className="text-3xl font-black text-blue-950 dark:text-white">{LEGAL_DOCUMENTS.length}</span>
+                <span className="text-[11px] text-blue-600 dark:text-blue-400 block">
+                  {lang === 'en' ? 'PDF & Digital Copies' : 'PDF र डिजिटल प्रति'}
+                </span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Primary Tabs: संघीय सरकार vs प्रदेश सरकार */}
-        <div className="flex border-b-2 border-slate-200 mb-6 gap-2" role="tablist" aria-label="सरकारको तह">
+        <div className="flex border-b-2 border-slate-200 dark:border-slate-800 mb-6 gap-2" role="tablist" aria-label="Government Level">
           <button
             type="button"
             role="tab"
@@ -115,14 +143,14 @@ export default function LawsPage() {
               setActiveTab("federal");
               setSelectedProvince("all");
             }}
-            className={`py-3.5 px-6 font-bold text-sm sm:text-base rounded-t-xl transition-all flex items-center gap-2 border-t-2 border-x-2 -mb-0.5 ${
+            className={`py-3.5 px-6 font-bold text-sm sm:text-base rounded-t-xl transition-all flex items-center gap-2 border-t-2 border-x-2 -mb-0.5 cursor-pointer ${
               activeTab === "federal"
-                ? "bg-white text-blue-900 border-blue-900 border-b-white shadow-xs"
-                : "bg-slate-100 text-slate-600 border-transparent hover:text-slate-900"
+                ? "bg-white dark:bg-slate-900 text-blue-900 dark:text-blue-400 border-blue-900 dark:border-blue-600 border-b-white dark:border-b-slate-900 shadow-xs"
+                : "bg-slate-100 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 border-transparent hover:text-slate-900 dark:hover:text-white"
             }`}
           >
             <Building2 className="w-4 h-4" />
-            <span>१. संघीय सरकार मातहतका कानुनहरू</span>
+            <span>{t.laws.federalTab}</span>
           </button>
 
           <button
@@ -130,56 +158,56 @@ export default function LawsPage() {
             role="tab"
             aria-selected={activeTab === "provincial"}
             onClick={() => setActiveTab("provincial")}
-            className={`py-3.5 px-6 font-bold text-sm sm:text-base rounded-t-xl transition-all flex items-center gap-2 border-t-2 border-x-2 -mb-0.5 ${
+            className={`py-3.5 px-6 font-bold text-sm sm:text-base rounded-t-xl transition-all flex items-center gap-2 border-t-2 border-x-2 -mb-0.5 cursor-pointer ${
               activeTab === "provincial"
-                ? "bg-white text-blue-900 border-blue-900 border-b-white shadow-xs"
-                : "bg-slate-100 text-slate-600 border-transparent hover:text-slate-900"
+                ? "bg-white dark:bg-slate-900 text-blue-900 dark:text-blue-400 border-blue-900 dark:border-blue-600 border-b-white dark:border-b-slate-900 shadow-xs"
+                : "bg-slate-100 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 border-transparent hover:text-slate-900 dark:hover:text-white"
             }`}
           >
             <Globe2 className="w-4 h-4" />
-            <span>२. प्रदेश सरकार मातहतका कानुनहरू (७ प्रदेश)</span>
+            <span>{t.laws.provincialTab}</span>
           </button>
         </div>
 
         {/* Filter & Search Toolbar */}
-        <section aria-labelledby="filter-heading" className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs mb-8">
-          <h2 id="filter-heading" className="sr-only">कानुन खोजी तथा फिल्टर</h2>
+        <section aria-labelledby="filter-heading" className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-xs mb-8">
+          <h2 id="filter-heading" className="sr-only">{lang === 'en' ? 'Filters' : 'फिल्टरहरू'}</h2>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             
             {/* Search Input */}
             <div className={activeTab === "provincial" ? "lg:col-span-2" : "lg:col-span-2"}>
-              <label htmlFor="law-search" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                कानुनको नाम वा विषयबाट खोजी
+              <label htmlFor="law-search" className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                {lang === 'en' ? 'Search by Keyword / Title' : 'कानुनको नाम वा कुञ्जीशब्दबाट खोजी'}
               </label>
               <div className="relative">
                 <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" aria-hidden="true" />
                 <input
                   id="law-search"
                   type="search"
-                  placeholder="ऐन, नियमावली, कार्यविधि वा किवर्ड टाइप गर्नुहोस्..."
+                  placeholder={t.laws.searchPlaceholder}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-blue-600 focus:outline-hidden font-medium"
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-blue-600 focus:outline-hidden font-medium"
                 />
               </div>
             </div>
 
             {/* Category Dropdown */}
             <div>
-              <label htmlFor="category-select" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                दस्तावेजको प्रकार
+              <label htmlFor="category-select" className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                {lang === 'en' ? 'Document Category' : 'दस्तावेजको श्रेणी'}
               </label>
               <select
                 id="category-select"
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:bg-white focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
+                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white font-semibold focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
               >
-                <option value="all">सबै प्रकार (All Categories)</option>
+                <option value="all">{t.laws.categoryAll}</option>
                 {LAW_CATEGORIES.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.name_ne}
+                    {getLocalizedCategoryName(c.id)}
                   </option>
                 ))}
               </select>
@@ -188,27 +216,27 @@ export default function LawsPage() {
             {/* Province Dropdown (Only for Provincial Tab) */}
             {activeTab === "provincial" ? (
               <div>
-                <label htmlFor="province-select" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                  प्रदेश छनौट गर्नुहोस्
+                <label htmlFor="province-select" className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                  {lang === 'en' ? 'Select Province' : 'प्रदेश छनौट गर्नुहोस्'}
                 </label>
                 <select
                   id="province-select"
                   value={selectedProvince}
                   onChange={(e) => setSelectedProvince(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:bg-white focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white font-semibold focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
                 >
-                  <option value="all">सबै ७ प्रदेश (All Provinces)</option>
+                  <option value="all">{lang === 'en' ? 'All 7 Provinces' : 'सबै ७ प्रदेशहरू'}</option>
                   {NEPAL_PROVINCES.map((p) => (
                     <option key={p.id} value={p.id}>
-                      {p.name_ne} ({p.name_en})
+                      {lang === "ne" ? p.name_ne : p.name_en}
                     </option>
                   ))}
                 </select>
               </div>
             ) : (
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                  द्रुत फिल्टर
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                  {lang === 'en' ? 'Quick Actions' : 'द्रुत कार्य'}
                 </label>
                 <button
                   type="button"
@@ -216,36 +244,38 @@ export default function LawsPage() {
                     setSearchQuery("");
                     setSelectedCategory("all");
                   }}
-                  className="w-full py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-colors text-center cursor-pointer"
+                  className="w-full py-2.5 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl transition-colors text-center cursor-pointer"
                 >
-                  फिल्टर रिसेट गर्नुहोस्
+                  {lang === 'en' ? 'Reset Filters' : 'फिल्टर रिसेट गर्नुहोस्'}
                 </button>
               </div>
             )}
           </div>
 
           {/* Quick Category Buttons Bar */}
-          <div className="pt-4 mt-4 border-t border-slate-200 flex flex-wrap items-center gap-1.5">
-            <span className="text-xs font-bold text-slate-500 mr-2">द्रुत वर्ग:</span>
+          <div className="pt-4 mt-4 border-t border-slate-200 dark:border-slate-800 flex flex-wrap items-center gap-1.5">
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 mr-2">
+              {lang === 'en' ? 'Quick Category:' : 'द्रुत श्रेणी:'}
+            </span>
             <button
               type="button"
               onClick={() => setSelectedCategory("all")}
-              className={`px-3 py-1 rounded-full text-xs font-bold transition-colors ${
-                selectedCategory === "all" ? "bg-blue-900 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+              className={`px-3 py-1 rounded-full text-xs font-bold transition-colors cursor-pointer ${
+                selectedCategory === "all" ? "bg-blue-900 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200"
               }`}
             >
-              सबै
+              {t.common.all}
             </button>
             {LAW_CATEGORIES.map((cat) => (
               <button
                 key={cat.id}
                 type="button"
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`px-3 py-1 rounded-full text-xs font-bold transition-colors ${
-                  selectedCategory === cat.id ? "bg-blue-900 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                className={`px-3 py-1 rounded-full text-xs font-bold transition-colors cursor-pointer ${
+                  selectedCategory === cat.id ? "bg-blue-900 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200"
                 }`}
               >
-                {cat.name_ne.split(" ")[0]}
+                {getLocalizedCategoryName(cat.id)}
               </button>
             ))}
           </div>
@@ -254,65 +284,75 @@ export default function LawsPage() {
         {/* Legal Documents Listing Grid */}
         <section aria-labelledby="documents-list-heading">
           <div className="flex items-center justify-between mb-4">
-            <h2 id="documents-list-heading" className="text-lg font-bold text-slate-900">
-              {activeTab === "federal" ? "संघीय सरकारका कानुनी दस्तावेजहरू" : "प्रदेश सरकारका कानुनी दस्तावेजहरू"} ({filteredDocs.length})
+            <h2 id="documents-list-heading" className="text-lg font-bold text-slate-900 dark:text-white">
+              {activeTab === "federal" 
+                ? (lang === "ne" ? "संघीय सरकारका कानुनी दस्तावेजहरू" : "Federal Government Legal Documents")
+                : (lang === "ne" ? "प्रदेश सरकारका कानुनी दस्तावेजहरू" : "Provincial Government Legal Documents")} ({filteredDocs.length})
             </h2>
-            <span className="text-xs text-slate-500">
-              दस्तावेज हेर्न वा PDF डाउनलोड गर्न कार्डमा क्लिक गर्नुहोस्।
+            <span className="text-xs text-slate-500 dark:text-slate-400">
+              {lang === 'en' ? 'Click card to preview or download' : 'विवरण तथा PDF हेर्न कार्डमा क्लिक गर्नुहोस्'}
             </span>
           </div>
 
           {filteredDocs.length === 0 ? (
-            <div className="bg-white rounded-2xl p-12 text-center border border-dashed border-slate-300">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl p-12 text-center border border-dashed border-slate-300 dark:border-slate-700">
               <FileText className="w-12 h-12 text-slate-400 mx-auto mb-3" />
-              <p className="text-base font-bold text-slate-800">कुनै कानुनी दस्तावेज फेला परेन।</p>
-              <p className="text-xs text-slate-500 mt-1">कृपया खोजी शब्द वा वर्ग फिल्टर परिवर्तन गरी पुनः प्रयास गर्नुहोस्।</p>
+              <p className="text-base font-bold text-slate-800 dark:text-slate-200">{t.laws.noLawsFound}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                {lang === 'en' ? 'Please adjust your search keywords or category filters.' : 'कृपया खोजी शब्द वा श्रेणी परिवर्तन गरी पुनः प्रयास गर्नुहोस्।'}
+              </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {filteredDocs.map((doc) => (
                 <article
                   key={doc.id}
-                  className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs hover:shadow-md hover:border-blue-400 transition-all flex flex-col justify-between group"
+                  className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-xs hover:shadow-md hover:border-blue-400 dark:hover:border-blue-600 transition-all flex flex-col justify-between group"
                 >
                   <div>
                     {/* Tags Bar */}
                     <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-900">
-                          {doc.category_name_ne}
+                        <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/60 text-blue-900 dark:text-blue-300">
+                          {getLocalizedCategoryName(doc.category)}
                         </span>
                         <span className={`text-[11px] font-semibold px-2 py-0.5 rounded ${
-                          doc.gov_level === "federal" ? "bg-emerald-50 text-emerald-800" : "bg-purple-50 text-purple-800"
+                          doc.gov_level === "federal" 
+                            ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300" 
+                            : "bg-purple-50 dark:bg-purple-950/40 text-purple-800 dark:text-purple-300"
                         }`}>
-                          {doc.gov_level === "federal" ? "संघीय सरकार" : doc.province_name_ne || "प्रदेश सरकार"}
+                          {doc.gov_level === "federal" 
+                            ? (lang === "ne" ? "संघीय सरकार" : "Federal Government") 
+                            : getLocalizedProvinceName(doc.province_id)}
                         </span>
                       </div>
-                      <span className="text-xs text-slate-500 font-medium">
-                        वि.सं. {doc.publication_date_bs}
+                      <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                        {lang === "ne" ? `वि.सं. ${doc.publication_date_bs}` : `B.S. ${doc.publication_date_bs}`}
                       </span>
                     </div>
 
                     {/* Title */}
-                    <h3 className="text-base sm:text-lg font-bold text-slate-900 group-hover:text-blue-900 transition-colors leading-snug">
-                      {doc.title_ne}
+                    <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white group-hover:text-blue-900 dark:group-hover:text-blue-400 transition-colors leading-snug">
+                      {lang === "ne" ? doc.title_ne : (doc.title_en || doc.title_ne)}
                     </h3>
-                    <p className="text-xs text-slate-500 mt-0.5 mb-3 font-medium">{doc.title_en}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 mb-3 font-medium">
+                      {lang === "ne" ? doc.title_en : doc.title_ne}
+                    </p>
 
                     {/* Description preview */}
-                    <p className="text-xs text-slate-600 leading-relaxed line-clamp-3 mb-4">
+                    <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed line-clamp-3 mb-4">
                       {doc.description_ne}
                     </p>
 
                     {/* Authority */}
-                    <div className="flex items-center gap-1.5 text-xs text-slate-500 mb-4 bg-slate-50 p-2 rounded-lg">
+                    <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 mb-4 bg-slate-50 dark:bg-slate-800/60 p-2 rounded-lg">
                       <Building2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                       <span className="truncate">{doc.issuing_authority}</span>
                     </div>
                   </div>
 
                   {/* Actions Footer */}
-                  <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-2">
+                  <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
                     <span className="text-[11px] font-medium text-slate-400">
                       PDF ({doc.file_size})
                     </span>
@@ -321,18 +361,18 @@ export default function LawsPage() {
                       <button
                         type="button"
                         onClick={() => setSelectedDoc(doc)}
-                        className="px-3 py-1.5 rounded-lg bg-blue-50 text-blue-800 hover:bg-blue-900 hover:text-white text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                        className="px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300 hover:bg-blue-900 hover:text-white text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
                       >
                         <Eye className="w-3.5 h-3.5" />
-                        <span>दस्तावेज पढ्नुहोस्</span>
+                        <span>{t.laws.previewPdf}</span>
                       </button>
 
                       <button
                         type="button"
                         onClick={() => setSelectedDoc(doc)}
-                        className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
-                        title="PDF डाउनलोड गर्नुहोस्"
-                        aria-label={`${doc.title_ne} डाउनलोड`}
+                        className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
+                        title={t.laws.downloadPdf}
+                        aria-label={`${doc.title_ne} download`}
                       >
                         <Download className="w-4 h-4" />
                       </button>

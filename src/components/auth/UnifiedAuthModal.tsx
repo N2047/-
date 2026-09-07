@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/lib/authContext";
+import { useLanguage } from "@/lib/languageContext";
 import { KOSHI_DISTRICTS } from "@/lib/koshiGeography";
 import {
   Lock,
@@ -46,6 +47,7 @@ export default function UnifiedAuthModal({
   onSuccess,
 }: UnifiedAuthModalProps) {
   const { login, signupUser, signupEmployee, sendOtp, verifyOtp } = useAuth();
+  const { lang } = useLanguage();
 
   // Modal Navigation State
   const [mainTab, setMainTab] = useState<"signin" | "signup">(initialTab);
@@ -396,10 +398,10 @@ export default function UnifiedAuthModal({
             </div>
             <div>
               <h2 id="unified-auth-title" className="font-black text-base text-white flex items-center gap-2">
-                <span>अपाङ्गता सूचना केन्द्र (DIC)</span>
+                <span>{lang === 'en' ? 'Disability Information Center (DIC)' : 'अपाङ्गता सूचना केन्द्र (DIC)'}</span>
               </h2>
               <p className="text-xs text-blue-200/80 font-medium">
-                सुरक्षित प्रमाणीकरण तथा पहुँच प्रणाली
+                {lang === 'en' ? 'Secure Authentication & Access System' : 'सुरक्षित प्रमाणीकरण तथा पहुँच प्रणाली'}
               </p>
             </div>
           </div>
@@ -408,7 +410,7 @@ export default function UnifiedAuthModal({
             type="button"
             onClick={onClose}
             className="p-1.5 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 transition cursor-pointer"
-            aria-label="बन्द गर्नुहोस्"
+            aria-label={lang === 'en' ? 'Close' : 'बन्द गर्नुहोस्'}
           >
             <X className="w-5 h-5" />
           </button>
@@ -430,7 +432,7 @@ export default function UnifiedAuthModal({
             }`}
           >
             <Lock className="w-3.5 h-3.5" />
-            <span>Sign In (लगइन)</span>
+            <span>{lang === 'en' ? 'Sign In' : 'Sign In (लगइन)'}</span>
           </button>
 
           <button
@@ -449,7 +451,7 @@ export default function UnifiedAuthModal({
             }`}
           >
             <UserPlus className="w-3.5 h-3.5" />
-            <span>Sign Up (नयाँ खाता बनाउनुहोस्)</span>
+            <span>{lang === 'en' ? 'Sign Up (Register)' : 'Sign Up (नयाँ खाता बनाउनुहोस्)'}</span>
           </button>
         </div>
 
@@ -509,7 +511,7 @@ export default function UnifiedAuthModal({
             <form onSubmit={handleSignIn} className="space-y-4">
               <div>
                 <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  User ID / Email / Mobile Number *
+                  {lang === 'en' ? 'User ID / Email / Mobile Number *' : 'User ID / Email / Mobile Number *'}
                 </label>
                 <div className="relative">
                   <User className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
@@ -517,7 +519,7 @@ export default function UnifiedAuthModal({
                     type="text"
                     value={signInIdentifier}
                     onChange={(e) => setSignInIdentifier(e.target.value)}
-                    placeholder="DIC-EMP-000002 वा email@example.com वा ९८XXXXXXXX"
+                    placeholder={lang === 'en' ? 'DIC-EMP-000002 or email@example.com or 98XXXXXXXX' : 'DIC-EMP-000002 वा email@example.com वा ९८XXXXXXXX'}
                     required
                     className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-medium focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
                   />
@@ -527,16 +529,16 @@ export default function UnifiedAuthModal({
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <label className="font-bold text-slate-700 dark:text-slate-300">
-                    पासवर्ड *
+                    {lang === 'en' ? 'Password *' : 'पासवर्ड *'}
                   </label>
                   <button
                     type="button"
                     onClick={() => {
-                      alert("पासवर्ड रिसेट गर्न आफ्नो आधिकारिक Email वा Mobile नम्बर प्रयोग गर्नुहोस्। OTP मार्फत नयाँ पासवर्ड सेट गर्न सकिन्छ।");
+                      alert(lang === 'en' ? 'Please use your registered Email or Mobile number to reset password via OTP.' : 'पासवर्ड रिसेट गर्न आफ्नो आधिकारिक Email वा Mobile नम्बर प्रयोग गर्नुहोस्। OTP मार्फत नयाँ पासवर्ड सेट गर्न सकिन्छ।');
                     }}
                     className="text-[11px] text-blue-600 hover:underline font-semibold"
                   >
-                    पासवर्ड बिर्सनुभयो?
+                    {lang === 'en' ? 'Forgot password?' : 'पासवर्ड बिर्सनुभयो?'}
                   </button>
                 </div>
                 <div className="relative">
@@ -545,7 +547,7 @@ export default function UnifiedAuthModal({
                     type={showPassword ? "text" : "password"}
                     value={signInPassword}
                     onChange={(e) => setSignInPassword(e.target.value)}
-                    placeholder="तपाईंको पासवर्ड..."
+                    placeholder={lang === 'en' ? 'Your password...' : 'तपाईंको पासवर्ड...'}
                     required
                     className="w-full pl-9 pr-10 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-medium focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
                   />
@@ -565,11 +567,11 @@ export default function UnifiedAuthModal({
                 className="w-full py-3 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md flex items-center justify-center gap-2 transition disabled:opacity-50 cursor-pointer"
               >
                 {isLoading ? (
-                  <span>जाँच हुँदैछ...</span>
+                  <span>{lang === 'en' ? 'Verifying...' : 'जाँच हुँदैछ...'}</span>
                 ) : (
                   <>
                     <Lock className="w-4 h-4" />
-                    <span>Sign In गर्नुहोस्</span>
+                    <span>{lang === 'en' ? 'Sign In' : 'Sign In गर्नुहोस्'}</span>
                   </>
                 )}
               </button>
@@ -586,10 +588,10 @@ export default function UnifiedAuthModal({
                 <div className="space-y-4 py-2">
                   <div className="text-center mb-4">
                     <h3 className="font-bold text-sm text-slate-900 dark:text-white">
-                      खाताको प्रकार छनौट गर्नुहोस्
+                      {lang === 'en' ? 'Select Account Type' : 'खाताको प्रकार छनौट गर्नुहोस्'}
                     </h3>
                     <p className="text-slate-500 text-xs mt-1">
-                      तपाईं कुन रूपमा अपाङ्गता सूचना केन्द्रमा दर्ता हुन चाहनुहुन्छ?
+                      {lang === 'en' ? 'How would you like to register with Disability Information Center?' : 'तपाईं कुन रूपमा अपाङ्गता सूचना केन्द्रमा दर्ता हुन चाहनुहुन्छ?'}
                     </p>
                   </div>
 
@@ -608,14 +610,16 @@ export default function UnifiedAuthModal({
                     </div>
                     <div className="flex-1">
                       <div className="font-bold text-sm text-slate-900 dark:text-white flex items-center justify-between">
-                        <span>कर्मचारीका लागि Sign Up</span>
+                        <span>{lang === 'en' ? 'Sign Up for Municipal Staff / Facilitator' : 'कर्मचारीका लागि Sign Up'}</span>
                         <ArrowRight className="w-4 h-4 text-blue-600 group-hover:translate-x-1 transition-transform" />
                       </div>
                       <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
-                        स्थानीय तहका अपाङ्गता सहायता सहजकर्ता वा फोकल पर्सन। वार्षिक प्रतिवेदन प्रविष्टि तथा स्थानीय सेवा व्यवस्थापनका लागि।
+                        {lang === 'en'
+                          ? 'Local government disability facilitators or municipal focal persons. For annual report submission and local service management.'
+                          : 'स्थानीय तहका अपाङ्गता सहायता सहजकर्ता वा फोकल पर्सन। वार्षिक प्रतिवेदन प्रविष्टि तथा स्थानीय सेवा व्यवस्थापनका लागि।'}
                       </p>
                       <span className="inline-block mt-2 text-[10px] font-semibold text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-950 px-2 py-0.5 rounded-full">
-                        ⏳ दर्तापछि Admin Approval आवश्यक पर्दछ
+                        {lang === 'en' ? '⏳ Requires Admin Approval after registration' : '⏳ दर्तापछि Admin Approval आवश्यक पर्दछ'}
                       </span>
                     </div>
                   </button>
@@ -635,14 +639,16 @@ export default function UnifiedAuthModal({
                     </div>
                     <div className="flex-1">
                       <div className="font-bold text-sm text-slate-900 dark:text-white flex items-center justify-between">
-                        <span>सम्पूर्ण सामान्य Users का लागि Sign Up</span>
+                        <span>{lang === 'en' ? 'Sign Up for General Citizens & Public' : 'सम्पूर्ण सामान्य Users का लागि Sign Up'}</span>
                         <ArrowRight className="w-4 h-4 text-emerald-600 group-hover:translate-x-1 transition-transform" />
                       </div>
                       <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
-                        अपाङ्गता भएका व्यक्ति, अभिभावक, अनुसन्धानकर्ता वा आम नागरिक। कानुन, प्रतिवेदन, AI च्याटबोट तथा गुनासो सेवाका लागि।
+                        {lang === 'en'
+                          ? 'Persons with disabilities, families, researchers or citizens. Access laws, palika reports, AI chatbot, and grievance services.'
+                          : 'अपाङ्गता भएका व्यक्ति, अभिभावक, अनुसन्धानकर्ता वा आम नागरिक। कानुन, प्रतिवेदन, AI च्याटबोट तथा गुनासो सेवाका लागि।'}
                       </p>
                       <span className="inline-block mt-2 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950 px-2 py-0.5 rounded-full">
-                        ⚡ OTP प्रमाणीकरणपछि तुरुन्त सक्रिय (Immediate Access)
+                        {lang === 'en' ? '⚡ Immediate Access upon OTP verification' : '⚡ OTP प्रमाणीकरणपछि तुरुन्त सक्रिय (Immediate Access)'}
                       </span>
                     </div>
                   </button>
