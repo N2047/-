@@ -1,5 +1,25 @@
 [
   {
+    "id": "log_1788779038237_ii9c",
+    "action": "LAW_DOCUMENT_DELETED",
+    "performed_by_id": "admin-master-001",
+    "performed_by_name": "मुख्य प्रशासक",
+    "target_user_id": "law-prov-1788779038123",
+    "target_user_name": "परीक्षण कार्यविधि दस्तावेज",
+    "details": "कानुन दस्तावेज \"परीक्षण कार्यविधि दस्तावेज\" हटाइयो",
+    "timestamp": "2026-09-07T11:03:58.237Z"
+  },
+  {
+    "id": "log_1788779038127_8c9h",
+    "action": "LAW_DOCUMENT_CREATED",
+    "performed_by_id": "admin-master-001",
+    "performed_by_name": "मुख्य प्रशासक",
+    "target_user_id": "law-prov-1788779038123",
+    "target_user_name": "परीक्षण कार्यविधि दस्तावेज",
+    "details": "नयाँ कानुन दस्तावेज \"परीक्षण कार्यविधि दस्तावेज\" (कार्यविधि, provincial) थप गरियो",
+    "timestamp": "2026-09-07T11:03:58.127Z"
+  },
+  {
     "id": "log_1788775647946_exjv",
     "action": "ABOUT_SECTION_PURGED",
     "performed_by_id": "admin-master-001",

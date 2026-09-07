@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import LawDocumentModal from "@/components/laws/LawDocumentModal";
@@ -26,11 +26,23 @@ import {
 
 export default function LawsPage() {
   const { lang, setLang } = useLanguage();
+  const [docs, setDocs] = useState<LawDocument[]>(LEGAL_DOCUMENTS);
   const [activeTab, setActiveTab] = useState<GovLevel>("federal");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedProvince, setSelectedProvince] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedDoc, setSelectedDoc] = useState<LawDocument | null>(null);
+
+  useEffect(() => {
+    fetch("/api/laws")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.laws && Array.isArray(data.laws) && data.laws.length > 0) {
+          setDocs(data.laws);
+        }
+      })
+      .catch((err) => console.error("Failed to load live laws:", err));
+  }, []);
 
   const t = translations[lang];
 
@@ -65,7 +77,7 @@ export default function LawsPage() {
 
   // Filtered documents
   const filteredDocs = useMemo(() => {
-    return LEGAL_DOCUMENTS.filter((doc) => {
+    return docs.filter((doc) => {
       // Tab filter (federal vs provincial)
       if (activeTab === "federal" && doc.gov_level !== "federal") return false;
       if (activeTab === "provincial" && doc.gov_level !== "provincial") return false;
@@ -92,7 +104,7 @@ export default function LawsPage() {
 
       return true;
     });
-  }, [activeTab, selectedCategory, selectedProvince, searchQuery]);
+  }, [docs, activeTab, selectedCategory, selectedProvince, searchQuery]);
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 transition-colors">
@@ -124,7 +136,7 @@ export default function LawsPage() {
                 <span className="text-xs font-semibold text-blue-700 dark:text-blue-300 block">
                   {lang === 'en' ? 'Total Documents' : 'कुल दस्तावेजहरू'}
                 </span>
-                <span className="text-3xl font-black text-blue-950 dark:text-white">{LEGAL_DOCUMENTS.length}</span>
+                <span className="text-3xl font-black text-blue-950 dark:text-white">{docs.length}</span>
                 <span className="text-[11px] text-blue-600 dark:text-blue-400 block">
                   {lang === 'en' ? 'PDF & Digital Copies' : 'PDF र डिजिटल प्रति'}
                 </span>

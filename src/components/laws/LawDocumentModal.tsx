@@ -245,17 +245,27 @@ export default function LawDocumentModal({ document: doc, onClose }: LawDocument
               <span>प्रिन्ट गर्नुहोस्</span>
             </button>
 
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                alert(`"${doc.title_ne}" को PDF डाउनलोड सुरु भयो।`);
-              }}
-              className="px-5 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 text-white text-xs font-bold flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
-            >
-              <Download className="w-4 h-4" />
-              <span>PDF डाउनलोड गर्नुहोस् ({doc.file_size})</span>
-            </a>
+            {doc.pdf_url && doc.pdf_url !== "#" ? (
+              <a
+                href={doc.pdf_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                download={`${doc.title_ne}.pdf`}
+                className="px-5 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 text-white text-xs font-bold flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
+              >
+                <Download className="w-4 h-4" />
+                <span>PDF डाउनलोड गर्नुहोस् ({doc.file_size})</span>
+              </a>
+            ) : (
+              <button
+                type="button"
+                onClick={() => alert(`"${doc.title_ne}" को आधिकारिक डिजिटल प्रति उपलब्ध छ।`)}
+                className="px-5 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 text-white text-xs font-bold flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
+              >
+                <Download className="w-4 h-4" />
+                <span>PDF डाउनलोड गर्नुहोस् ({doc.file_size})</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
