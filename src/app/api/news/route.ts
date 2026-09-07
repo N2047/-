@@ -72,6 +72,7 @@ export async function POST(request: Request) {
       author_en,
       tags,
       image_url,
+      images,
       video_url,
       attachment_name,
       attachment_size
@@ -83,6 +84,18 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+
+    // Sanitize and limit images to max 10
+    const sanitizedImages = Array.isArray(images)
+      ? images.slice(0, 10).map((img: any) => ({
+          url: typeof img === "string" ? img : (img?.url || ""),
+          caption: typeof img === "object" && img?.caption ? String(img.caption).trim() : ""
+        })).filter((img: any) => Boolean(img.url))
+      : undefined;
+
+    const primaryImageUrl = (sanitizedImages && sanitizedImages.length > 0)
+      ? sanitizedImages[0].url
+      : (image_url ? image_url.trim() : undefined);
 
     const newArticle = createNews({
       title_ne: title_ne.trim(),
@@ -97,7 +110,8 @@ export async function POST(request: Request) {
       author: author ? author.trim() : "अपाङ्गता सूचना केन्द्र",
       author_en: author_en ? author_en.trim() : undefined,
       tags: Array.isArray(tags) ? tags : typeof tags === "string" ? tags.split(",").map(s => s.trim()).filter(Boolean) : ["सूचना"],
-      image_url: image_url ? image_url.trim() : undefined,
+      image_url: primaryImageUrl,
+      images: sanitizedImages,
       video_url: video_url ? video_url.trim() : undefined,
       attachment_name: attachment_name ? attachment_name.trim() : undefined,
       attachment_size: attachment_size ? attachment_size.trim() : undefined,
@@ -132,6 +146,17 @@ export async function PUT(request: Request) {
 
     if (updates.tags && typeof updates.tags === "string") {
       updates.tags = updates.tags.split(",").map((s: string) => s.trim()).filter(Boolean);
+    }
+
+    if (updates.images && Array.isArray(updates.images)) {
+      updates.images = updates.images.slice(0, 10).map((img: any) => ({
+        url: typeof img === "string" ? img : (img?.url || ""),
+        caption: typeof img === "object" && img?.caption ? String(img.caption).trim() : ""
+      })).filter((img: any) => Boolean(img.url));
+
+      if (updates.images.length > 0 && !updates.image_url) {
+        updates.image_url = updates.images[0].url;
+      }
     }
 
     const updated = updateNews(id, updates);

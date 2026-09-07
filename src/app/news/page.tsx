@@ -303,15 +303,50 @@ export default function NewsPage() {
               </div>
             )}
 
-            {readingArticle.image_url && !readingArticle.video_url && (
-              <div className="my-5 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 max-h-96 shadow-md bg-slate-100 dark:bg-slate-800">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={readingArticle.image_url}
-                  alt={isEnglish ? (readingArticle.title_en || readingArticle.title_ne) : readingArticle.title_ne}
-                  className="w-full h-full object-cover"
-                />
-              </div>
+            {/* MULTI-IMAGE GALLERY OR SINGLE IMAGE */}
+            {!readingArticle.video_url && (
+              (readingArticle.images && readingArticle.images.length > 0) ? (
+                <div className="my-6 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-black text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                      <ImageIcon className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                      <span>{isEnglish ? "Attached Photos" : "संलग्न तस्बिरहरू"} ({readingArticle.images.length})</span>
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    {readingArticle.images.map((img, i) => (
+                      <div key={i} className="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs flex flex-col">
+                        <div className="aspect-video bg-slate-100 dark:bg-slate-800 overflow-hidden relative">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={img.url}
+                            alt={img.caption || `Photo ${i + 1}`}
+                            className="w-full h-full object-cover hover:scale-105 transition duration-300"
+                          />
+                          <span className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-slate-900/80 text-white text-[10px] font-bold">
+                            #{i + 1}
+                          </span>
+                        </div>
+                        {img.caption && (
+                          <div className="p-3 bg-slate-50 dark:bg-slate-800/60 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                            {img.caption}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : readingArticle.image_url ? (
+                <div className="my-5 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 max-h-96 shadow-md bg-slate-100 dark:bg-slate-800">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={readingArticle.image_url}
+                    alt={isEnglish ? (readingArticle.title_en || readingArticle.title_ne) : readingArticle.title_ne}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : null
             )}
 
             {/* 3. Content Details */}
@@ -631,18 +666,23 @@ export default function NewsPage() {
                           <span>{isEnglish ? "Video" : "भिडियो"}</span>
                         </div>
                       </div>
-                    ) : item.image_url ? (
+                    ) : (item.image_url || (item.images && item.images.length > 0)) ? (
                       <div className="my-3 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 relative bg-slate-100 dark:bg-slate-800">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
-                          src={item.image_url}
+                          src={item.image_url || item.images![0].url}
                           alt={isEnglish ? (item.title_en || item.title_ne) : item.title_ne}
                           className="w-full h-44 object-cover group-hover:scale-102 transition-transform duration-300"
                           loading="lazy"
                         />
                         <div className="absolute top-2 right-2 px-2 py-0.5 rounded-md bg-slate-900/80 text-white text-[10px] font-bold flex items-center gap-1 backdrop-blur-xs">
                           <ImageIcon className="w-3 h-3" />
-                          <span>{isEnglish ? "Photo" : "तस्बिर"}</span>
+                          <span>
+                            {item.images && item.images.length > 1
+                              ? (isEnglish ? `${item.images.length} Photos` : `${item.images.length} तस्बिरहरू`)
+                              : (isEnglish ? "Photo" : "तस्बिर")
+                            }
+                          </span>
                         </div>
                       </div>
                     ) : null}

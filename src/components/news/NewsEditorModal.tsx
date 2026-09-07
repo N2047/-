@@ -19,7 +19,9 @@ import {
   PlayCircle,
   Trash2,
   Sparkles,
-  Link2
+  Link2,
+  UploadCloud,
+  Plus
 } from "lucide-react";
 
 interface NewsEditorModalProps {
@@ -55,6 +57,7 @@ export default function NewsEditorModal({
   // Section 2: Media (Image or Video - Optional)
   const [mediaType, setMediaType] = useState<"none" | "image" | "video">("none");
   const [imageUrl, setImageUrl] = useState("");
+  const [images, setImages] = useState<{ url: string; caption: string }[]>([]);
   const [videoUrl, setVideoUrl] = useState("");
 
   // Section 3: Text Content Below Media
@@ -86,12 +89,18 @@ export default function NewsEditorModal({
         // Media setup
         setImageUrl(articleToEdit.image_url || "");
         setVideoUrl(articleToEdit.video_url || "");
-        if (articleToEdit.video_url) {
-          setMediaType("video");
-        } else if (articleToEdit.image_url) {
+        if (articleToEdit.images && articleToEdit.images.length > 0) {
+          setImages(articleToEdit.images.map(i => ({ url: i.url, caption: i.caption || "" })));
           setMediaType("image");
+        } else if (articleToEdit.image_url) {
+          setImages([{ url: articleToEdit.image_url, caption: "" }]);
+          setMediaType("image");
+        } else if (articleToEdit.video_url) {
+          setMediaType("video");
+          setImages([]);
         } else {
           setMediaType("none");
+          setImages([]);
         }
 
         setSummaryNe(articleToEdit.summary_ne);
@@ -111,6 +120,7 @@ export default function NewsEditorModal({
         setAuthorEn("Disability Information Center, Biratnagar");
         setMediaType("none");
         setImageUrl("");
+        setImages([]);
         setVideoUrl("");
         setSummaryNe("");
         setSummaryEn("");
@@ -156,6 +166,11 @@ export default function NewsEditorModal({
 
     setIsSubmitting(true);
 
+    const validImages = images.filter(i => Boolean(i.url));
+    const finalImageUrl = mediaType === "image" 
+      ? (validImages.length > 0 ? validImages[0].url : (imageUrl.trim() || undefined)) 
+      : undefined;
+
     const payload = {
       category,
       title_ne: titleNe.trim(),
@@ -164,7 +179,8 @@ export default function NewsEditorModal({
       author: author.trim(),
       author_en: authorEn.trim() || undefined,
       // Media is optional
-      image_url: mediaType === "image" && imageUrl.trim() ? imageUrl.trim() : undefined,
+      image_url: finalImageUrl,
+      images: mediaType === "image" && validImages.length > 0 ? validImages : undefined,
       video_url: mediaType === "video" && videoUrl.trim() ? videoUrl.trim() : undefined,
       summary_ne: summaryNe.trim(),
       summary_en: summaryEn.trim() || undefined,
@@ -432,58 +448,126 @@ export default function NewsEditorModal({
 
             {/* A. If Image Chosen */}
             {mediaType === "image" && (
-              <div className="space-y-2.5 pt-1">
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                  तस्बिरको वेब लिङ्क (Image URL):
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="url"
-                    placeholder="https://example.com/photo.jpg"
-                    value={imageUrl}
-                    onChange={(e) => setImageUrl(e.target.value)}
-                    className="flex-1 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
-                  />
-                  {imageUrl && (
-                    <button
-                      type="button"
-                      onClick={() => setImageUrl("")}
-                      className="px-2.5 py-2 bg-rose-100 text-rose-700 rounded-xl hover:bg-rose-200 text-xs font-bold cursor-pointer"
-                      title="तस्बिर हटाउनुहोस्"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  )}
+              <div className="space-y-3 pt-1">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                    संलग्न तस्बिरहरू (Attached Photos - बढीमा १० वटा):
+                  </label>
+                  <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
+                    images.length === 10 ? "bg-amber-100 text-amber-900" : "bg-indigo-100 text-indigo-900"
+                  }`}>
+                    {images.length} / १० तस्बिरहरू थपिएका छन्
+                  </span>
                 </div>
 
-                {/* Quick Sample Image Buttons */}
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="text-[11px] text-slate-500 font-semibold">नमुना तस्बिरहरू:</span>
-                  {SAMPLE_IMAGES.map((img, i) => (
-                    <button
-                      key={i}
-                      type="button"
-                      onClick={() => setImageUrl(img.url)}
-                      className="text-[11px] px-2 py-0.5 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold border border-amber-300 cursor-pointer"
-                    >
-                      + {img.label}
-                    </button>
-                  ))}
-                </div>
+                {/* List of images */}
+                {images.length > 0 && (
+                  <div className="space-y-2.5">
+                    {images.map((imgItem, idx) => (
+                      <div key={idx} className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 space-y-2">
+                        <div className="flex items-center justify-between pb-1 border-b border-slate-100 dark:border-slate-800">
+                          <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                            तस्बिर #{idx + 1}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const next = [...images];
+                              next.splice(idx, 1);
+                              setImages(next);
+                            }}
+                            className="text-rose-600 hover:text-rose-700 text-xs font-bold flex items-center gap-1 cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>हटाउनुहोस्</span>
+                          </button>
+                        </div>
 
-                {/* Live Image Preview */}
-                {imageUrl && (
-                  <div className="relative rounded-xl overflow-hidden border border-slate-300 dark:border-slate-700 max-h-48 bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img 
-                      src={imageUrl} 
-                      alt="Preview" 
-                      className="w-full h-48 object-cover"
-                      onError={() => alert("तस्बिर लोड गर्न सकिएन, कृपया सही लिङ्क जाँच्नुहोस्।")}
-                    />
-                    <div className="absolute bottom-2 left-2 bg-slate-900/80 text-white text-[10px] px-2 py-0.5 rounded-md font-semibold">
-                      तस्बिर पूर्वावलोकन (Preview)
-                    </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-start">
+                          {imgItem.url && (
+                            <div className="sm:col-span-3 aspect-video sm:aspect-square rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={imgItem.url} alt={`Photo ${idx + 1}`} className="w-full h-full object-cover" />
+                            </div>
+                          )}
+
+                          <div className={imgItem.url ? "sm:col-span-9 space-y-2" : "sm:col-span-12 space-y-2"}>
+                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                              <label className="shrink-0">
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                      const reader = new FileReader();
+                                      reader.onload = (ev) => {
+                                        const resUrl = ev.target?.result as string;
+                                        const next = [...images];
+                                        next[idx].url = resUrl;
+                                        setImages(next);
+                                      };
+                                      reader.readAsDataURL(file);
+                                    }
+                                  }}
+                                />
+                                <span className="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold inline-flex items-center gap-1 cursor-pointer">
+                                  <UploadCloud className="w-3 h-3" />
+                                  <span>कम्प्युटरबाट तस्बिर छान्नुहोस्</span>
+                                </span>
+                              </label>
+
+                              <span className="text-[11px] text-slate-400 font-bold self-center">वा</span>
+
+                              <input
+                                type="url"
+                                placeholder="अनलाइन लिङ्क (URL)..."
+                                value={imgItem.url.startsWith("data:") ? "" : imgItem.url}
+                                onChange={(e) => {
+                                  const next = [...images];
+                                  next[idx].url = e.target.value;
+                                  setImages(next);
+                                }}
+                                className="flex-1 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1 text-xs"
+                              />
+                            </div>
+
+                            <input
+                              type="text"
+                              placeholder="तस्बिरको विवरण / क्याप्सन लेख्नुहोस्..."
+                              value={imgItem.caption}
+                              onChange={(e) => {
+                                const next = [...images];
+                                next[idx].caption = e.target.value;
+                                setImages(next);
+                              }}
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1 text-xs"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Progressive Add Button */}
+                {images.length < 10 ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (images.length < 10) {
+                        setImages(prev => [...prev, { url: "", caption: "" }]);
+                      }
+                    }}
+                    className="w-full py-2 px-3 border-2 border-dashed border-amber-400 hover:border-amber-600 rounded-xl text-amber-900 dark:text-amber-200 text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>+ तस्बिर थप्नुहोस् (Add Image) — बाँकी: {10 - images.length}</span>
+                  </button>
+                ) : (
+                  <div className="p-2 rounded-xl bg-amber-100 text-amber-900 text-center text-xs font-bold">
+                    बढीमा १० वटा तस्बिर पुग्यो (Maximum 10 images limit reached)
                   </div>
                 )}
               </div>

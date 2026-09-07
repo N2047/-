@@ -1,5 +1,10 @@
 export type NewsCategoryKey = 'notice' | 'news' | 'program' | 'achievement' | 'announcement';
 
+export interface NewsImageItem {
+  url: string;
+  caption?: string;
+}
+
 export interface NewsArticle {
   id: string;
   title_ne: string;
@@ -16,6 +21,7 @@ export interface NewsArticle {
   tags: string[];
   // Optional Media fields
   image_url?: string;
+  images?: NewsImageItem[];
   video_url?: string;
   attachment_name?: string;
   attachment_size?: string;

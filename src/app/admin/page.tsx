@@ -44,7 +44,9 @@ import {
   User, 
   ExternalLink,
   ChevronRight,
-  BookOpen
+  BookOpen,
+  Image as ImageIcon,
+  UploadCloud
 } from "lucide-react";
 import Link from "next/link";
 import FormConfigModal from "@/components/admin/FormConfigModal";
@@ -126,7 +128,19 @@ export default function AdminPage() {
   const [newsLoading, setNewsLoading] = useState(false);
   const [newArticleModalOpen, setNewArticleModalOpen] = useState(false);
   const [articleToDelete, setArticleToDelete] = useState<any | null>(null);
-  const [newArticleData, setNewArticleData] = useState({
+  const [newArticleData, setNewArticleData] = useState<{
+    title_ne: string;
+    title_en: string;
+    category: string;
+    summary_ne: string;
+    content_ne: string;
+    published_date_bs: string;
+    author: string;
+    tags: string;
+    image_url: string;
+    images: { url: string; caption: string }[];
+    is_priority: boolean;
+  }>({
     title_ne: "",
     title_en: "",
     category: "सूचना",
@@ -136,6 +150,7 @@ export default function AdminPage() {
     author: "अपाङ्गता सूचना केन्द्र",
     tags: "सूचना, कोशी प्रदेश",
     image_url: "",
+    images: [],
     is_priority: false
   });
 
@@ -362,14 +377,31 @@ export default function AdminPage() {
   const handleCreateArticle = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const payload = {
+        ...newArticleData,
+        image_url: newArticleData.images[0]?.url || newArticleData.image_url || ""
+      };
       const res = await fetch("/api/news", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newArticleData)
+        body: JSON.stringify(payload)
       });
       if (res.ok) {
         alert("नयाँ सूचना/समाचार सफलतापूर्वक प्रकाशित भयो।");
         setNewArticleModalOpen(false);
+        setNewArticleData({
+          title_ne: "",
+          title_en: "",
+          category: "सूचना",
+          summary_ne: "",
+          content_ne: "",
+          published_date_bs: "२०८२/०५/२१",
+          author: "अपाङ्गता सूचना केन्द्र",
+          tags: "सूचना, कोशी प्रदेश",
+          image_url: "",
+          images: [],
+          is_priority: false
+        });
         loadDatabaseStats();
       } else {
         const err = await res.json();
@@ -1609,7 +1641,7 @@ export default function AdminPage() {
       {/* NEW ARTICLE / NOTICE MODAL */}
       {newArticleModalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 max-w-lg w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 max-w-2xl w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
               <h3 className="font-bold text-sm text-slate-900 dark:text-white">
                 नयाँ सामग्री प्रकाशन (Add News / Notice)
@@ -1670,6 +1702,166 @@ export default function AdminPage() {
                   onChange={(e) => setNewArticleData({ ...newArticleData, content_ne: e.target.value })}
                   className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800"
                 />
+              </div>
+
+              {/* MULTI-IMAGE UPLOAD SECTION (बढीमा १० वटा तस्बिर + विवरण / क्याप्सन) */}
+              <div className="p-4 rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/30 border-2 border-indigo-200 dark:border-indigo-900/60 space-y-3">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <ImageIcon className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                    <span>तस्बिरहरू संलग्न गर्नुहोस् (Attach Photos - बढीमा १० वटा)</span>
+                  </div>
+                  <span className={`text-[11px] font-black px-2.5 py-0.5 rounded-full ${
+                    newArticleData.images.length === 10
+                      ? "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200"
+                      : "bg-indigo-100 text-indigo-900 dark:bg-indigo-950 dark:text-indigo-200"
+                  }`}>
+                    {newArticleData.images.length} / १० तस्बिर थपियो
+                  </span>
+                </div>
+                
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  तपाईंले यो सूचना वा समाचारमा १० पटक सम्म तस्बिर थप गर्न सक्नुहुन्छ र प्रत्येक तस्बिरको छुट्टाछुट्टै विवरण (Description) लेख्न सक्नुहुन्छ।
+                </p>
+
+                {/* List of Attached Images */}
+                {newArticleData.images.length > 0 && (
+                  <div className="space-y-3 pt-1">
+                    {newArticleData.images.map((imgItem, idx) => (
+                      <div 
+                        key={idx} 
+                        className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 space-y-2.5 shadow-xs"
+                      >
+                        <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-1.5">
+                          <span className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                            <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[10px] flex items-center justify-center font-bold">
+                              {idx + 1}
+                            </span>
+                            <span>तस्बिर #{idx + 1}</span>
+                          </span>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const next = [...newArticleData.images];
+                              next.splice(idx, 1);
+                              setNewArticleData(prev => ({ ...prev, images: next }));
+                            }}
+                            className="p-1 px-2 text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-lg text-[11px] font-bold flex items-center gap-1 cursor-pointer transition"
+                            title="यो तस्बिर हटाउनुहोस्"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>हटाउनुहोस्</span>
+                          </button>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-start">
+                          {/* Image preview box if url is set */}
+                          {imgItem.url ? (
+                            <div className="sm:col-span-3 aspect-video sm:aspect-square rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 relative group">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img 
+                                src={imgItem.url} 
+                                alt={imgItem.caption || `तस्बिर ${idx + 1}`} 
+                                className="w-full h-full object-cover" 
+                              />
+                            </div>
+                          ) : null}
+
+                          <div className={imgItem.url ? "sm:col-span-9 space-y-2.5" : "sm:col-span-12 space-y-2.5"}>
+                            {/* File Upload or URL */}
+                            <div className="space-y-1">
+                              <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                                तस्बिर छनौट गर्नुहोस् (Choose Photo):
+                              </label>
+                              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                                <label className="shrink-0">
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={(e) => {
+                                      const file = e.target.files?.[0];
+                                      if (file) {
+                                        const reader = new FileReader();
+                                        reader.onload = (ev) => {
+                                          const dataUrl = ev.target?.result as string;
+                                          const next = [...newArticleData.images];
+                                          next[idx].url = dataUrl;
+                                          setNewArticleData(prev => ({ ...prev, images: next }));
+                                        };
+                                        reader.readAsDataURL(file);
+                                      }
+                                    }}
+                                  />
+                                  <span className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[11px] font-bold inline-flex items-center gap-1.5 cursor-pointer shadow-xs">
+                                    <UploadCloud className="w-3.5 h-3.5" />
+                                    <span>कम्प्युटरबाट तस्बिर छान्नुहोस्</span>
+                                  </span>
+                                </label>
+
+                                <span className="text-[11px] text-slate-400 font-bold self-center">वा</span>
+
+                                <input
+                                  type="url"
+                                  placeholder="अनलाइन तस्बिर लिङ्क (URL)..."
+                                  value={imgItem.url.startsWith("data:") ? "" : imgItem.url}
+                                  onChange={(e) => {
+                                    const next = [...newArticleData.images];
+                                    next[idx].url = e.target.value;
+                                    setNewArticleData(prev => ({ ...prev, images: next }));
+                                  }}
+                                  className="flex-1 px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 text-[11px] bg-slate-50 dark:bg-slate-800 focus:bg-white focus:outline-hidden"
+                                />
+                              </div>
+                            </div>
+
+                            {/* Description / Caption Field */}
+                            <div className="space-y-1">
+                              <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                                तस्बिरको विवरण (Image Description / Caption) *
+                              </label>
+                              <input
+                                type="text"
+                                placeholder="उदा. कार्यक्रमको उदघाटन सत्र, सहभागीहरूको समूह तस्बिर, सहायक सामग्री वितरण..."
+                                value={imgItem.caption}
+                                onChange={(e) => {
+                                  const next = [...newArticleData.images];
+                                  next[idx].caption = e.target.value;
+                                  setNewArticleData(prev => ({ ...prev, images: next }));
+                                }}
+                                className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 text-[11px] bg-white dark:bg-slate-900 focus:ring-2 focus:ring-indigo-600 focus:outline-hidden"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Progressive Add Button - Maximum 10 */}
+                {newArticleData.images.length < 10 ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (newArticleData.images.length < 10) {
+                        setNewArticleData(prev => ({
+                          ...prev,
+                          images: [...prev.images, { url: "", caption: "" }]
+                        }));
+                      }
+                    }}
+                    className="w-full py-2.5 px-3 border-2 border-dashed border-indigo-400 dark:border-indigo-700 hover:border-indigo-600 rounded-xl text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100/50 dark:hover:bg-indigo-950/40 text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>+ तस्बिर थप्नुहोस् (Add Image) — थप {10 - newArticleData.images.length} वटा बाँकी</span>
+                  </button>
+                ) : (
+                  <div className="p-2.5 rounded-xl bg-amber-100 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-200 text-center text-xs font-bold">
+                    ⚠️ अधिकतम १० वटा तस्बिरको सीमा पूरा भयो (Maximum 10 images limit reached)
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
