@@ -392,7 +392,7 @@ export default function DicChatbot() {
         <button
           onClick={() => setIsOpen(!isOpen)}
           aria-label={isOpen ? "AI च्याटबोट बन्द गर्नुहोस्" : "अपाङ्गता सूचना केन्द्र AI च्याटबोट खोल्नुहोस्"}
-          className={`relative p-3.5 sm:p-4 rounded-full shadow-2xl transition-all duration-300 flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-emerald-400 ${
+          className={`relative p-3.5 sm:p-4 min-w-[52px] min-h-[52px] rounded-full shadow-2xl transition-all duration-300 flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-emerald-400 ${
             isOpen
               ? "bg-slate-700 hover:bg-slate-800 text-white rotate-90"
               : "bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white hover:scale-105"
@@ -418,7 +418,7 @@ export default function DicChatbot() {
           className={`fixed z-50 transition-all duration-300 flex flex-col bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 shadow-2xl border border-slate-200 dark:border-slate-800 ${
             isExpanded
               ? "inset-2 sm:inset-6 rounded-2xl"
-              : "bottom-20 right-4 sm:right-6 w-[95vw] sm:w-[440px] h-[580px] max-h-[85vh] rounded-2xl"
+              : "bottom-20 inset-x-3 sm:inset-x-auto sm:right-6 sm:bottom-24 sm:w-[440px] h-[560px] max-h-[82dvh] rounded-2xl"
           }`}
         >
           {/* Header */}
@@ -447,7 +447,7 @@ export default function DicChatbot() {
                 <button
                   onClick={() => setIsSettingsOpen(!isSettingsOpen)}
                   title="n8n Webhook / OpenAI सेटिङ्स (केवल Super Admin)"
-                  className={`p-1.5 rounded-lg hover:bg-white/20 transition ${isSettingsOpen ? "bg-white/25" : ""}`}
+                  className={`p-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg hover:bg-white/20 transition ${isSettingsOpen ? "bg-white/25" : ""}`}
                   aria-label="सेटिङ्स खोल्नुहोस्"
                 >
                   <Settings className="w-4 h-4" />
@@ -458,7 +458,7 @@ export default function DicChatbot() {
               <button
                 onClick={handleClearChat}
                 title="च्याट खाली गर्नुहोस्"
-                className="p-1.5 rounded-lg hover:bg-white/20 transition"
+                className="p-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg hover:bg-white/20 transition"
                 aria-label="च्याट खाली गर्नुहोस्"
               >
                 <RotateCcw className="w-4 h-4" />
@@ -468,7 +468,7 @@ export default function DicChatbot() {
               <button
                 onClick={() => setIsExpanded(!isExpanded)}
                 title={isExpanded ? "साधारण आकार" : "ठूलो आकार"}
-                className="hidden sm:block p-1.5 rounded-lg hover:bg-white/20 transition"
+                className="hidden sm:flex p-2 min-w-[36px] min-h-[36px] items-center justify-center rounded-lg hover:bg-white/20 transition"
                 aria-label={isExpanded ? "साधारण आकार" : "ठूलो आकार"}
               >
                 {isExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
@@ -478,7 +478,7 @@ export default function DicChatbot() {
               <button
                 onClick={() => setIsOpen(false)}
                 title="बन्द गर्नुहोस्"
-                className="p-1.5 rounded-lg hover:bg-white/20 transition"
+                className="p-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg hover:bg-white/20 transition"
                 aria-label="बन्द गर्नुहोस्"
               >
                 <X className="w-4 h-4" />
@@ -711,7 +711,7 @@ export default function DicChatbot() {
                   <button
                     key={i}
                     onClick={() => handleSendMessage(sugg)}
-                    className="text-left text-xs bg-white dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-200 hover:text-emerald-700 dark:hover:text-emerald-300 px-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-700 shadow-xs transition"
+                    className="text-left text-xs bg-white dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-200 hover:text-emerald-700 dark:hover:text-emerald-300 px-3 py-1.5 min-h-[36px] flex items-center rounded-full border border-slate-200 dark:border-slate-700 shadow-xs transition cursor-pointer"
                   >
                     {sugg}
                   </button>
@@ -741,14 +741,14 @@ export default function DicChatbot() {
                 }}
                 rows={1}
                 placeholder="यहाँ आफ्नो प्रश्न टाइप गर्नुहोस् (Enter थिचेर पठाउनुहोस्)..."
-                className="flex-1 max-h-24 resize-none px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition leading-relaxed"
+                className="flex-1 max-h-24 resize-none px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-base sm:text-sm min-h-[46px] focus:outline-none focus:ring-2 focus:ring-emerald-500 transition leading-relaxed"
               />
 
               <button
                 type="submit"
                 disabled={!inputQuery.trim() || isLoading}
                 aria-label="सन्देश पठाउनुहोस्"
-                className="p-2.5 sm:p-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 disabled:opacity-40 text-white shadow-md transition shrink-0 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                className="p-2.5 sm:p-3 min-w-[46px] min-h-[46px] flex items-center justify-center rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 disabled:opacity-40 text-white shadow-md transition shrink-0 focus:outline-none focus:ring-2 focus:ring-emerald-400 cursor-pointer"
               >
                 {isLoading ? (
                   <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />

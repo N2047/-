@@ -22,7 +22,8 @@ import {
   Sun, 
   Sliders, 
   PhoneCall, 
-  ChevronDown 
+  ChevronDown,
+  FileEdit 
 } from "lucide-react";
 import { translations, Language } from "@/lib/translations";
 import { useLanguage } from "@/lib/languageContext";
@@ -85,25 +86,25 @@ export default function Header({ lang: propLang, onLanguageChange }: HeaderProps
         </a>
 
         {/* Top Accessibility & Authentication Bar */}
-        <aside aria-label={activeLang === 'ne' ? "पहुँच तथा सुरक्षा नियन्त्रण" : "Accessibility and security controls"} className="bg-slate-900 text-slate-100 text-xs px-4 py-1.5">
+        <aside aria-label={activeLang === 'ne' ? "पहुँच तथा सुरक्षा नियन्त्रण" : "Accessibility and security controls"} className="bg-slate-900 text-slate-100 text-xs px-3 sm:px-4 py-2 sm:py-1.5">
           <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center space-x-2">
-              <span className="font-semibold text-amber-400">{t.common.nepalGov}</span>
-              <span className="hidden sm:inline text-slate-400">|</span>
-              <span className="hidden sm:inline text-slate-300">{t.common.dicCenter}</span>
+              <span className="font-bold text-amber-400 text-xs sm:text-xs tracking-wide">{t.common.nepalGov}</span>
+              <span className="text-slate-500">|</span>
+              <span className="text-slate-300 text-[11px] sm:text-xs">{t.common.dicCenter}</span>
             </div>
 
-            <div className="flex items-center space-x-2.5" role="toolbar" aria-label={t.common.accessibility}>
+            <div className="flex items-center space-x-2 sm:space-x-2.5 ml-auto" role="toolbar" aria-label={t.common.accessibility}>
               {/* Main Accessibility Trigger Button in Top Bar */}
               <button
                 type="button"
                 onClick={() => setIsPanelOpen(true)}
-                className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-[11px] shadow-xs cursor-pointer transition-all focus:ring-2 focus:ring-white"
+                className="flex items-center gap-1.5 px-3 py-1.5 sm:py-1 rounded-lg bg-amber-400 hover:bg-amber-300 active:bg-amber-500 text-slate-950 font-black text-xs shadow-xs cursor-pointer transition-all focus:ring-2 focus:ring-white min-h-[36px] sm:min-h-[32px]"
                 aria-label={activeLang === 'ne' ? "पहुँचयुक्तता सेटिङ्स प्यानल खोल्नुहोस् (Alt+A)" : "Open Accessibility Settings Panel (Alt+A)"}
                 title={activeLang === 'ne' ? "पहुँचयुक्तता सेटिङ्स (Alt+A)" : "Accessibility Settings (Alt+A)"}
               >
-                <span className="text-xs" aria-hidden="true">♿</span>
-                <span>{t.common.accessibility}</span>
+                <span className="text-sm" aria-hidden="true">♿</span>
+                <span className="hidden xs:inline">{t.common.accessibility}</span>
                 {audioPin && (
                   <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" title="Audio Pin Active" />
                 )}
@@ -113,7 +114,7 @@ export default function Header({ lang: propLang, onLanguageChange }: HeaderProps
               <button
                 type="button"
                 onClick={toggleDarkMode}
-                className={`px-2 py-0.5 rounded-lg cursor-pointer transition-all flex items-center gap-1 text-[11px] font-bold ${
+                className={`px-2.5 py-1.5 sm:py-1 rounded-lg cursor-pointer transition-all flex items-center gap-1 text-xs font-bold min-h-[36px] sm:min-h-[32px] ${
                   darkMode
                     ? "bg-amber-400 text-slate-950 hover:bg-amber-300 shadow-xs"
                     : "bg-slate-800 text-slate-200 hover:text-amber-300 hover:bg-slate-700 border border-slate-700"
@@ -123,60 +124,32 @@ export default function Header({ lang: propLang, onLanguageChange }: HeaderProps
               >
                 {darkMode ? (
                   <>
-                    <Sun className="w-3.5 h-3.5 text-slate-950 fill-amber-500" />
-                    <span className="hidden sm:inline">{t.common.darkModeOn}</span>
+                    <Sun className="w-4 h-4 text-slate-950 fill-amber-500" />
+                    <span className="hidden md:inline">{t.common.darkModeOn}</span>
                   </>
                 ) : (
                   <>
-                    <Moon className="w-3.5 h-3.5 text-slate-300" />
-                    <span className="hidden sm:inline">{t.common.darkMode}</span>
+                    <Moon className="w-4 h-4 text-slate-300" />
+                    <span className="hidden md:inline">{t.common.darkMode}</span>
                   </>
                 )}
               </button>
 
-              {/* User Authentication Status */}
+              {/* User Authentication Status (Desktop & Tablet) */}
               {isAuthenticated && user ? (
-                <div className="flex items-center gap-2 bg-slate-800 rounded-lg px-2.5 py-1 border border-slate-700">
-                  <div className="flex items-center gap-1.5 text-[11px] font-bold text-amber-300">
+                <div className="hidden sm:flex items-center gap-2 bg-slate-800 rounded-lg px-2.5 py-1 border border-slate-700 min-h-[32px]">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-amber-300">
                     <User className="w-3.5 h-3.5 text-amber-400" />
-                    <span className="max-w-[120px] sm:max-w-[160px] truncate">{user.name}</span>
+                    <span className="max-w-[120px] sm:max-w-[150px] truncate">{user.name}</span>
                   </div>
-                  <span className="text-[10px] px-2 py-0.5 rounded font-bold hidden sm:inline-flex items-center gap-1 bg-blue-900/90 text-blue-100 border border-blue-700">
-                    {user.role === "super_admin" || user.role === "provincial_admin" ? (
-                      <>{t.common.superAdminRole}</>
-                    ) : user.role === "employee" || user.role === "palika_staff" ? (
-                      <>🏛️ {user.palika_name || (activeLang === 'ne' ? "कर्मचारी" : "Staff")}</>
-                    ) : (
-                      <>{t.common.citizenRole}</>
-                    )}
-                  </span>
-                  {/* Shortcut for Super Admin or Employee */}
-                  {(user.role === "super_admin" || user.role === "provincial_admin") && (
-                    <Link
-                      href="/admin"
-                      className="text-[10px] bg-amber-400 text-slate-950 hover:bg-amber-300 font-extrabold px-1.5 py-0.5 rounded shadow-xs"
-                      title="Admin Dashboard"
-                    >
-                      {activeLang === 'ne' ? "एडमिन" : "Admin"}
-                    </Link>
-                  )}
-                  {(user.role === "employee" || user.role === "palika_staff") && user.palika_id && (
-                    <Link
-                      href={`/local-reporting/palika/${user.palika_id}`}
-                      className="text-[10px] bg-emerald-500 hover:bg-emerald-400 text-white font-extrabold px-1.5 py-0.5 rounded shadow-xs"
-                      title={activeLang === 'ne' ? "मेरो स्थानीय तहको प्रतिवेदन" : "My Municipality Report"}
-                    >
-                      {activeLang === 'ne' ? "प्रतिवेदन" : "Report"}
-                    </Link>
-                  )}
                   <button
                     type="button"
                     onClick={logout}
-                    className="text-[11px] text-rose-300 hover:text-white flex items-center gap-0.5 cursor-pointer ml-1 font-semibold"
+                    className="text-xs text-rose-300 hover:text-white flex items-center gap-0.5 cursor-pointer ml-1 font-semibold"
                     title={t.common.logout}
                   >
-                    <LogOut className="w-3 h-3" />
-                    <span className="hidden sm:inline">{t.common.logout}</span>
+                    <LogOut className="w-3.5 h-3.5" />
+                    <span className="hidden md:inline">{t.common.logout}</span>
                   </button>
                 </div>
               ) : (
@@ -184,7 +157,7 @@ export default function Header({ lang: propLang, onLanguageChange }: HeaderProps
                   type="button"
                   id="header-sign-in-btn"
                   onClick={() => setAuthModalOpen(true)}
-                  className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-gradient-to-r from-blue-700 to-indigo-800 hover:from-blue-600 hover:to-indigo-700 text-white text-[11px] font-extrabold transition-all shadow-sm cursor-pointer border border-blue-500/50 hover:border-amber-400 focus:ring-2 focus:ring-amber-400"
+                  className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 sm:py-1 rounded-lg bg-gradient-to-r from-blue-700 to-indigo-800 hover:from-blue-600 hover:to-indigo-700 text-white text-xs font-extrabold transition-all shadow-sm cursor-pointer border border-blue-500/50 hover:border-amber-400 focus:ring-2 focus:ring-amber-400 min-h-[32px]"
                 >
                   <Lock className="w-3.5 h-3.5 text-amber-300" />
                   <span>{t.common.signInRegister}</span>
@@ -192,13 +165,13 @@ export default function Header({ lang: propLang, onLanguageChange }: HeaderProps
               )}
 
               {/* Global Language Switcher */}
-              <div className="flex items-center bg-slate-800 rounded p-0.5" role="group" aria-label="Language selector">
-                <Globe className="w-3 h-3 text-slate-400 ml-1 mr-0.5" aria-hidden="true" />
+              <div className="flex items-center bg-slate-800 rounded-lg p-0.5 border border-slate-700" role="group" aria-label="Language selector">
+                <Globe className="w-3.5 h-3.5 text-slate-400 ml-1.5 mr-1" aria-hidden="true" />
                 <button
                   type="button"
                   id="lang-switcher-ne"
                   onClick={() => handleLanguageSwitch("ne")}
-                  className={`px-2 py-0.5 rounded text-[11px] font-bold transition-all cursor-pointer ${
+                  className={`px-2.5 py-1 sm:py-0.5 rounded-md text-xs font-bold transition-all cursor-pointer min-h-[32px] sm:min-h-[28px] ${
                     activeLang === "ne" ? "bg-blue-600 text-white shadow-xs" : "text-slate-300 hover:text-white"
                   }`}
                   aria-pressed={activeLang === "ne"}
@@ -209,50 +182,53 @@ export default function Header({ lang: propLang, onLanguageChange }: HeaderProps
                   type="button"
                   id="lang-switcher-en"
                   onClick={() => handleLanguageSwitch("en")}
-                  className={`px-2 py-0.5 rounded text-[11px] font-bold transition-all cursor-pointer ${
+                  className={`px-2.5 py-1 sm:py-0.5 rounded-md text-xs font-bold transition-all cursor-pointer min-h-[32px] sm:min-h-[28px] ${
                     activeLang === "en" ? "bg-blue-600 text-white shadow-xs" : "text-slate-300 hover:text-white"
                   }`}
                   aria-pressed={activeLang === "en"}
                 >
-                  English
+                  EN
                 </button>
               </div>
             </div>
           </div>
         </aside>
 
-        {/* Main Branding Section (Nepal Gov Logo on Left - DIC in Center - NFD-N Logo on Right) */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-3 sm:gap-6">
+        {/* Main Branding Section (Nepal Gov Logo on Left - DIC in Center - NFD-N Logo & Hamburger on Right) */}
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3.5 flex items-center justify-between gap-2 sm:gap-4">
           {/* Left: Nepal Government Emblem */}
           <div className="flex items-center shrink-0">
             <Link href="/" title={t.common.nepalGov} className="block focus:outline-hidden focus:ring-2 focus:ring-red-500 rounded-lg">
               <img
                 src="/images/emblem-nepal.svg"
                 alt={t.common.nepalGov}
-                className="h-12 sm:h-16 w-auto object-contain drop-shadow-xs hover:scale-105 transition-transform"
+                className="h-10 sm:h-14 md:h-16 w-auto object-contain drop-shadow-xs hover:scale-105 transition-transform"
                 loading="eager"
               />
             </Link>
           </div>
 
-          {/* Center: DIC Branding Title & Tagline */}
+          {/* Center: DIC Branding Title & Tagline (Fluid & Accessible) */}
           <Link
             href="/"
-            className="flex flex-col sm:flex-row items-center text-center sm:text-left gap-2.5 sm:gap-4 group cursor-pointer mx-auto"
+            className="flex items-center text-left gap-2 sm:gap-3.5 group cursor-pointer flex-1 min-w-0 mx-1.5 sm:mx-4 justify-center sm:justify-start"
             aria-label={t.app_name}
           >
             <div
-              className="w-11 h-11 sm:w-14 sm:h-14 bg-gradient-to-br from-red-700 via-blue-900 to-indigo-950 text-white rounded-2xl flex items-center justify-center font-black text-lg sm:text-2xl shadow-lg border-2 border-amber-400 shrink-0 group-hover:scale-105 transition-transform"
+              className="w-9 h-9 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-gradient-to-br from-red-700 via-blue-900 to-indigo-950 text-white rounded-xl sm:rounded-2xl flex items-center justify-center font-black text-sm sm:text-xl md:text-2xl shadow-md border-2 border-amber-400 shrink-0 group-hover:scale-105 transition-transform"
               aria-hidden="true"
             >
               DIC
             </div>
-            <div className="text-center sm:text-left">
-              <span className="text-lg sm:text-2xl lg:text-3xl font-black tracking-tight text-red-600 dark:text-red-400 leading-tight block">
+            <div className="min-w-0">
+              <span className="text-sm sm:text-xl lg:text-2xl xl:text-3xl font-black tracking-tight text-red-600 dark:text-red-400 leading-tight block truncate sm:whitespace-normal">
                 {t.app_name}
               </span>
-              <span className="text-[11px] sm:text-xs lg:text-sm text-slate-800 dark:text-slate-200 font-semibold block mt-0.5">
+              <span className="text-[10px] sm:text-xs lg:text-sm text-slate-700 dark:text-slate-300 font-medium block truncate sm:whitespace-normal leading-tight mt-0.5">
                 {t.tagline}
+              </span>
+              <span className="hidden sm:block text-[11px] lg:text-xs text-blue-900 dark:text-blue-300 font-bold mt-0.5">
+                {t.gov_province}
               </span>
             </div>
           </Link>
@@ -264,26 +240,26 @@ export default function Header({ lang: propLang, onLanguageChange }: HeaderProps
               target="_blank"
               rel="noopener noreferrer"
               title="National Federation of the Disabled Nepal (NFD-N)"
-              className="block focus:outline-hidden focus:ring-2 focus:ring-blue-500 rounded-lg"
+              className="hidden xs:block focus:outline-hidden focus:ring-2 focus:ring-blue-500 rounded-lg"
             >
               <img
                 src="/images/nfdn-logo.png"
                 alt="NFD-N Logo"
-                className="h-11 sm:h-15 w-auto object-contain drop-shadow-xs hover:scale-105 transition-transform"
+                className="h-9 sm:h-12 md:h-14 w-auto object-contain drop-shadow-xs hover:scale-105 transition-transform"
                 loading="eager"
               />
             </a>
 
-            {/* Mobile Right Hamburger Button */}
-            <div className="flex items-center gap-1.5 lg:hidden">
+            {/* Mobile Hamburger Button with 48x48px Touch Target */}
+            <div className="flex items-center lg:hidden">
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-1.5 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 focus:ring-2 focus:ring-blue-600 cursor-pointer"
+                className="w-11 h-11 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-600 cursor-pointer shadow-xs active:scale-95 transition-all"
                 aria-expanded={mobileMenuOpen}
                 aria-label={mobileMenuOpen ? t.common.close : "Menu"}
               >
-                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                {mobileMenuOpen ? <X className="w-6 h-6 text-red-600" /> : <Menu className="w-6 h-6" />}
               </button>
             </div>
           </div>
@@ -355,7 +331,7 @@ export default function Header({ lang: propLang, onLanguageChange }: HeaderProps
                   aria-expanded={reportsDropdownOpen}
                   aria-haspopup="true"
                   className={`inline-flex items-center gap-1.5 px-3.5 py-2.5 text-xs font-semibold rounded-t-md transition-colors border-b-2 cursor-pointer ${
-                    pathname.startsWith("/local-reporting") || pathname.startsWith("/reports") || reportsDropdownOpen
+                    pathname.startsWith("/report-entry") || pathname.startsWith("/local-reporting") || pathname.startsWith("/reports") || reportsDropdownOpen
                       ? "text-amber-300 font-bold border-amber-400 bg-blue-800/60"
                       : "text-slate-100 hover:text-amber-300 hover:bg-blue-800/80 dark:hover:bg-slate-800 border-transparent hover:border-amber-400"
                   }`}
@@ -367,12 +343,37 @@ export default function Header({ lang: propLang, onLanguageChange }: HeaderProps
 
                 {/* Dropdown Menu */}
                 <div
-                  className={`absolute top-full left-0 w-72 bg-white dark:bg-slate-900 rounded-b-xl shadow-2xl border border-slate-200 dark:border-slate-800 py-1.5 z-50 text-slate-900 dark:text-slate-100 transition-all duration-150 ${
+                  className={`absolute top-full left-0 w-80 bg-white dark:bg-slate-900 rounded-b-xl shadow-2xl border border-slate-200 dark:border-slate-800 py-1.5 z-50 text-slate-900 dark:text-slate-100 transition-all duration-150 ${
                     reportsDropdownOpen ? "block" : "hidden group-hover:block"
                   }`}
                   role="menu"
                   aria-label={t.nav_reports}
                 >
+                  {/* १. प्रतिवेदन प्रविष्टि */}
+                  <Link
+                    href="/report-entry"
+                    role="menuitem"
+                    onClick={() => setReportsDropdownOpen(false)}
+                    className={`flex items-start gap-2.5 px-3.5 py-2.5 transition-colors group/item ${
+                      pathname.startsWith("/report-entry")
+                        ? "bg-indigo-50 dark:bg-slate-800/90"
+                        : "hover:bg-indigo-50 dark:hover:bg-slate-800/70"
+                    }`}
+                  >
+                    <FileEdit className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5 group-hover/item:scale-110 transition-transform" />
+                    <div>
+                      <span className="text-xs font-bold text-slate-900 dark:text-slate-100 group-hover/item:text-indigo-700 dark:group-hover/item:text-amber-400 block">
+                        {activeLang === 'ne' ? '१. ' : '1. '}{t.nav_report_entry}
+                      </span>
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 block">
+                        {activeLang === 'ne' ? "स्थानीय तहका कर्मचारी तथा फोकल पर्सनका लागि प्रतिवेदन प्रविष्टि" : "Annual report submission portal for authorized palika staff"}
+                      </span>
+                    </div>
+                  </Link>
+
+                  <div className="border-t border-slate-100 dark:border-slate-800 my-1"></div>
+
+                  {/* २. स्थानीयतहगत प्रतिवेदन */}
                   <Link
                     href="/local-reporting"
                     role="menuitem"
@@ -386,7 +387,7 @@ export default function Header({ lang: propLang, onLanguageChange }: HeaderProps
                     <Building2 className="w-4 h-4 text-blue-700 dark:text-blue-400 shrink-0 mt-0.5 group-hover/item:scale-110 transition-transform" />
                     <div>
                       <span className="text-xs font-bold text-slate-900 dark:text-slate-100 group-hover/item:text-blue-700 dark:group-hover/item:text-amber-400 block">
-                        {t.nav_palika_report}
+                        {activeLang === 'ne' ? '२. ' : '2. '}{t.nav_palika_report}
                       </span>
                       <span className="text-[10px] text-slate-500 dark:text-slate-400 block">
                         {activeLang === 'ne' ? "१३७ वटै स्थानीय तहका प्रोफाइल तथा वस्तुस्थिति विवरण" : "Profiles and performance of all 137 local bodies"}
@@ -396,6 +397,7 @@ export default function Header({ lang: propLang, onLanguageChange }: HeaderProps
 
                   <div className="border-t border-slate-100 dark:border-slate-800 my-1"></div>
 
+                  {/* ३. स्थानीय तहको एकीकृत प्रतिवेदन */}
                   <Link
                     href="/reports"
                     role="menuitem"
@@ -409,10 +411,10 @@ export default function Header({ lang: propLang, onLanguageChange }: HeaderProps
                     <BarChart3 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5 group-hover/item:scale-110 transition-transform" />
                     <div>
                       <span className="text-xs font-bold text-slate-900 dark:text-slate-100 group-hover/item:text-emerald-700 dark:group-hover/item:text-amber-400 block">
-                        {t.nav_overall_report}
+                        {activeLang === 'ne' ? '३. ' : '3. '}{t.nav_overall_report}
                       </span>
                       <span className="text-[10px] text-slate-500 dark:text-slate-400 block">
-                        {activeLang === 'ne' ? "कोशी प्रदेश स्तरीय विषयगत तथा तुलनात्मक तथ्याङ्क" : "Province-wide thematic and comparative analytics"}
+                        {activeLang === 'ne' ? "कोशी प्रदेश स्तरीय विषयगत तथा तुलनात्मक एकीकृत तथ्याङ्क" : "Province-wide thematic and comparative analytics"}
                       </span>
                     </div>
                   </Link>
@@ -512,51 +514,122 @@ export default function Header({ lang: propLang, onLanguageChange }: HeaderProps
           </div>
         </nav>
 
-        {/* Mobile Drawer Navigation */}
+        {/* Mobile Drawer Navigation (Slide-down & Fully Accessible) */}
         {mobileMenuOpen && (
-          <nav aria-label="Mobile Navigation" className="lg:hidden bg-blue-950 dark:bg-slate-950 text-white border-t border-blue-900 dark:border-slate-800 px-4 py-3 shadow-xl space-y-3">
+          <nav aria-label="Mobile Navigation" className="lg:hidden bg-blue-950 dark:bg-slate-950 text-white border-t border-blue-900 dark:border-slate-800 px-4 py-4 shadow-2xl space-y-4 animate-in slide-in-from-top-2 duration-200">
+            {/* Quick Language Switcher for Mobile */}
+            <div className="bg-blue-900/60 dark:bg-slate-900 p-2 rounded-2xl border border-blue-800/80 dark:border-slate-800">
+              <span className="text-[11px] font-bold text-blue-200 dark:text-slate-400 block mb-1.5 px-1 uppercase tracking-wider">
+                🌐 {activeLang === 'ne' ? "भाषा छनौट (Select Language)" : "Select Language"}
+              </span>
+              <div className="grid grid-cols-2 gap-2" role="group" aria-label="Mobile Language selector">
+                <button
+                  type="button"
+                  onClick={() => handleLanguageSwitch("ne")}
+                  className={`min-h-[44px] rounded-xl text-sm font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                    activeLang === "ne"
+                      ? "bg-blue-600 text-white shadow-md ring-2 ring-amber-400"
+                      : "bg-blue-950/80 text-slate-300 hover:text-white hover:bg-blue-800"
+                  }`}
+                  aria-pressed={activeLang === "ne"}
+                >
+                  <span>🇳🇵 नेपाली (Nepali)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleLanguageSwitch("en")}
+                  className={`min-h-[44px] rounded-xl text-sm font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                    activeLang === "en"
+                      ? "bg-blue-600 text-white shadow-md ring-2 ring-amber-400"
+                      : "bg-blue-950/80 text-slate-300 hover:text-white hover:bg-blue-800"
+                  }`}
+                  aria-pressed={activeLang === "en"}
+                >
+                  <span>🇬🇧 English</span>
+                </button>
+              </div>
+            </div>
+
             {/* Mobile Accessibility & Dark Mode Buttons */}
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2.5">
               <button
                 type="button"
                 onClick={() => {
                   setMobileMenuOpen(false);
                   setIsPanelOpen(true);
                 }}
-                className="py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-950 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 shadow-md cursor-pointer"
+                className="min-h-[48px] bg-amber-400 hover:bg-amber-300 active:bg-amber-500 text-slate-950 rounded-2xl text-xs sm:text-sm font-black flex items-center justify-center gap-2 shadow-md cursor-pointer transition-all"
+                aria-label={activeLang === 'ne' ? "पहुँचयुक्तता सेटिङ्स (Alt+A)" : "Accessibility Settings (Alt+A)"}
               >
-                <span className="text-base" aria-hidden="true">♿</span>
+                <span className="text-lg" aria-hidden="true">♿</span>
                 <span>{t.common.accessibility}</span>
               </button>
               <button
                 type="button"
                 onClick={toggleDarkMode}
-                className={`py-2.5 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 shadow-md cursor-pointer transition-all ${
+                className={`min-h-[48px] rounded-2xl text-xs sm:text-sm font-black flex items-center justify-center gap-2 shadow-md cursor-pointer transition-all ${
                   darkMode
-                    ? "bg-amber-400 text-slate-950 font-black shadow-xs"
+                    ? "bg-amber-400 text-slate-950 shadow-xs"
                     : "bg-slate-800 text-white hover:bg-slate-700 border border-slate-700"
                 }`}
               >
-                {darkMode ? <Sun className="w-4 h-4 text-slate-950 fill-amber-500" /> : <Moon className="w-4 h-4 text-slate-300" />}
+                {darkMode ? <Sun className="w-5 h-5 text-slate-950 fill-amber-500" /> : <Moon className="w-5 h-5 text-slate-300" />}
                 <span>{darkMode ? t.common.darkModeOn : t.common.darkModeOff}</span>
               </button>
             </div>
 
             {/* Mobile Auth Status */}
-            <div className="p-3 rounded-xl bg-blue-900/70 dark:bg-slate-900 border border-blue-800 dark:border-slate-800 flex items-center justify-between">
+            <div className="p-3.5 rounded-2xl bg-blue-900/60 dark:bg-slate-900 border border-blue-800 dark:border-slate-800">
               {isAuthenticated && user ? (
-                <div className="flex items-center justify-between w-full">
-                  <div className="text-xs text-slate-300">
-                    {user.name} ({user.role === "super_admin" ? "Super Admin" : "User"})
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-full bg-amber-400 text-slate-950 flex items-center justify-center font-black text-xs">
+                        <User className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="text-sm font-bold text-white">{user.name}</div>
+                        <div className="text-[11px] text-amber-300 font-semibold">
+                          {user.role === "super_admin" || user.role === "provincial_admin" ? (
+                            <>{t.common.superAdminRole}</>
+                          ) : user.role === "employee" || user.role === "palika_staff" ? (
+                            <>🏛️ {user.palika_name || (activeLang === 'ne' ? "कर्मचारी" : "Staff")}</>
+                          ) : (
+                            <>{t.common.citizenRole}</>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={logout}
+                      className="min-h-[40px] px-3.5 bg-rose-900/80 hover:bg-rose-800 text-rose-100 rounded-xl text-xs font-bold cursor-pointer flex items-center gap-1.5 transition-colors"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span>{t.common.logout}</span>
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={logout}
-                    className="px-3 py-1.5 bg-rose-900 hover:bg-rose-800 text-rose-200 rounded text-xs font-bold cursor-pointer flex items-center gap-1"
-                  >
-                    <LogOut className="w-3.5 h-3.5" />
-                    <span>{t.common.logout}</span>
-                  </button>
+                  {/* Shortcuts */}
+                  {(user.role === "super_admin" || user.role === "provincial_admin") && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="min-h-[44px] w-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs rounded-xl flex items-center justify-center gap-2 shadow-xs transition-colors"
+                    >
+                      <ShieldCheck className="w-4 h-4" />
+                      <span>{activeLang === 'ne' ? "मुख्य प्रशासकीय ड्यासबोर्ड (Admin Panel)" : "Admin Dashboard"}</span>
+                    </Link>
+                  )}
+                  {(user.role === "employee" || user.role === "palika_staff") && user.palika_id && (
+                    <Link
+                      href={`/local-reporting/palika/${user.palika_id}`}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="min-h-[44px] w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs rounded-xl flex items-center justify-center gap-2 shadow-xs transition-colors"
+                    >
+                      <Building2 className="w-4 h-4" />
+                      <span>{activeLang === 'ne' ? "मेरो स्थानीय तहको प्रतिवेदन भर्नुहोस्" : "Fill Municipality Report"}</span>
+                    </Link>
+                  )}
                 </div>
               ) : (
                 <button
@@ -565,22 +638,24 @@ export default function Header({ lang: propLang, onLanguageChange }: HeaderProps
                     setMobileMenuOpen(false);
                     setAuthModalOpen(true);
                   }}
-                  className="w-full py-2.5 bg-gradient-to-r from-blue-700 to-indigo-800 text-white rounded-lg text-xs font-black flex items-center justify-center gap-1.5 shadow-md"
+                  className="min-h-[48px] w-full bg-gradient-to-r from-blue-700 via-indigo-700 to-blue-800 hover:from-blue-600 hover:to-indigo-600 text-white rounded-xl text-sm font-black flex items-center justify-center gap-2 shadow-md cursor-pointer border border-blue-500/60"
                 >
-                  <Lock className="w-3.5 h-3.5 text-amber-300" />
+                  <Lock className="w-4 h-4 text-amber-300" />
                   <span>{t.common.signInRegister}</span>
                 </button>
               )}
             </div>
 
-            {/* Mobile Nav Links */}
-            <ul className="space-y-1">
+            {/* Mobile Nav Links with 48px Minimum Touch Targets */}
+            <ul className="space-y-1.5 pt-1">
               <li>
                 <Link
                   href="/"
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center px-3 py-2.5 rounded-md text-sm font-semibold ${
-                    pathname === "/" ? "bg-blue-900 text-amber-400 font-bold" : "hover:bg-blue-900 dark:hover:bg-slate-800 text-slate-100"
+                  className={`min-h-[48px] flex items-center px-4 py-3 rounded-xl text-base font-bold transition-all ${
+                    pathname === "/"
+                      ? "bg-blue-900 text-amber-300 font-black shadow-xs ring-1 ring-amber-400/40"
+                      : "hover:bg-blue-900/60 dark:hover:bg-slate-800 text-slate-100"
                   }`}
                 >
                   <span>{t.nav_home}</span>
@@ -590,11 +665,13 @@ export default function Header({ lang: propLang, onLanguageChange }: HeaderProps
                 <Link
                   href="/about"
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center px-3 py-2.5 rounded-md text-sm font-semibold ${
-                    pathname === "/about" ? "bg-blue-900 text-amber-400 font-bold" : "hover:bg-blue-900 dark:hover:bg-slate-800 text-slate-100"
+                  className={`min-h-[48px] flex items-center px-4 py-3 rounded-xl text-base font-bold transition-all ${
+                    pathname === "/about"
+                      ? "bg-blue-900 text-amber-300 font-black shadow-xs ring-1 ring-amber-400/40"
+                      : "hover:bg-blue-900/60 dark:hover:bg-slate-800 text-slate-100"
                   }`}
                 >
-                  <Info className="w-4 h-4 mr-2" aria-hidden="true" />
+                  <Info className="w-5 h-5 mr-3 text-amber-400" aria-hidden="true" />
                   <span>{t.nav_about}</span>
                 </Link>
               </li>
@@ -602,11 +679,13 @@ export default function Header({ lang: propLang, onLanguageChange }: HeaderProps
                 <Link
                   href="/laws"
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center px-3 py-2.5 rounded-md text-sm font-semibold ${
-                    pathname === "/laws" ? "bg-blue-900 text-amber-400 font-bold" : "hover:bg-blue-900 dark:hover:bg-slate-800 text-slate-100"
+                  className={`min-h-[48px] flex items-center px-4 py-3 rounded-xl text-base font-bold transition-all ${
+                    pathname === "/laws"
+                      ? "bg-blue-900 text-amber-300 font-black shadow-xs ring-1 ring-amber-400/40"
+                      : "hover:bg-blue-900/60 dark:hover:bg-slate-800 text-slate-100"
                   }`}
                 >
-                  <FileText className="w-4 h-4 mr-2" aria-hidden="true" />
+                  <FileText className="w-5 h-5 mr-3 text-amber-400" aria-hidden="true" />
                   <span>{t.nav_laws}</span>
                 </Link>
               </li>
@@ -616,31 +695,60 @@ export default function Header({ lang: propLang, onLanguageChange }: HeaderProps
                 <button
                   type="button"
                   onClick={() => setMobileReportsOpen(!mobileReportsOpen)}
-                  className="w-full flex items-center justify-between px-3 py-2.5 rounded-md text-sm font-semibold hover:bg-blue-900 dark:hover:bg-slate-800 text-slate-100"
+                  className="min-h-[48px] w-full flex items-center justify-between px-4 py-3 rounded-xl text-base font-bold hover:bg-blue-900/60 dark:hover:bg-slate-800 text-slate-100 cursor-pointer"
+                  aria-expanded={mobileReportsOpen}
                 >
-                  <span className="flex items-center gap-2">
-                    <BarChart3 className="w-4 h-4" aria-hidden="true" />
+                  <span className="flex items-center gap-3">
+                    <BarChart3 className="w-5 h-5 text-amber-400" aria-hidden="true" />
                     <span>{t.nav_reports}</span>
                   </span>
-                  <ChevronDown className={`w-4 h-4 transition-transform ${mobileReportsOpen ? "rotate-180 text-amber-400" : ""}`} />
+                  <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${mobileReportsOpen ? "rotate-180 text-amber-400" : ""}`} />
                 </button>
                 {mobileReportsOpen && (
-                  <div className="pl-6 pr-2 py-1 space-y-1 bg-blue-900/40 rounded-lg mt-1">
+                  <div className="pl-4 pr-2 py-2 space-y-2 bg-blue-900/40 dark:bg-slate-900/60 rounded-2xl mt-1 border border-blue-800/40">
+                    {/* १. प्रतिवेदन प्रविष्टि */}
+                    <Link
+                      href="/report-entry"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="min-h-[48px] flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-blue-100 hover:text-white hover:bg-blue-800/80 transition-colors"
+                    >
+                      <FileEdit className="w-4 h-4 text-amber-300 shrink-0" />
+                      <div>
+                        <span>{activeLang === 'ne' ? '१. ' : '1. '}{t.nav_report_entry}</span>
+                        <span className="block text-[11px] text-blue-300 font-normal">
+                          {activeLang === 'ne' ? "वार्षिक प्रतिवेदन प्रविष्टि पोर्टल" : "Annual report submission portal"}
+                        </span>
+                      </div>
+                    </Link>
+
+                    {/* २. स्थानीयतहगत प्रतिवेदन */}
                     <Link
                       href="/local-reporting"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-2 px-3 py-2 rounded text-xs font-semibold text-blue-100 hover:text-white hover:bg-blue-800"
+                      className="min-h-[48px] flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-blue-100 hover:text-white hover:bg-blue-800/80 transition-colors"
                     >
-                      <Building2 className="w-3.5 h-3.5 text-blue-300" />
-                      <span>{t.nav_palika_report}</span>
+                      <Building2 className="w-4 h-4 text-blue-300 shrink-0" />
+                      <div>
+                        <span>{activeLang === 'ne' ? '२. ' : '2. '}{t.nav_palika_report}</span>
+                        <span className="block text-[11px] text-blue-300 font-normal">
+                          {activeLang === 'ne' ? "१३७ वटै स्थानीय तहका प्रोफाइल तथा विवरण" : "Individual palika reports"}
+                        </span>
+                      </div>
                     </Link>
+
+                    {/* ३. स्थानीय तहको एकीकृत प्रतिवेदन */}
                     <Link
                       href="/reports"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-2 px-3 py-2 rounded text-xs font-semibold text-blue-100 hover:text-white hover:bg-blue-800"
+                      className="min-h-[48px] flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-blue-100 hover:text-white hover:bg-blue-800/80 transition-colors"
                     >
-                      <BarChart3 className="w-3.5 h-3.5 text-emerald-300" />
-                      <span>{t.nav_overall_report}</span>
+                      <BarChart3 className="w-4 h-4 text-emerald-300 shrink-0" />
+                      <div>
+                        <span>{activeLang === 'ne' ? '३. ' : '3. '}{t.nav_overall_report}</span>
+                        <span className="block text-[11px] text-emerald-300 font-normal">
+                          {activeLang === 'ne' ? "सबै १३७ पालिका एकीकृत तथ्याङ्क" : "All 137 palikas integrated"}
+                        </span>
+                      </div>
                     </Link>
                   </div>
                 )}
@@ -650,11 +758,13 @@ export default function Header({ lang: propLang, onLanguageChange }: HeaderProps
                 <Link
                   href="/news"
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center px-3 py-2.5 rounded-md text-sm font-semibold ${
-                    pathname === "/news" ? "bg-blue-900 text-amber-400 font-bold" : "hover:bg-blue-900 dark:hover:bg-slate-800 text-slate-100"
+                  className={`min-h-[48px] flex items-center px-4 py-3 rounded-xl text-base font-bold transition-all ${
+                    pathname === "/news"
+                      ? "bg-blue-900 text-amber-300 font-black shadow-xs ring-1 ring-amber-400/40"
+                      : "hover:bg-blue-900/60 dark:hover:bg-slate-800 text-slate-100"
                   }`}
                 >
-                  <Newspaper className="w-4 h-4 mr-2" aria-hidden="true" />
+                  <Newspaper className="w-5 h-5 mr-3 text-amber-400" aria-hidden="true" />
                   <span>{t.nav_news}</span>
                 </Link>
               </li>
@@ -662,11 +772,13 @@ export default function Header({ lang: propLang, onLanguageChange }: HeaderProps
                 <Link
                   href="/contact"
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center px-3 py-2.5 rounded-md text-sm font-semibold ${
-                    pathname === "/contact" ? "bg-blue-900 text-amber-400 font-bold" : "hover:bg-blue-900 dark:hover:bg-slate-800 text-slate-100"
+                  className={`min-h-[48px] flex items-center px-4 py-3 rounded-xl text-base font-bold transition-all ${
+                    pathname === "/contact"
+                      ? "bg-blue-900 text-amber-300 font-black shadow-xs ring-1 ring-amber-400/40"
+                      : "hover:bg-blue-900/60 dark:hover:bg-slate-800 text-slate-100"
                   }`}
                 >
-                  <PhoneCall className="w-4 h-4 mr-2" aria-hidden="true" />
+                  <PhoneCall className="w-5 h-5 mr-3 text-amber-400" aria-hidden="true" />
                   <span>{t.nav_contact}</span>
                 </Link>
               </li>
@@ -674,11 +786,13 @@ export default function Header({ lang: propLang, onLanguageChange }: HeaderProps
                 <Link
                   href="/search"
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center px-3 py-2.5 rounded-md text-sm font-semibold ${
-                    pathname === "/search" ? "bg-blue-900 text-amber-400 font-bold" : "hover:bg-blue-900 dark:hover:bg-slate-800 text-slate-100"
+                  className={`min-h-[48px] flex items-center px-4 py-3 rounded-xl text-base font-bold transition-all ${
+                    pathname === "/search"
+                      ? "bg-blue-900 text-amber-300 font-black shadow-xs ring-1 ring-amber-400/40"
+                      : "hover:bg-blue-900/60 dark:hover:bg-slate-800 text-slate-100"
                   }`}
                 >
-                  <Search className="w-4 h-4 mr-2" aria-hidden="true" />
+                  <Search className="w-5 h-5 mr-3 text-amber-400" aria-hidden="true" />
                   <span>{t.nav_search}</span>
                 </Link>
               </li>
@@ -686,12 +800,14 @@ export default function Header({ lang: propLang, onLanguageChange }: HeaderProps
                 <Link
                   href="/admin"
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center px-3 py-2.5 rounded-md text-sm font-black border border-amber-400/60 shadow-xs ${
-                    pathname.startsWith("/admin") ? "bg-amber-950/90 text-amber-300 ring-1 ring-amber-400" : "bg-amber-950/60 hover:bg-amber-900/80 text-amber-300"
+                  className={`min-h-[48px] flex items-center px-4 py-3 rounded-xl text-base font-black border border-amber-400/60 shadow-xs transition-all ${
+                    pathname.startsWith("/admin")
+                      ? "bg-amber-950 text-amber-300 ring-2 ring-amber-400"
+                      : "bg-amber-950/70 hover:bg-amber-900/90 text-amber-300"
                   }`}
                   aria-label={t.common.adminPanel}
                 >
-                  <ShieldCheck className="w-4 h-4 mr-2 text-amber-400" aria-hidden="true" />
+                  <ShieldCheck className="w-5 h-5 mr-3 text-amber-400" aria-hidden="true" />
                   <span>{t.common.adminPanel}</span>
                 </Link>
               </li>

@@ -1,0 +1,78 @@
+{
+  "app_name_ne": "अपाङ्गता सूचना केन्द्र",
+  "app_name_en": "Disability Information Center",
+  "app_sub_name_ne": "Disability Information Center (DIC)",
+  "app_sub_name_en": "अपाङ्गता सूचना केन्द्र (DIC)",
+  "brand_desc_ne": "नेपाल सरकार तथा प्रदेश सरकार मातहत अपाङ्गता सवालका कानुन, नीति, स्थानीय तह वार्षिक कार्यसम्पादन र तथ्यांक व्यवस्थापनको एकीकृत पोर्टल।",
+  "brand_desc_en": "Integrated digital portal for disability laws, policies, local government annual performance, and demographic data management under the Government of Nepal and Koshi Province Government.",
+  "wcag_badge_ne": "WCAG 2.2 AA मापदण्डअनुसार पहुँचयुक्त बनाउन विकास भइरहेको प्रणाली",
+  "wcag_badge_en": "System developed to comply with WCAG 2.2 AA Accessibility Standards",
+  "quick_links_title_ne": "प्रमुख मोड्युलहरू",
+  "quick_links_title_en": "Key Modules",
+  "quick_links": [
+    {
+      "id": "link-1",
+      "label_ne": "विद्यमान कानुनको दस्तावेज",
+      "label_en": "Legal Documents",
+      "href": "/laws",
+      "is_active": true
+    },
+    {
+      "id": "link-entry",
+      "label_ne": "प्रतिवेदन प्रविष्टि",
+      "label_en": "Report Entry",
+      "href": "/report-entry",
+      "is_active": true
+    },
+    {
+      "id": "link-2",
+      "label_ne": "स्थानीयतहगत प्रतिवेदन",
+      "label_en": "Local Body Report",
+      "href": "/local-reporting",
+      "is_active": true
+    },
+    {
+      "id": "link-3",
+      "label_ne": "स्थानीय तहको एकीकृत प्रतिवेदन",
+      "label_en": "Integrated Report",
+      "href": "/reports",
+      "is_active": true
+    },
+    {
+      "id": "link-4",
+      "label_ne": "सूचना/समाचार",
+      "label_en": "News & Notices",
+      "href": "/news",
+      "is_active": true
+    },
+    {
+      "id": "link-5",
+      "label_ne": "हाम्रो बारेमा",
+      "label_en": "About Us",
+      "href": "/about",
+      "is_active": true
+    },
+    {
+      "id": "link-6",
+      "label_ne": "सम्पर्क",
+      "label_en": "Contact",
+      "href": "/contact",
+      "is_active": true
+    }
+  ],
+  "contact_title_ne": "सम्पर्क तथा सहयोग",
+  "contact_title_en": "Contact & Support",
+  "help_desk_name_ne": "अपाङ्गता सहायता सहजकर्ता सहयोग कक्ष",
+  "help_desk_name_en": "Disability Facilitator Support Desk",
+  "phone_ne": "फोन: +९७७-०२१-४६०XXX (कोशी प्रदेश)",
+  "phone_en": "Phone: +977-021-460XXX (Koshi Province)",
+  "email": "info.dic@koshi.gov.np",
+  "address_ne": "विराटनगर, कोशी प्रदेश, नेपाल",
+  "address_en": "Biratnagar, Koshi Province, Nepal",
+  "copyright_ne": "© २०८२/०८३ अपाङ्गता सूचना केन्द्र (DIC)। सम्पूर्ण अधिकार सुरक्षित।",
+  "copyright_en": "© 2082/083 Disability Information Center (DIC). All Rights Reserved.",
+  "a11y_note_ne": "WCAG 2.2 AA मापदण्ड अनुरूप निर्मित पहुँचयुक्त डिजिटल प्रणाली।",
+  "a11y_note_en": "WCAG 2.2 AA compliant accessible digital system.",
+  "updated_at": "2026-09-11T17:23:05.547Z",
+  "updated_by": "Super Admin (रिसेट गरिएको)"
+}

@@ -409,7 +409,7 @@ export default function UnifiedAuthModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 transition cursor-pointer"
+            className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-slate-300 hover:text-white hover:bg-white/10 transition cursor-pointer"
             aria-label={lang === 'en' ? 'Close' : 'बन्द गर्नुहोस्'}
           >
             <X className="w-5 h-5" />
@@ -425,13 +425,13 @@ export default function UnifiedAuthModal({
               setErrorMessage("");
               setPendingAccountNotice(null);
             }}
-            className={`py-2.5 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
+            className={`py-3 min-h-[48px] rounded-2xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
               mainTab === "signin"
                 ? "bg-white dark:bg-slate-900 text-blue-700 dark:text-blue-400 shadow-xs"
                 : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
             }`}
           >
-            <Lock className="w-3.5 h-3.5" />
+            <Lock className="w-4 h-4" />
             <span>{lang === 'en' ? 'Sign In' : 'Sign In (लगइन)'}</span>
           </button>
 
@@ -444,14 +444,14 @@ export default function UnifiedAuthModal({
               setErrorMessage("");
               setPendingAccountNotice(null);
             }}
-            className={`py-2.5 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
+            className={`py-3 min-h-[48px] rounded-2xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
               mainTab === "signup"
                 ? "bg-white dark:bg-slate-900 text-blue-700 dark:text-blue-400 shadow-xs"
                 : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
             }`}
           >
-            <UserPlus className="w-3.5 h-3.5" />
-            <span>{lang === 'en' ? 'Sign Up (Register)' : 'Sign Up (नयाँ खाता बनाउनुहोस्)'}</span>
+            <UserPlus className="w-4 h-4" />
+            <span>{lang === 'en' ? 'Sign Up (Register)' : 'Sign Up (नयाँ खाता)'}</span>
           </button>
         </div>
 
@@ -514,14 +514,14 @@ export default function UnifiedAuthModal({
                   {lang === 'en' ? 'User ID / Email / Mobile Number *' : 'User ID / Email / Mobile Number *'}
                 </label>
                 <div className="relative">
-                  <User className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                  <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                   <input
                     type="text"
                     value={signInIdentifier}
                     onChange={(e) => setSignInIdentifier(e.target.value)}
                     placeholder={lang === 'en' ? 'DIC-EMP-000002 or email@example.com or 98XXXXXXXX' : 'DIC-EMP-000002 वा email@example.com वा ९८XXXXXXXX'}
                     required
-                    className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-medium focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
+                    className="w-full pl-10 pr-3.5 py-3 min-h-[48px] rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-base sm:text-sm font-medium focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
                   />
                 </div>
               </div>
@@ -536,25 +536,25 @@ export default function UnifiedAuthModal({
                     onClick={() => {
                       alert(lang === 'en' ? 'Please use your registered Email or Mobile number to reset password via OTP.' : 'पासवर्ड रिसेट गर्न आफ्नो आधिकारिक Email वा Mobile नम्बर प्रयोग गर्नुहोस्। OTP मार्फत नयाँ पासवर्ड सेट गर्न सकिन्छ।');
                     }}
-                    className="text-[11px] text-blue-600 hover:underline font-semibold"
+                    className="text-xs text-blue-600 hover:underline font-semibold py-1 px-1"
                   >
                     {lang === 'en' ? 'Forgot password?' : 'पासवर्ड बिर्सनुभयो?'}
                   </button>
                 </div>
                 <div className="relative">
-                  <KeyRound className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                  <KeyRound className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                   <input
                     type={showPassword ? "text" : "password"}
                     value={signInPassword}
                     onChange={(e) => setSignInPassword(e.target.value)}
                     placeholder={lang === 'en' ? 'Your password...' : 'तपाईंको पासवर्ड...'}
                     required
-                    className="w-full pl-9 pr-10 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-medium focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
+                    className="w-full pl-10 pr-11 py-3 min-h-[48px] rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-base sm:text-sm font-medium focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600"
+                    className="absolute right-2.5 top-2.5 p-1.5 min-w-[36px] min-h-[36px] flex items-center justify-center text-slate-400 hover:text-slate-600 cursor-pointer"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -564,7 +564,7 @@ export default function UnifiedAuthModal({
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-3 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md flex items-center justify-center gap-2 transition disabled:opacity-50 cursor-pointer"
+                className="w-full py-3.5 min-h-[48px] rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-md flex items-center justify-center gap-2 transition disabled:opacity-50 cursor-pointer"
               >
                 {isLoading ? (
                   <span>{lang === 'en' ? 'Verifying...' : 'जाँच हुँदैछ...'}</span>
@@ -684,7 +684,7 @@ export default function UnifiedAuthModal({
                           value={userName}
                           onChange={(e) => setUserName(e.target.value)}
                           placeholder="तपाईंको नाम (उदा. रमेश श्रेष्ठ)"
-                          className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-medium focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
+                          className="w-full px-3.5 py-3 min-h-[46px] rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-base sm:text-sm font-medium focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
                         />
                       </div>
 
@@ -698,7 +698,7 @@ export default function UnifiedAuthModal({
                           onChange={(e) => setUserIdentifier(e.target.value)}
                           placeholder="name@example.com वा ९८XXXXXXXX"
                           required
-                          className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-medium focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
+                          className="w-full px-3.5 py-3 min-h-[46px] rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-base sm:text-sm font-medium focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
                         />
                         <p className="text-[11px] text-slate-500 mt-1">
                           यस ठेगानामा ६-अंकको OTP कोड पठाइनेछ।
@@ -718,7 +718,7 @@ export default function UnifiedAuthModal({
                           onChange={(e) => setEmpName(e.target.value)}
                           placeholder="सहायता सहजकर्ताको नाम"
                           required
-                          className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-medium focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
+                          className="w-full px-3.5 py-3 min-h-[46px] rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-base sm:text-sm font-medium focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
                         />
                       </div>
 
@@ -736,7 +736,7 @@ export default function UnifiedAuthModal({
                                 setEmpPalikaId(dist.local_governments[0].id);
                               }
                             }}
-                            className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-medium focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
+                            className="w-full px-3.5 py-3 min-h-[46px] rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-base sm:text-sm font-medium focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
                           >
                             {KOSHI_DISTRICTS.map((d) => (
                               <option key={d.id} value={d.id}>
@@ -753,7 +753,7 @@ export default function UnifiedAuthModal({
                           <select
                             value={empPalikaId}
                             onChange={(e) => setEmpPalikaId(e.target.value)}
-                            className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-medium focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
+                            className="w-full px-3.5 py-3 min-h-[46px] rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-base sm:text-sm font-medium focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
                           >
                             {availablePalikas.map((p) => (
                               <option key={p.id} value={p.id}>
@@ -780,7 +780,7 @@ export default function UnifiedAuthModal({
                             onChange={(e) => setEmpEmail(e.target.value)}
                             placeholder="yourname@gmail.com"
                             required={empOtpChannel === "email"}
-                            className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-medium focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
+                            className="w-full px-3.5 py-3 min-h-[46px] rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-base sm:text-sm font-medium focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
                           />
                         </div>
 
@@ -799,7 +799,7 @@ export default function UnifiedAuthModal({
                             onChange={(e) => setEmpPhone(e.target.value)}
                             placeholder="९८XXXXXXXX"
                             required
-                            className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-medium focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
+                            className="w-full px-3.5 py-3 min-h-[46px] rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-base sm:text-sm font-medium focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
                           />
                         </div>
                       </div>
@@ -813,7 +813,7 @@ export default function UnifiedAuthModal({
                           <button
                             type="button"
                             onClick={() => setEmpOtpChannel("email")}
-                            className={`p-2 rounded-xl border text-left cursor-pointer transition flex items-center gap-2 ${
+                            className={`p-2.5 min-h-[50px] rounded-xl border text-left cursor-pointer transition flex items-center gap-2 ${
                               empOtpChannel === "email"
                                 ? "bg-blue-900 text-white border-blue-900 shadow-xs"
                                 : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-50"
@@ -831,7 +831,7 @@ export default function UnifiedAuthModal({
                           <button
                             type="button"
                             onClick={() => setEmpOtpChannel("phone")}
-                            className={`p-2 rounded-xl border text-left cursor-pointer transition flex items-center gap-2 ${
+                            className={`p-2.5 min-h-[50px] rounded-xl border text-left cursor-pointer transition flex items-center gap-2 ${
                               empOtpChannel === "phone"
                                 ? "bg-blue-900 text-white border-blue-900 shadow-xs"
                                 : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-50"
@@ -853,7 +853,7 @@ export default function UnifiedAuthModal({
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full py-3 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md flex items-center justify-center gap-2 transition disabled:opacity-50"
+                    className="w-full py-3.5 min-h-[48px] rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-md flex items-center justify-center gap-2 transition disabled:opacity-50 cursor-pointer"
                   >
                     {isLoading ? (
                       <span>OTP पठाउँदै...</span>
@@ -925,17 +925,17 @@ export default function UnifiedAuthModal({
                         value={digit}
                         onChange={(e) => handleOtpDigitChange(idx, e.target.value)}
                         onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                        className="w-10 h-12 text-center text-lg font-bold rounded-xl border-2 border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 focus:outline-hidden"
+                        className="w-11 h-13 sm:w-12 sm:h-14 text-center text-xl font-bold rounded-xl border-2 border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 focus:outline-hidden"
                         aria-label={`अंक ${idx + 1}`}
                       />
                     ))}
                   </div>
 
-                  <div className="flex items-center justify-between text-[11px] text-slate-500">
+                  <div className="flex items-center justify-between text-xs text-slate-500">
                     <button
                       type="button"
                       onClick={() => setSignupStep(1)}
-                      className="text-slate-600 hover:text-slate-900 hover:underline cursor-pointer"
+                      className="text-slate-600 hover:text-slate-900 hover:underline py-1.5 px-2 cursor-pointer font-medium"
                     >
                       ← विवरण सच्याउनुहोस्
                     </button>
@@ -944,7 +944,7 @@ export default function UnifiedAuthModal({
                       type="button"
                       disabled={otpTimer > 0}
                       onClick={handleSendOtp}
-                      className="text-blue-600 font-bold hover:underline disabled:opacity-50 cursor-pointer"
+                      className="text-blue-600 font-bold hover:underline py-1.5 px-2 disabled:opacity-50 cursor-pointer"
                     >
                       {otpTimer > 0 ? `पुन: पठाउन (${otpTimer}s)` : "OTP पुन: पठाउनुहोस्"}
                     </button>
@@ -953,7 +953,7 @@ export default function UnifiedAuthModal({
                   <button
                     type="submit"
                     disabled={isLoading || otpCode.join("").length < 6}
-                    className="w-full py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md flex items-center justify-center gap-2 transition disabled:opacity-50"
+                    className="w-full py-3.5 min-h-[48px] rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md flex items-center justify-center gap-2 transition disabled:opacity-50 cursor-pointer"
                   >
                     {isLoading ? <span>जाँचिँदैछ...</span> : <span>OTP प्रमाणीकरण गर्नुहोस् (Verify)</span>}
                   </button>
@@ -979,7 +979,7 @@ export default function UnifiedAuthModal({
                         onChange={(e) => setCreatePassword(e.target.value)}
                         placeholder="नयाँ पासवर्ड..."
                         required
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-medium focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
+                        className="w-full px-3.5 py-3 min-h-[48px] rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-base sm:text-sm font-medium focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
                       />
                     </div>
                   </div>
@@ -994,14 +994,14 @@ export default function UnifiedAuthModal({
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="पासवर्ड दोहोर्‍याउनुहोस्..."
                       required
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-medium focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
+                      className="w-full px-3.5 py-3 min-h-[48px] rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-base sm:text-sm font-medium focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
                     />
                   </div>
 
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full py-3 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md flex items-center justify-center gap-2 transition disabled:opacity-50"
+                    className="w-full py-3.5 min-h-[48px] rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-md flex items-center justify-center gap-2 transition disabled:opacity-50 cursor-pointer"
                   >
                     {isLoading ? (
                       <span>खाता सिर्जना गर्दै...</span>

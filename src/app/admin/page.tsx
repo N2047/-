@@ -48,7 +48,8 @@ import {
   Image as ImageIcon,
   UploadCloud,
   Bot,
-  Cpu
+  Cpu,
+  LayoutTemplate
 } from "lucide-react";
 import Link from "next/link";
 import FormConfigModal from "@/components/admin/FormConfigModal";
@@ -60,6 +61,7 @@ import AdminAccountApproval from "@/components/admin/AdminAccountApproval";
 import AdminAboutManagement from "@/components/admin/AdminAboutManagement";
 import AdminLawManager from "@/components/admin/AdminLawManager";
 import AdminAiConfigManager from "@/components/admin/AdminAiConfigManager";
+import AdminFooterManager from "@/components/admin/AdminFooterManager";
 import { useAuth } from "@/lib/authContext";
 import { useAccessibility } from "@/lib/accessibilityContext";
 import { useLanguage } from "@/lib/languageContext";
@@ -103,6 +105,7 @@ export default function AdminPage() {
     | "about_mgmt"
     | "reports_mgmt"
     | "website_mgmt"
+    | "footer_mgmt"
     | "accessibility"
     | "system_settings"
     | "ai_config"
@@ -954,6 +957,23 @@ export default function AdminPage() {
               <span>{lang === "ne" ? "वेबसाइट व्यवस्थापन (CMS)" : "Website CMS"}</span>
             </button>
 
+            {/* 10. Footer CMS Management */}
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("footer_mgmt");
+                setMobileSidebarOpen(false);
+              }}
+              className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${
+                activeTab === "footer_mgmt"
+                  ? "bg-blue-900 text-white font-bold shadow-xs"
+                  : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+              }`}
+            >
+              <LayoutTemplate className="w-4 h-4 text-amber-500" />
+              <span>{lang === "ne" ? "फुटर व्यवस्थापन (Footer CMS)" : "Footer Management (CMS)"}</span>
+            </button>
+
             {/* SYSTEM & SECURITY */}
             <div className="pt-3 pb-1 px-3 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
               {lang === "ne" ? "⚙️ प्रणाली तथा सुरक्षा" : "⚙️ System & Security"}
@@ -1525,50 +1545,15 @@ export default function AdminPage() {
             <AdminAboutManagement />
           )}
 
-          {/* TAB 9: WEBSITE MANAGEMENT CMS (Requirement 13 & 14) */}
+          {/* TAB: FOOTER CMS MANAGEMENT */}
+          {activeTab === "footer_mgmt" && (
+            <AdminFooterManager />
+          )}
+
+          {/* TAB 9: WEBSITE MANAGEMENT CMS */}
           {activeTab === "website_mgmt" && (
-            <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
-              <h2 className="text-lg font-bold flex items-center gap-2">
-                <Globe className="w-5 h-5 text-teal-600" />
-                <span>वेबसाइट सामग्री व्यवस्थापन (Website CMS & Settings)</span>
-              </h2>
-              <p className="text-xs text-slate-500">
-                गृहपृष्ठको ब्यानर, आपतकालीन सन्देशहरू, मुख्य कार्डहरू र फुटर लिङ्कहरूको सम्पादन
-              </p>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-2">
-                  <div className="font-bold text-slate-900 dark:text-white text-xs">आपतकालीन घोषणा / सूचना टिकर</div>
-                  <input
-                    type="text"
-                    defaultValue="कोशी प्रदेशका १४ जिल्लाका १३७ स्थानीय तहमा अपाङ्गता परिचयपत्र दर्ता कार्य जारी छ।"
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 text-xs bg-white dark:bg-slate-900"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => alert("आपतकालीन सन्देश अपडेट गरियो।")}
-                    className="px-3 py-1.5 bg-blue-900 text-white rounded-lg font-bold text-[11px] cursor-pointer"
-                  >
-                    अपडेट गर्नुहोस्
-                  </button>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-2">
-                  <div className="font-bold text-slate-900 dark:text-white text-xs">सम्पर्क हटलाइन नम्बर</div>
-                  <input
-                    type="text"
-                    defaultValue="+977-21-460000 / +977-9842661754"
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 text-xs bg-white dark:bg-slate-900"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => alert("हटलाइन नम्बर सुरक्षित भयो।")}
-                    className="px-3 py-1.5 bg-emerald-700 text-white rounded-lg font-bold text-[11px] cursor-pointer"
-                  >
-                    सुरक्षित गर्नुहोस्
-                  </button>
-                </div>
-              </div>
+            <div className="space-y-6">
+              <AdminFooterManager />
             </div>
           )}
 

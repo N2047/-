@@ -4,13 +4,10 @@ import React, { useRef, useEffect } from "react";
 import Link from "next/link";
 import Header from "@/components/Header";
 import StatsCards from "@/components/StatsCards";
-import QuickPalikaFinder from "@/components/QuickPalikaFinder";
 import Footer from "@/components/Footer";
 import { translations } from "@/lib/translations";
 import { useLanguage } from "@/lib/languageContext";
 import { 
-  FileText, 
-  Building2, 
   BarChart3, 
   ArrowRight, 
   CheckCircle2, 
@@ -48,55 +45,6 @@ export default function HomePage() {
             <p className="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto mt-3">
               {t.hero_desc}
             </p>
-
-            {/* Action Buttons: कानुन, १. पालिका प्रतिवेदन, २. समग्र प्रतिवेदन */}
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
-              <Link
-                href="/laws"
-                className="px-5 sm:px-6 py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm sm:text-base shadow-lg shadow-amber-500/20 flex items-center gap-2 transition-all transform hover:-translate-y-0.5 cursor-pointer"
-              >
-                <FileText className="w-5 h-5" aria-hidden="true" />
-                <span>{t.hero_btn_laws}</span>
-              </Link>
-
-              {/* १. पालिका प्रतिवेदन (प्रत्येक वा सेलेक्ट गरिएको पालिका) */}
-              <Link
-                href="/local-reporting"
-                className="px-5 sm:px-6 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm sm:text-base shadow-lg shadow-blue-600/25 flex items-center gap-2 border border-blue-400/40 transition-all transform hover:-translate-y-0.5 cursor-pointer"
-                title={lang === "ne" ? "प्रत्येक पालिका वा सेलेक्ट गरिएको पालिकाको प्रतिवेदन हेर्नुहोस्" : "View local government report"}
-              >
-                <Building2 className="w-5 h-5 text-amber-300" aria-hidden="true" />
-                <div className="text-left">
-                  <span>{t.hero_btn_reporting}</span>
-                  <span className="block text-[10px] text-blue-200 font-normal">{t.hero_reporting_sub}</span>
-                </div>
-              </Link>
-
-              {/* २. समग्र प्रतिवेदन (सबै १३७ पालिकाको कम्पाइल प्रतिवेदन) */}
-              <Link
-                href="/reports"
-                className="px-5 sm:px-6 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm sm:text-base shadow-lg shadow-emerald-600/25 flex items-center gap-2 border border-emerald-400/40 transition-all transform hover:-translate-y-0.5 cursor-pointer"
-                title={lang === "ne" ? "सबै १३७ स्थानीय तहको एकीकृत कम्पाइल प्रतिवेदन तथा विषयगत विश्लेषण" : "Compiled report of all 137 palikas"}
-              >
-                <BarChart3 className="w-5 h-5 text-amber-300" aria-hidden="true" />
-                <div className="text-left">
-                  <span>{t.hero_btn_reports}</span>
-                  <span className="block text-[10px] text-emerald-200 font-normal">{t.hero_reports_sub}</span>
-                </div>
-              </Link>
-            </div>
-
-            {/* Sub-Banner Quick Indicator */}
-            <div className="mt-5 inline-flex flex-wrap items-center justify-center gap-2 px-4 py-2 bg-slate-800/80 border border-slate-700/80 rounded-2xl text-xs text-slate-300">
-              <span className="font-bold text-amber-400">{t.hero_classification}</span>
-              <Link href="/local-reporting" className="hover:text-amber-300 underline font-medium">
-                {t.hero_classification_palika}
-              </Link>
-              <span className="text-slate-500">|</span>
-              <Link href="/reports" className="hover:text-amber-300 underline font-medium">
-                {t.hero_classification_overall}
-              </Link>
-            </div>
           </div>
         </section>
 
@@ -230,8 +178,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* QUICK PALIKA FINDER SECTION */}
-        <QuickPalikaFinder lang={lang} />
       </main>
 
       <Footer lang={lang} />

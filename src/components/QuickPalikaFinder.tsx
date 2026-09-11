@@ -140,7 +140,7 @@ export default function QuickPalikaFinder({ lang: propLang }: QuickPalikaFinderP
           >
             {/* 1. District Select */}
             <div>
-              <label htmlFor="district-select" className="block text-xs font-bold text-amber-300 mb-1.5">
+              <label htmlFor="district-select" className="block text-xs font-bold text-amber-300 mb-1.5 uppercase tracking-wider">
                 {t.quick_step_1}
               </label>
               <select
@@ -161,7 +161,7 @@ export default function QuickPalikaFinder({ lang: propLang }: QuickPalikaFinderP
                     }
                   }
                 }}
-                className="w-full bg-slate-900 text-white text-sm rounded-xl px-3.5 py-2.5 border border-slate-700 focus:ring-2 focus:ring-amber-400 focus:outline-hidden"
+                className="w-full bg-slate-900 text-white text-base sm:text-sm rounded-xl px-4 py-3 min-h-[48px] border border-slate-700 focus:ring-2 focus:ring-amber-400 focus:outline-hidden font-medium cursor-pointer"
               >
                 <option value="">{t.select_district}</option>
                 {KOSHI_DISTRICTS.map((district) => (
@@ -174,7 +174,7 @@ export default function QuickPalikaFinder({ lang: propLang }: QuickPalikaFinderP
 
             {/* 2. Palika Select */}
             <div>
-              <label htmlFor="palika-select" className="block text-xs font-bold text-amber-300 mb-1.5">
+              <label htmlFor="palika-select" className="block text-xs font-bold text-amber-300 mb-1.5 uppercase tracking-wider">
                 {t.quick_step_2}
               </label>
               <select
@@ -193,9 +193,9 @@ export default function QuickPalikaFinder({ lang: propLang }: QuickPalikaFinderP
                     }
                   }
                 }}
-                className={`w-full text-sm rounded-xl px-3.5 py-2.5 border focus:ring-2 focus:ring-amber-400 focus:outline-hidden ${
+                className={`w-full text-base sm:text-sm rounded-xl px-4 py-3 min-h-[48px] border focus:ring-2 focus:ring-amber-400 focus:outline-hidden font-medium ${
                   selectedDistrictId 
-                    ? "bg-slate-900 text-white border-slate-700" 
+                    ? "bg-slate-900 text-white border-slate-700 cursor-pointer" 
                     : "bg-slate-800 text-slate-400 border-slate-700 cursor-not-allowed opacity-60"
                 }`}
               >
@@ -211,19 +211,19 @@ export default function QuickPalikaFinder({ lang: propLang }: QuickPalikaFinderP
             </div>
 
             {/* 3. Action Buttons: Form Fill (Secure) + Profile */}
-            <div className="flex flex-col sm:flex-row gap-2 items-end">
+            <div className="flex flex-col sm:flex-row gap-2.5 items-stretch sm:items-end w-full">
               {/* Show yellow "प्रतिवेदन फारम" ONLY for Super Admin OR Employee of this assigned palika */}
               {canAccessForm && (
                 <Link
                   href={selectedPalikaId ? `/local-reporting/palika/${selectedPalikaId}` : "#"}
                   aria-disabled={!selectedPalikaId}
-                  className={`flex-1 py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all text-center min-h-[44px] ${
+                  className={`flex-1 py-3 px-3 rounded-xl font-bold text-sm sm:text-sm flex items-center justify-center gap-2 transition-all text-center min-h-[48px] ${
                     selectedPalikaId 
                       ? "bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-lg shadow-amber-400/20 cursor-pointer" 
                       : "bg-slate-700/60 text-slate-400 cursor-not-allowed pointer-events-none"
                   }`}
                 >
-                  <Lock className="w-3.5 h-3.5 shrink-0" />
+                  <Lock className="w-4 h-4 shrink-0" />
                   <span>{lang === "ne" ? "प्रतिवेदन फारम" : "Reporting Form"}</span>
                   <ArrowRight className="w-4 h-4 shrink-0" aria-hidden="true" />
                 </Link>
@@ -233,12 +233,10 @@ export default function QuickPalikaFinder({ lang: propLang }: QuickPalikaFinderP
               <Link
                 href={selectedPalikaId ? `/local-reporting/palika/${selectedPalikaId}/profile` : "#"}
                 aria-disabled={!selectedPalikaId}
-                className={`py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all border min-h-[44px] ${
-                  !canAccessForm ? "w-full flex-1" : ""
-                } ${
+                className={`w-full flex-1 py-3 px-4 rounded-xl font-bold text-sm sm:text-sm flex items-center justify-center gap-2 transition-all border min-h-[48px] ${
                   selectedPalikaId
-                    ? "bg-blue-600/30 hover:bg-blue-600/50 text-white border-blue-400/40 hover:border-blue-300 shadow-md cursor-pointer"
-                    : "bg-white/5 text-slate-500 border-white/5 cursor-not-allowed pointer-events-none"
+                    ? "bg-blue-600/50 hover:bg-blue-600/70 text-white border-blue-400/50 hover:border-blue-300 shadow-md cursor-pointer"
+                    : "bg-white/5 text-slate-400 border-white/10 cursor-not-allowed pointer-events-none"
                 }`}
                 title={lang === "ne" ? "पालिका प्रतिवेदन हेर्नुहोस् (खुल्ला विवरण)" : "View palika public report"}
               >
@@ -253,22 +251,22 @@ export default function QuickPalikaFinder({ lang: propLang }: QuickPalikaFinderP
             </div>
           </form>
 
-          {/* Quick palika badges when district selected */}
+          {/* Quick palika badges when district selected (Touch-Friendly) */}
           {currentDistrict && (
-            <div className="mt-4 pt-4 border-t border-white/10 relative z-10">
-              <p className="text-xs font-semibold text-slate-300 mb-2">
-                {lang === "ne" ? `${currentDistrict.name_ne} जिल्लाका स्थानीय तहहरू:` : `Local governments in ${currentDistrict.name_en} District:`}
+            <div className="mt-5 pt-4 border-t border-white/10 relative z-10">
+              <p className="text-xs sm:text-sm font-bold text-amber-300 mb-3">
+                {lang === "ne" ? `📍 ${currentDistrict.name_ne} जिल्लाका स्थानीय तहहरू (ट्याप गर्नुहोस्):` : `📍 Local governments in ${currentDistrict.name_en} District (tap to select):`}
               </p>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-2">
                 {palikas.map((p) => (
                   <button
                     key={p.id}
                     type="button"
                     onClick={() => setSelectedPalikaId(p.id)}
-                    className={`text-xs px-2.5 py-1 rounded-full border transition-colors cursor-pointer ${
+                    className={`text-xs sm:text-sm px-3.5 py-2 min-h-[40px] rounded-xl border transition-all cursor-pointer active:scale-95 flex items-center justify-center font-semibold ${
                       selectedPalikaId === p.id
-                        ? "bg-amber-400 text-slate-950 font-bold border-amber-300"
-                        : "bg-white/5 text-slate-200 border-white/10 hover:bg-white/15"
+                        ? "bg-amber-400 text-slate-950 font-black border-amber-300 shadow-md ring-2 ring-amber-300"
+                        : "bg-white/10 text-slate-100 border-white/20 hover:bg-white/20"
                     }`}
                   >
                     {lang === "ne" ? p.name_ne : p.name_en}

@@ -20,9 +20,12 @@ import {
   Globe2, 
   Layers, 
   FileCheck,
-  Check
+  Check,
+  LayoutGrid,
+  List
 } from "lucide-react";
 import { LawDocument, LawCategory, GovLevel, LAW_CATEGORIES, NEPAL_PROVINCES } from "@/lib/lawsData";
+import { LAW_THEMES, getLawTheme } from "@/lib/lawTheme";
 import { useAuth } from "@/lib/authContext";
 import { useLanguage } from "@/lib/languageContext";
 
@@ -38,6 +41,7 @@ export default function AdminLawManager() {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
 
   // Modal State
+  const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [editingDoc, setEditingDoc] = useState<LawDocument | null>(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
@@ -311,73 +315,239 @@ export default function AdminLawManager() {
       </div>
 
       {/* Filter and Search Controls */}
-      <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-        {/* Search */}
-        <div className="relative flex-1 max-w-sm">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="कानुनको नाम वा कुञ्जीशब्द खोज्नुहोस्..."
-            className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:outline-hidden"
-          />
+      <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4 text-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          {/* Search */}
+          <div className="relative flex-1 max-w-md">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="कानुनको नाम वा कुञ्जीशब्द खोज्नुहोस्..."
+              className="w-full pl-10 pr-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:outline-hidden font-medium text-xs sm:text-sm"
+            />
+          </div>
+
+          {/* Controls: Level Select + View Mode Toggle */}
+          <div className="flex items-center gap-2.5 flex-wrap">
+            {/* Level Filter */}
+            <select
+              value={levelFilter}
+              onChange={(e) => setLevelFilter(e.target.value)}
+              className="bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 font-bold cursor-pointer text-xs"
+            >
+              <option value="all">🏛️ सबै तह (All Levels)</option>
+              <option value="federal">🏛️ संघीय कानुन (Federal)</option>
+              <option value="provincial">🏔️ प्रदेश कानुन (Provincial)</option>
+            </select>
+
+            {/* View Mode Toggle: Grid vs Table */}
+            <div className="flex items-center p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+              <button
+                type="button"
+                onClick={() => setViewMode("grid")}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                  viewMode === "grid"
+                    ? "bg-white dark:bg-slate-700 text-indigo-700 dark:text-indigo-300 shadow-xs ring-1 ring-indigo-400/40"
+                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                }`}
+                title="६-कोठे कार्ड दृश्य"
+              >
+                <LayoutGrid className="w-3.5 h-3.5" />
+                <span>कार्ड दृश्य</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("table")}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                  viewMode === "table"
+                    ? "bg-white dark:bg-slate-700 text-indigo-700 dark:text-indigo-300 shadow-xs ring-1 ring-indigo-400/40"
+                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                }`}
+                title="तालिका दृश्य"
+              >
+                <List className="w-3.5 h-3.5" />
+                <span>तालिका</span>
+              </button>
+            </div>
+
+            <span className="text-[11px] text-slate-500 dark:text-slate-400 font-bold px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+              कुल: {filteredLaws.length}
+            </span>
+          </div>
         </div>
 
-        {/* Filters */}
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* Level Filter */}
-          <select
-            value={levelFilter}
-            onChange={(e) => setLevelFilter(e.target.value)}
-            className="bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 font-medium cursor-pointer"
-          >
-            <option value="all">सबै तह (All Levels)</option>
-            <option value="federal">संघीय कानुन (Federal)</option>
-            <option value="provincial">प्रदेश कानुन (Provincial)</option>
-          </select>
+        {/* Category Filter Bar - Full Line Width, Prominent Typography, Exact Requested Colors */}
+        <div className="pt-3 border-t border-slate-100 dark:border-slate-800">
+          <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-2.5 sm:gap-3 w-full">
+            <div className="flex items-center gap-1.5 shrink-0 self-start lg:self-center">
+              <span className="text-sm sm:text-base font-black text-slate-800 dark:text-slate-100 flex items-center gap-1.5 whitespace-nowrap">
+                <span>⚖️</span>
+                <span>श्रेणी:</span>
+              </span>
+            </div>
 
-          {/* Category Filter */}
-          <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className="bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 font-medium cursor-pointer"
-          >
-            <option value="all">सबै वर्ग (All Categories)</option>
-            <option value="act">ऐन (Acts)</option>
-            <option value="rule">नियमावली (Rules)</option>
-            <option value="procedure">कार्यविधि (Procedures)</option>
-            <option value="directive">निर्देशिका (Directives)</option>
-            <option value="guideline">मार्गदर्शन (Guidelines)</option>
-            <option value="circular">परिपत्र (Circulars)</option>
-          </select>
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 sm:gap-2.5 flex-1 w-full">
+              {/* All Category */}
+              {(() => {
+                const allTheme = LAW_THEMES.all;
+                const isAll = categoryFilter === "all";
+                return (
+                  <button
+                    type="button"
+                    onClick={() => setCategoryFilter("all")}
+                    className={`min-h-[46px] px-2.5 py-2 rounded-xl text-xs sm:text-sm md:text-[15px] font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95 w-full ${
+                      isAll ? allTheme.btnActive : allTheme.btnInactive
+                    }`}
+                  >
+                    <span className="w-2.5 h-2.5 rounded-full bg-slate-600 dark:bg-slate-300 shrink-0" />
+                    <span>सबै</span>
+                  </button>
+                );
+              })()}
 
-          <span className="text-[11px] text-slate-500 font-bold px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded-lg">
-            कुल: {filteredLaws.length}
-          </span>
+              {/* Specific Categories */}
+              {LAW_CATEGORIES.map((cat) => {
+                const theme = getLawTheme(cat.id);
+                const isActive = categoryFilter === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => setCategoryFilter(cat.id)}
+                    className={`min-h-[46px] px-2.5 py-2 rounded-xl text-xs sm:text-sm md:text-[15px] font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95 w-full ${
+                      isActive ? theme.btnActive : theme.btnInactive
+                    }`}
+                    title={`${cat.name_ne} — ${theme.colorName_ne}`}
+                  >
+                    <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${theme.dotColor}`} />
+                    <span>{cat.name_ne.split(" ")[0]}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Laws Table */}
-      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs">
-        {loading ? (
-          <div className="p-8 text-center text-xs text-slate-500">
-            कानुन दस्तावेजहरू लोड हुँदैछ...
-          </div>
-        ) : filteredLaws.length === 0 ? (
-          <div className="p-8 text-center space-y-2">
-            <p className="text-xs font-bold text-slate-600 dark:text-slate-400">
-              कुनै कानुनी दस्तावेज फेला परेन।
-            </p>
-            <button
-              type="button"
-              onClick={handleOpenAddModal}
-              className="px-3.5 py-1.5 bg-indigo-700 text-white rounded-xl text-xs font-bold cursor-pointer"
-            >
-              + नयाँ दस्तावेज थप्नुहोस्
-            </button>
-          </div>
-        ) : (
+      {/* Laws Display: Grid (6-Columns) or Table */}
+      {loading ? (
+        <div className="p-12 text-center text-xs text-slate-500 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800">
+          कानुन दस्तावेजहरू लोड हुँदैछ...
+        </div>
+      ) : filteredLaws.length === 0 ? (
+        <div className="p-12 text-center space-y-2 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800">
+          <p className="text-sm font-bold text-slate-600 dark:text-slate-400">
+            कुनै कानुनी दस्तावेज फेला परेन।
+          </p>
+          <button
+            type="button"
+            onClick={handleOpenAddModal}
+            className="px-4 py-2 bg-indigo-700 text-white rounded-xl text-xs font-bold cursor-pointer"
+          >
+            + नयाँ दस्तावेज थप्नुहोस्
+          </button>
+        </div>
+      ) : viewMode === "grid" ? (
+        /* 6-Column Card Grid on Desktop */
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 sm:gap-3.5">
+          {filteredLaws.map((doc) => {
+            const theme = getLawTheme(doc.category);
+            return (
+              <article
+                key={doc.id}
+                className={`rounded-2xl border p-3.5 shadow-xs hover:shadow-lg transition-all duration-200 flex flex-col justify-between group relative overflow-hidden ${theme.cardClasses}`}
+              >
+                {/* Top Spine / Accent Stripe */}
+                <div className={`h-1.5 w-full absolute top-0 left-0 ${theme.spineColor}`} />
+
+                <div>
+                  {/* Tags Bar */}
+                  <div className="flex items-center justify-between gap-1.5 pt-1 mb-2">
+                    <span className={`text-[11px] font-black px-2 py-0.5 rounded-md ${theme.badgeClasses}`}>
+                      {doc.category_name_ne}
+                    </span>
+                    <span className="text-[10px] font-mono opacity-75 font-semibold truncate">
+                      {doc.publication_date_bs}
+                    </span>
+                  </div>
+
+                  {/* Gov Level Badge */}
+                  <div className="mb-2">
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${theme.levelBadgeClasses}`}>
+                      {doc.gov_level === "federal" ? "🏛️ संघीय" : `🏔️ ${doc.province_name_ne || "प्रदेश"}`}
+                    </span>
+                  </div>
+
+                  {/* Title */}
+                  <h3 className={`text-xs sm:text-[13px] font-black leading-snug line-clamp-3 transition-colors ${theme.titleHoverClasses}`}>
+                    {doc.title_ne}
+                  </h3>
+                  {doc.title_en && (
+                    <p className="text-[10px] opacity-70 italic line-clamp-1 mt-0.5">
+                      {doc.title_en}
+                    </p>
+                  )}
+
+                  {/* Description preview */}
+                  <p className="text-[11px] opacity-85 leading-relaxed line-clamp-2 mt-2 mb-2">
+                    {doc.description_ne}
+                  </p>
+                </div>
+
+                {/* Authority & Actions */}
+                <div className="pt-2 mt-auto border-t border-black/10 dark:border-white/10 flex flex-col gap-1.5">
+                  <div className="flex items-center gap-1 text-[10px] opacity-75 truncate">
+                    <Building2 className="w-3 h-3 shrink-0 opacity-70" />
+                    <span className="truncate">{doc.issuing_authority}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-1 pt-1">
+                    <span className="text-[10px] font-mono font-medium opacity-70">
+                      {doc.file_size || "PDF"}
+                    </span>
+                    <div className="flex items-center gap-1">
+                      {doc.pdf_url && doc.pdf_url !== "#" && (
+                        <a
+                          href={doc.pdf_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-1.5 rounded-md bg-white/80 dark:bg-slate-800/80 hover:bg-slate-900 hover:text-white transition-colors cursor-pointer"
+                          title="PDF हेर्नुहोस्"
+                        >
+                          <Eye className="w-3 h-3" />
+                        </a>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => handleOpenEditModal(doc)}
+                        className="p-1.5 rounded-md bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-600 hover:text-white text-blue-700 dark:text-blue-300 transition-colors cursor-pointer"
+                        title="सम्पादन गर्नुहोस्"
+                      >
+                        <Edit3 className="w-3 h-3" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setDocToDelete(doc);
+                          setDeleteModalOpen(true);
+                        }}
+                        className="p-1.5 rounded-md bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-600 hover:text-white text-rose-700 dark:text-rose-300 transition-colors cursor-pointer"
+                        title="हटाउनुहोस्"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      ) : (
+        /* Table View */
+        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs" aria-label="कानुनी दस्तावेज तालिका">
               <thead className="bg-slate-100 dark:bg-slate-800 font-bold text-slate-700 dark:text-slate-300">
@@ -455,8 +625,8 @@ export default function AdminLawManager() {
               </tbody>
             </table>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* ========================================================================= */}
       {/* ADD / EDIT LAW MODAL */}
@@ -564,32 +734,76 @@ export default function AdminLawManager() {
               </div>
 
               {/* 2. CATEGORY SELECTION (Act, Rule, Procedure, Directive, Guideline, Circular) */}
-              <div className="space-y-1.5">
-                <label className="block font-black text-slate-800 dark:text-slate-200">
-                  २. कानुनको प्रकार / वर्ग छनौट गर्नुहोस् (Select Law Category) *
-                </label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {LAW_CATEGORIES.map((cat) => (
-                    <button
-                      key={cat.id}
-                      type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, category: cat.id }))}
-                      className={`p-2.5 rounded-xl border text-left transition cursor-pointer ${
-                        formData.category === cat.id
-                          ? "bg-indigo-50 dark:bg-indigo-950/60 border-indigo-600 text-indigo-900 dark:text-indigo-200 ring-2 ring-indigo-500/40 font-bold"
-                          : "bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100"
-                      }`}
-                    >
-                      <div className="font-bold flex items-center justify-between">
-                        <span>{cat.name_ne}</span>
-                        {formData.category === cat.id && <Check className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />}
-                      </div>
-                      <div className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
-                        {cat.desc}
-                      </div>
-                    </button>
-                  ))}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block font-black text-slate-800 dark:text-slate-200">
+                    २. कानुनको प्रकार / वर्ग छनौट गर्नुहोस् (Select Law Category) *
+                  </label>
+                  <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                    रंग अनुसार वर्गीकरण
+                  </span>
                 </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                  {LAW_CATEGORIES.map((cat) => {
+                    const theme = getLawTheme(cat.id);
+                    const isSelected = formData.category === cat.id;
+                    return (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, category: cat.id }))}
+                        className={`p-3 rounded-xl border text-left transition-all cursor-pointer relative overflow-hidden ${
+                          isSelected
+                            ? `${theme.btnActive} ring-2 ring-offset-1`
+                            : `${theme.btnInactive} hover:scale-[1.01]`
+                        }`}
+                      >
+                        <div className="font-black text-xs sm:text-sm flex items-center justify-between">
+                          <span className="flex items-center gap-1.5">
+                            <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${isSelected ? "bg-white" : theme.dotColor}`} />
+                            {cat.name_ne.split(" ")[0]}
+                          </span>
+                          {isSelected && <Check className="w-4 h-4 text-white shrink-0" />}
+                        </div>
+                        <div className={`text-[10px] font-bold mt-1 ${isSelected ? "text-white/90" : "opacity-80"}`}>
+                          {theme.colorName_ne}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Real-time Category Card Preview */}
+                {(() => {
+                  const previewTheme = getLawTheme(formData.category);
+                  const selectedCategoryObj = LAW_CATEGORIES.find(c => c.id === formData.category);
+                  return (
+                    <div className="mt-2 p-3 rounded-2xl border bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-700">
+                      <span className="text-[11px] font-black text-slate-600 dark:text-slate-400 block mb-2">
+                        🎨 कार्ड पूर्वावलोकन (६ वटा कोठा मध्ये १ कोठा यस्तो रंगमा देखिनेछ):
+                      </span>
+                      <div className="max-w-[260px]">
+                        <div className={`rounded-xl border p-3 shadow-xs relative overflow-hidden ${previewTheme.cardClasses}`}>
+                          <div className={`h-1.5 w-full absolute top-0 left-0 ${previewTheme.spineColor}`} />
+                          <div className="flex items-center justify-between gap-1 pt-1 mb-1.5">
+                            <span className={`text-[10px] font-black px-1.5 py-0.5 rounded ${previewTheme.badgeClasses}`}>
+                              {selectedCategoryObj?.name_ne.split(" ")[0] || "ऐन"}
+                            </span>
+                            <span className="text-[9px] font-mono opacity-75 font-semibold">
+                              {formData.publication_date_bs || "२०८०/०१/०१"}
+                            </span>
+                          </div>
+                          <h4 className="text-xs font-black line-clamp-2 leading-snug">
+                            {formData.title_ne || "कानुनको शीर्षक यहाँ देखिनेछ..."}
+                          </h4>
+                          <div className="mt-2 pt-1 border-t border-black/10 dark:border-white/10 text-[9px] font-bold opacity-80">
+                            रंग: {previewTheme.colorName_ne}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
 
               {/* 3. DOCUMENT TITLES */}

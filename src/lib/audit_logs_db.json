@@ -1,5 +1,35 @@
 [
   {
+    "id": "log_1789147385549_p63q",
+    "action": "RESET_FOOTER",
+    "performed_by_id": "admin-unknown",
+    "performed_by_name": "Super Admin",
+    "target_user_id": "footer-global",
+    "target_user_name": "Website Footer",
+    "details": "वेबसाइट फुटर सामग्रीलाई पूर्वनिर्धारित अवस्थामा रिसेट गरियो।",
+    "timestamp": "2026-09-11T17:23:05.549Z"
+  },
+  {
+    "id": "log_1789147377840_rac0",
+    "action": "UPDATE_FOOTER",
+    "performed_by_id": "admin-unknown",
+    "performed_by_name": "Super Admin",
+    "target_user_id": "footer-global",
+    "target_user_name": "Website Footer",
+    "details": "वेबसाइट फुटर (तलको भाग) सामग्री परिमार्जन गरियो।",
+    "timestamp": "2026-09-11T17:22:57.840Z"
+  },
+  {
+    "id": "log_1789147374122_3xz9",
+    "action": "RESET_FOOTER",
+    "performed_by_id": "admin-unknown",
+    "performed_by_name": "Super Admin",
+    "target_user_id": "footer-global",
+    "target_user_name": "Website Footer",
+    "details": "वेबसाइट फुटर सामग्रीलाई पूर्वनिर्धारित अवस्थामा रिसेट गरियो।",
+    "timestamp": "2026-09-11T17:22:54.122Z"
+  },
+  {
     "id": "log_1788779038237_ii9c",
     "action": "LAW_DOCUMENT_DELETED",
     "performed_by_id": "admin-master-001",

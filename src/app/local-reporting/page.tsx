@@ -24,7 +24,8 @@ import {
   Calendar,
   Users,
   Eye,
-  RotateCcw
+  RotateCcw,
+  FileEdit
 } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/lib/authContext";
@@ -87,22 +88,29 @@ export default function LocalReportingPage() {
 
       <main id="main-content" tabIndex={-1} className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 focus:outline-hidden">
         
-        {/* DUAL REPORT NAVIGATION SWITCHER: १. पालिका प्रतिवेदन vs २. समग्र प्रतिवेदन */}
-        <div className="flex items-center justify-center p-1.5 bg-slate-200/90 dark:bg-slate-800 rounded-2xl max-w-2xl mx-auto mb-8 shadow-xs border border-slate-300 dark:border-slate-700">
+        {/* 3-WAY REPORT NAVIGATION SWITCHER: १. प्रतिवेदन प्रविष्टि | २. स्थानीयतहगत प्रतिवेदन | ३. स्थानीय तहको एकीकृत प्रतिवेदन */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center p-1.5 gap-1.5 sm:gap-1 bg-slate-200/90 rounded-2xl max-w-3xl mx-auto mb-8 shadow-xs border border-slate-300">
+          <Link
+            href="/report-entry"
+            className="flex-1 py-3 px-3.5 sm:px-4 min-h-[46px] rounded-xl text-xs sm:text-sm font-black flex items-center justify-center gap-2 text-slate-700 hover:text-indigo-900 hover:bg-white/60 transition-all"
+          >
+            <FileEdit className="w-4 h-4 text-indigo-600 shrink-0" />
+            <span>{lang === 'ne' ? '१. प्रतिवेदन प्रविष्टि' : '1. Report Entry'}</span>
+          </Link>
           <Link
             href="/local-reporting"
-            className="flex-1 py-2.5 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-black flex items-center justify-center gap-2 bg-blue-900 text-white shadow-sm transition-all"
+            className="flex-1 py-3 px-3.5 sm:px-4 min-h-[46px] rounded-xl text-xs sm:text-sm font-black flex items-center justify-center gap-2 bg-blue-900 text-white shadow-sm transition-all"
             aria-current="page"
           >
             <Building2 className="w-4 h-4 text-amber-300 shrink-0" />
-            <span>१. पालिका प्रतिवेदन (स्थानीय तहगत)</span>
+            <span>{lang === 'ne' ? '२. स्थानीयतहगत प्रतिवेदन' : '2. Local Body Report'}</span>
           </Link>
           <Link
             href="/reports"
-            className="flex-1 py-2.5 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-black flex items-center justify-center gap-2 text-slate-700 hover:text-blue-900 hover:bg-white/60 transition-all"
+            className="flex-1 py-3 px-3.5 sm:px-4 min-h-[46px] rounded-xl text-xs sm:text-sm font-black flex items-center justify-center gap-2 text-slate-700 hover:text-emerald-900 hover:bg-white/60 transition-all"
           >
             <BarChart3 className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>२. समग्र प्रतिवेदन (सबै १३७ पालिका कम्पाइल)</span>
+            <span>{lang === 'ne' ? '३. स्थानीय तहको एकीकृत प्रतिवेदन' : '3. Integrated Report'}</span>
           </Link>
         </div>
 
@@ -139,7 +147,7 @@ export default function LocalReportingPage() {
                 स्थानीय सरकार प्रतिवेदन पोर्टल
               </span>
               <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-                अपाङ्गता सम्बन्धी कोशी प्रदेश स्थानीय सरकारको प्रतिवेदन
+                अपाङ्गता सम्बन्धी स्थानीयतहगत प्रतिवेदन (कोशी प्रदेश)
               </h1>
               <p className="text-sm sm:text-base text-slate-600 mt-2 max-w-3xl">
                 कोशी प्रदेशका <strong>१४ जिल्ला</strong> का <strong>१३७ स्थानीय तह</strong> बाट प्रत्येक पालिकाको छुट्टाछुट्टै प्रतिवेदन वा कुनै सेलेक्ट गरिएको पालिकाको प्रतिवेदन मात्र हेर्ने र प्रविष्टि गर्ने प्रणाली।
@@ -175,11 +183,11 @@ export default function LocalReportingPage() {
             </div>
 
             {/* View Mode Toggle */}
-            <div className="flex items-center gap-1.5 bg-blue-900/60 p-1 rounded-xl border border-blue-700 shrink-0">
+            <div className="flex items-center gap-1.5 bg-blue-900/60 p-1 rounded-xl border border-blue-700 shrink-0 w-full sm:w-auto">
               <button
                 type="button"
                 onClick={() => setViewMode("all")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                className={`flex-1 sm:flex-initial px-3.5 py-2 min-h-[40px] rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
                   viewMode === "all" ? "bg-amber-400 text-slate-950 shadow-xs" : "text-blue-200 hover:text-white"
                 }`}
               >
@@ -193,7 +201,7 @@ export default function LocalReportingPage() {
                   }
                   setViewMode("single");
                 }}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                className={`flex-1 sm:flex-initial px-3.5 py-2 min-h-[40px] rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
                   viewMode === "single" ? "bg-amber-400 text-slate-950 shadow-xs" : "text-blue-200 hover:text-white"
                 }`}
               >
@@ -412,7 +420,7 @@ export default function LocalReportingPage() {
             <span className="text-xs font-bold text-slate-500 block mb-2">
               जिल्ला द्रुत छनौट:
             </span>
-            <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="जिल्लाहरूको सूची">
+            <div className="flex flex-wrap gap-2" role="tablist" aria-label="जिल्लाहरूको सूची">
               {KOSHI_DISTRICTS.map((d, i) => (
                 <button
                   key={d.id}
@@ -422,7 +430,7 @@ export default function LocalReportingPage() {
                     setSelectedDistrictId(d.id);
                     setSearchQuery("");
                   }}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  className={`px-3.5 py-2.5 min-h-[42px] flex items-center rounded-xl text-xs font-bold transition-all cursor-pointer ${
                     selectedDistrictId === d.id
                       ? "bg-blue-900 text-white shadow-xs"
                       : "bg-slate-100 hover:bg-slate-200 text-slate-700"

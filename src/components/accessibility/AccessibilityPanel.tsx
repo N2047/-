@@ -128,7 +128,7 @@ export default function AccessibilityPanel() {
             ref={closeButtonRef}
             type="button"
             onClick={() => setIsPanelOpen(false)}
-            className="p-2 text-slate-300 hover:text-white hover:bg-blue-900 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer focus:ring-2 focus:ring-amber-400"
+            className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-300 hover:text-white hover:bg-blue-900 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer focus:ring-2 focus:ring-amber-400"
             aria-label="पहुँचयुक्तता प्यानल बन्द गर्नुहोस् (Esc)"
             title="बन्द गर्नुहोस् (Esc)"
           >
@@ -155,7 +155,7 @@ export default function AccessibilityPanel() {
               <button
                 type="button"
                 onClick={toggleAudioPin}
-                className={`px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 transition-all cursor-pointer shadow-md shrink-0 ${
+                className={`px-4 py-2.5 min-h-[44px] rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer shadow-md shrink-0 ${
                   audioPin
                     ? "bg-emerald-600 text-white hover:bg-emerald-500"
                     : "bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300"
@@ -189,7 +189,7 @@ export default function AccessibilityPanel() {
                         key={spd}
                         type="button"
                         onClick={() => setSpeechSpeed(spd)}
-                        className={`py-1.5 px-2 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
+                        className={`py-2 px-2 min-h-[42px] rounded-lg text-xs font-semibold border transition-all cursor-pointer flex items-center justify-center ${
                           speechSpeed === spd
                             ? "bg-amber-500 text-slate-950 border-amber-600 font-bold shadow-xs"
                             : "bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300"
@@ -213,7 +213,7 @@ export default function AccessibilityPanel() {
                         key={vol}
                         type="button"
                         onClick={() => setSpeechVolume(vol)}
-                        className={`py-1.5 px-2 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
+                        className={`py-2 px-2 min-h-[42px] rounded-lg text-xs font-semibold border transition-all cursor-pointer flex items-center justify-center ${
                           speechVolume === vol
                             ? "bg-amber-500 text-slate-950 border-amber-600 font-bold shadow-xs"
                             : "bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300"
@@ -293,7 +293,7 @@ export default function AccessibilityPanel() {
                 <button
                   type="button"
                   onClick={toggleDarkMode}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  className={`px-3.5 py-2.5 min-h-[44px] rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
                     darkMode
                       ? "bg-amber-400 text-slate-950 shadow-xs"
                       : "bg-slate-300 dark:bg-slate-700 text-slate-800 dark:text-slate-200"
@@ -319,7 +319,7 @@ export default function AccessibilityPanel() {
                       key={m.mode}
                       type="button"
                       onClick={() => setColorMode(m.mode)}
-                      className={`py-1 px-1.5 rounded-md text-[11px] font-bold border transition-all cursor-pointer ${
+                      className={`py-2 px-1.5 min-h-[42px] rounded-md text-[11px] font-bold border transition-all cursor-pointer flex items-center justify-center ${
                         colorMode === m.mode
                           ? "bg-purple-700 text-white border-purple-900 shadow-xs"
                           : "bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300"
@@ -416,7 +416,7 @@ export default function AccessibilityPanel() {
                   key={item.m}
                   type="button"
                   onClick={() => setMotion(item.m)}
-                  className={`py-2 px-2.5 rounded-xl border text-xs font-bold text-center transition-all cursor-pointer ${
+                  className={`py-2.5 px-2.5 min-h-[44px] rounded-xl border text-xs font-bold text-center transition-all cursor-pointer flex items-center justify-center ${
                     motion === item.m
                       ? "bg-cyan-700 text-white border-cyan-900 shadow-xs"
                       : "bg-slate-50 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300"
@@ -471,11 +471,11 @@ export default function AccessibilityPanel() {
         </div>
 
         {/* Modal Footer with Reset Button */}
-        <div className="p-3.5 bg-slate-100 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2 shrink-0">
+        <div className="p-3.5 bg-slate-100 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 shrink-0">
           <button
             type="button"
             onClick={resetSettings}
-            className="px-3.5 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+            className="px-4 py-2.5 min-h-[44px] rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>पूर्वनिर्धारित अवस्थामा फर्काउनुहोस् (Reset)</span>
@@ -484,7 +484,7 @@ export default function AccessibilityPanel() {
           <button
             type="button"
             onClick={() => setIsPanelOpen(false)}
-            className="px-5 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 dark:bg-amber-500 dark:hover:bg-amber-400 text-white dark:text-slate-950 text-xs font-bold shadow-md transition-all cursor-pointer"
+            className="px-6 py-2.5 min-h-[44px] rounded-xl bg-blue-900 hover:bg-blue-800 dark:bg-amber-500 dark:hover:bg-amber-400 text-white dark:text-slate-950 text-xs font-bold shadow-md transition-all cursor-pointer flex items-center justify-center"
           >
             सम्पन्न (Done)
           </button>

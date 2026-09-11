@@ -64,6 +64,9 @@ html[data-color-mode="soft"] {
 html {
   font-size: var(--font-scale);
   scroll-behavior: smooth;
+  overflow-x: hidden;
+  max-width: 100vw;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -72,6 +75,58 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Noto Sans Devanagari";
   line-height: 1.65;
   transition: background-color 0.2s ease, color 0.2s ease;
+  overflow-x: hidden;
+  max-width: 100vw;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent unwanted mobile auto-zooming in iOS Safari & Chrome on inputs < 16px */
+@media screen and (max-width: 768px) {
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Touch-Friendly Target Helpers (WCAG 2.5.5 / 2.5.8 Compliant) */
+.touch-target {
+  min-height: 48px;
+  min-width: 48px;
+}
+
+.touch-target-sm {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Safe Area Inset Utilities for Modern Devices with Notches/Home Bars */
+.pb-safe {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom, 1rem));
+}
+
+.pt-safe {
+  padding-top: max(1rem, env(safe-area-inset-top, 1rem));
+}
+
+/* Smooth Touch Table Momentum Scrolling */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.table-responsive::-webkit-scrollbar {
+  height: 6px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 9999px;
+}
+
+html.dark .table-responsive::-webkit-scrollbar-thumb {
+  background-color: #475569;
 }
 
 /* High Visibility Focus Ring */

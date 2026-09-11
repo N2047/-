@@ -34,11 +34,15 @@ import {
   EyeOff
 } from "lucide-react";
 import GovernmentGrievanceForm from "@/components/grievance/GovernmentGrievanceForm";
+import UnifiedCommunicationForm from "@/components/contact/UnifiedCommunicationForm";
 
 export default function ContactPage() {
   const { lang, setLang } = useLanguage();
   const t = translations[lang];
   const { announceLive, speakText, audioPin } = useAccessibility();
+
+  // Active Feature in Section 3: "broadcast" (एकीकृत संचार) vs "directory" (पालिकागत निर्देशिका)
+  const [activeFeature, setActiveFeature] = useState<"broadcast" | "directory">("broadcast");
 
   // Province and Local Contacts State
   const [provinceContacts, setProvinceContacts] = useState<ProvinceContact[]>([]);
@@ -404,40 +408,80 @@ export default function ContactPage() {
                 </p>
               </div>
 
-              {/* Quick Search Input */}
-              <div className="w-full sm:w-80 relative">
-                <label htmlFor="contact-search" className="sr-only">
-                  {lang === "ne" ? "सम्पर्क खोज्नुहोस्" : "Search Contacts"}
-                </label>
-                <div className="relative">
-                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" aria-hidden="true" />
-                  <input
-                    id="contact-search"
-                    type="search"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder={lang === "ne" ? "जिल्ला, पालिका, नाम वा नम्बर खोज्नुहोस्..." : "Search district, municipality, name or phone..."}
-                    className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-medium text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
-                  />
+              {/* Quick Search Input (Active only in directory mode) */}
+              {activeFeature === "directory" && (
+                <div className="w-full sm:w-80 relative">
+                  <label htmlFor="contact-search" className="sr-only">
+                    {lang === "ne" ? "सम्पर्क खोज्नुहोस्" : "Search Contacts"}
+                  </label>
+                  <div className="relative">
+                    <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" aria-hidden="true" />
+                    <input
+                      id="contact-search"
+                      type="search"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder={lang === "ne" ? "जिल्ला, पालिका, नाम वा नम्बर खोज्नुहोस्..." : "Search district, municipality, name or phone..."}
+                      className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-medium text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
-            {/* SEARCH RESULTS DROPDOWN / LIST (When user types search query) */}
-            {searchQuery.trim() && (
-              <div className="mb-6 p-4 rounded-2xl bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold text-blue-900 dark:text-blue-300">
-                    {lang === "ne" ? `खोज नतिजा: ${searchResults.length} वटा स्थानीय तह फेला पर्यो` : `Search Results: ${searchResults.length} local governments found`}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setSearchQuery("")}
-                    className="text-xs text-slate-500 hover:text-slate-800 dark:hover:text-white font-semibold cursor-pointer"
-                  >
-                    {lang === "ne" ? "बन्द गर्नुहोस्" : "Close"}
-                  </button>
-                </div>
+            {/* Feature Switcher Tabs: १. एकीकृत संचार vs २. पालिकागत सम्पर्क निर्देशिका */}
+            <div className="flex flex-wrap border-b-2 border-slate-200 dark:border-slate-800 mb-6 gap-2" role="tablist" aria-label="स्थानीय तह सम्पर्क सुविधाहरू">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeFeature === "broadcast"}
+                onClick={() => setActiveFeature("broadcast")}
+                className={`py-3.5 px-6 font-black text-xs sm:text-sm rounded-t-2xl transition-all flex items-center gap-2 border-t-2 border-x-2 -mb-0.5 cursor-pointer ${
+                  activeFeature === "broadcast"
+                    ? "bg-white dark:bg-slate-900 text-blue-900 dark:text-blue-400 border-blue-900 dark:border-blue-500 border-b-white dark:border-b-slate-900 shadow-xs"
+                    : "bg-slate-100 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 border-transparent hover:text-slate-900 dark:hover:text-white"
+                }`}
+              >
+                <Send className="w-4 h-4 text-blue-600" />
+                <span>१. एकीकृत संचार (मन्त्रालय ➔ १३७ वटै स्थानीय तह)</span>
+              </button>
+
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeFeature === "directory"}
+                onClick={() => setActiveFeature("directory")}
+                className={`py-3.5 px-6 font-black text-xs sm:text-sm rounded-t-2xl transition-all flex items-center gap-2 border-t-2 border-x-2 -mb-0.5 cursor-pointer ${
+                  activeFeature === "directory"
+                    ? "bg-white dark:bg-slate-900 text-blue-900 dark:text-blue-400 border-blue-900 dark:border-blue-500 border-b-white dark:border-b-slate-900 shadow-xs"
+                    : "bg-slate-100 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 border-transparent hover:text-slate-900 dark:hover:text-white"
+                }`}
+              >
+                <Building2 className="w-4 h-4 text-emerald-600" />
+                <span>२. पालिकागत सम्पर्क निर्देशिका (जिल्ला र पालिका छनौट)</span>
+              </button>
+            </div>
+
+            {/* TAB CONTENT 1: UNIFIED COMMUNICATION */}
+            {activeFeature === "broadcast" ? (
+              <UnifiedCommunicationForm />
+            ) : (
+              <div>
+                {/* SEARCH RESULTS DROPDOWN / LIST (When user types search query) */}
+                {searchQuery.trim() && (
+                  <div className="mb-6 p-4 rounded-2xl bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-bold text-blue-900 dark:text-blue-300">
+                        {lang === "ne" ? `खोज नतिजा: ${searchResults.length} वटा स्थानीय तह फेला पर्यो` : `Search Results: ${searchResults.length} local governments found`}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setSearchQuery("")}
+                        className="text-xs text-slate-500 hover:text-slate-800 dark:hover:text-white font-semibold cursor-pointer"
+                      >
+                        {lang === "ne" ? "बन्द गर्नुहोस्" : "Close"}
+                      </button>
+                    </div>
 
                 {searchResults.length === 0 ? (
                   <p className="text-xs text-slate-500 dark:text-slate-400 py-2">
@@ -778,9 +822,11 @@ export default function ContactPage() {
                 </p>
               </div>
             )}
-
           </div>
-        </section>
+        )}
+
+      </div>
+    </section>
 
         {/* ============================================================= */}
         {/* GOVERNMENT GRIEVANCE & COMPLAINT SUBMISSION SYSTEM */}

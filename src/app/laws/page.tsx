@@ -12,6 +12,7 @@ import {
   LawCategory, 
   GovLevel 
 } from "@/lib/lawsData";
+import { LAW_THEMES, getLawTheme } from "@/lib/lawTheme";
 import { translations } from "@/lib/translations";
 import { useLanguage } from "@/lib/languageContext";
 import { 
@@ -113,7 +114,7 @@ export default function LawsPage() {
       {/* MODAL FOR LAW VIEW & PDF PREVIEW */}
       <LawDocumentModal document={selectedDoc} onClose={() => setSelectedDoc(null)} />
 
-      <main id="main-content" tabIndex={-1} className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 focus:outline-hidden">
+      <main id="main-content" tabIndex={-1} className="flex-1 max-w-7xl 2xl:max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 focus:outline-hidden">
         
         {/* Page Hero Header */}
         <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-xs mb-8">
@@ -264,42 +265,70 @@ export default function LawsPage() {
             )}
           </div>
 
-          {/* Quick Category Buttons Bar */}
-          <div className="pt-4 mt-4 border-t border-slate-200 dark:border-slate-800 flex flex-wrap items-center gap-1.5">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 mr-2">
-              {lang === 'en' ? 'Quick Category:' : 'द्रुत श्रेणी:'}
-            </span>
-            <button
-              type="button"
-              onClick={() => setSelectedCategory("all")}
-              className={`px-3 py-1 rounded-full text-xs font-bold transition-colors cursor-pointer ${
-                selectedCategory === "all" ? "bg-blue-900 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200"
-              }`}
-            >
-              {t.common.all}
-            </button>
-            {LAW_CATEGORIES.map((cat) => (
-              <button
-                key={cat.id}
-                type="button"
-                onClick={() => setSelectedCategory(cat.id)}
-                className={`px-3 py-1 rounded-full text-xs font-bold transition-colors cursor-pointer ${
-                  selectedCategory === cat.id ? "bg-blue-900 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200"
-                }`}
-              >
-                {getLocalizedCategoryName(cat.id)}
-              </button>
-            ))}
+          {/* Category Filter Bar - Full Line Width, Prominent Typography, Exact Requested Colors */}
+          <div className="pt-4 mt-4 border-t border-slate-200 dark:border-slate-800">
+            <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-2.5 sm:gap-3 w-full">
+              {/* Category Prefix Label matching user's screenshot */}
+              <div className="flex items-center gap-1.5 shrink-0 self-start lg:self-center">
+                <span className="text-sm sm:text-base font-black text-slate-800 dark:text-slate-100 flex items-center gap-1.5 whitespace-nowrap">
+                  <span>⚖️</span>
+                  <span>{lang === 'en' ? 'Category:' : 'श्रेणी:'}</span>
+                </span>
+              </div>
+
+              {/* 7-column responsive grid spanning the entire remaining width of the line */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 sm:gap-2.5 flex-1 w-full">
+                {/* 1. All Button */}
+                {(() => {
+                  const allTheme = LAW_THEMES.all;
+                  const isAllActive = selectedCategory === "all";
+                  return (
+                    <button
+                      type="button"
+                      onClick={() => setSelectedCategory("all")}
+                      className={`min-h-[46px] px-2.5 py-2 rounded-xl text-xs sm:text-sm md:text-[15px] font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95 w-full ${
+                        isAllActive ? allTheme.btnActive : allTheme.btnInactive
+                      }`}
+                    >
+                      <span className="w-2.5 h-2.5 rounded-full bg-slate-600 dark:bg-slate-300 shrink-0" aria-hidden="true" />
+                      <span>{t.common.all}</span>
+                    </button>
+                  );
+                })()}
+
+                {/* 2-7 Category Buttons with exact assigned colors */}
+                {LAW_CATEGORIES.map((cat) => {
+                  const theme = getLawTheme(cat.id);
+                  const isActive = selectedCategory === cat.id;
+                  return (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => setSelectedCategory(cat.id)}
+                      className={`min-h-[46px] px-2.5 py-2 rounded-xl text-xs sm:text-sm md:text-[15px] font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95 w-full ${
+                        isActive ? theme.btnActive : theme.btnInactive
+                      }`}
+                      title={`${getLocalizedCategoryName(cat.id)} — ${theme.colorName_ne}`}
+                    >
+                      <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${theme.dotColor}`} aria-hidden="true" />
+                      <span>{getLocalizedCategoryName(cat.id)}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </section>
 
-        {/* Legal Documents Listing Grid */}
+        {/* Legal Documents Listing Grid (6 Columns on Desktop) */}
         <section aria-labelledby="documents-list-heading">
           <div className="flex items-center justify-between mb-4">
-            <h2 id="documents-list-heading" className="text-lg font-bold text-slate-900 dark:text-white">
-              {activeTab === "federal" 
-                ? (lang === "ne" ? "संघीय सरकारका कानुनी दस्तावेजहरू" : "Federal Government Legal Documents")
-                : (lang === "ne" ? "प्रदेश सरकारका कानुनी दस्तावेजहरू" : "Provincial Government Legal Documents")} ({filteredDocs.length})
+            <h2 id="documents-list-heading" className="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <span>
+                {activeTab === "federal" 
+                  ? (lang === "ne" ? "संघीय सरकारका कानुनी दस्तावेजहरू" : "Federal Government Legal Documents")
+                  : (lang === "ne" ? "प्रदेश सरकारका कानुनी दस्तावेजहरू" : "Provincial Government Legal Documents")} ({filteredDocs.length})
+              </span>
             </h2>
             <span className="text-xs text-slate-500 dark:text-slate-400">
               {lang === 'en' ? 'Click card to preview or download' : 'विवरण तथा PDF हेर्न कार्डमा क्लिक गर्नुहोस्'}
@@ -315,83 +344,88 @@ export default function LawsPage() {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {filteredDocs.map((doc) => (
-                <article
-                  key={doc.id}
-                  className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-xs hover:shadow-md hover:border-blue-400 dark:hover:border-blue-600 transition-all flex flex-col justify-between group"
-                >
-                  <div>
-                    {/* Tags Bar */}
-                    <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/60 text-blue-900 dark:text-blue-300">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 sm:gap-3.5">
+              {filteredDocs.map((doc) => {
+                const theme = getLawTheme(doc.category);
+                return (
+                  <article
+                    key={doc.id}
+                    onClick={() => setSelectedDoc(doc)}
+                    className={`rounded-2xl border p-3.5 shadow-xs hover:shadow-lg transition-all duration-200 flex flex-col justify-between group relative overflow-hidden cursor-pointer ${theme.cardClasses}`}
+                  >
+                    {/* Top Spine / Accent Stripe */}
+                    <div className={`h-1.5 w-full absolute top-0 left-0 ${theme.spineColor}`} />
+
+                    <div>
+                      {/* Tags Bar */}
+                      <div className="flex items-center justify-between gap-1.5 pt-1 mb-2">
+                        <span className={`text-[11px] font-black px-2 py-0.5 rounded-md ${theme.badgeClasses}`}>
                           {getLocalizedCategoryName(doc.category)}
                         </span>
-                        <span className={`text-[11px] font-semibold px-2 py-0.5 rounded ${
-                          doc.gov_level === "federal" 
-                            ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300" 
-                            : "bg-purple-50 dark:bg-purple-950/40 text-purple-800 dark:text-purple-300"
-                        }`}>
-                          {doc.gov_level === "federal" 
-                            ? (lang === "ne" ? "संघीय सरकार" : "Federal Government") 
-                            : getLocalizedProvinceName(doc.province_id)}
+                        <span className="text-[10px] font-mono opacity-75 font-semibold truncate">
+                          {doc.publication_date_bs}
                         </span>
                       </div>
-                      <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                        {lang === "ne" ? `वि.सं. ${doc.publication_date_bs}` : `B.S. ${doc.publication_date_bs}`}
-                      </span>
+
+                      {/* Gov Level Badge */}
+                      <div className="mb-2">
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${theme.levelBadgeClasses}`}>
+                          {doc.gov_level === "federal" 
+                            ? (lang === "ne" ? "🏛️ संघीय सरकार" : "🏛️ Federal") 
+                            : `🏔️ ${getLocalizedProvinceName(doc.province_id)}`}
+                        </span>
+                      </div>
+
+                      {/* Title */}
+                      <h3 className={`text-xs sm:text-[13px] font-black leading-snug line-clamp-3 transition-colors ${theme.titleHoverClasses}`}>
+                        {lang === "ne" ? doc.title_ne : (doc.title_en || doc.title_ne)}
+                      </h3>
+                      {doc.title_en && (
+                        <p className="text-[10px] opacity-70 italic line-clamp-1 mt-0.5">
+                          {doc.title_en}
+                        </p>
+                      )}
+
+                      {/* Description preview */}
+                      <p className="text-[11px] opacity-85 leading-relaxed line-clamp-2 mt-2 mb-2">
+                        {doc.description_ne}
+                      </p>
                     </div>
 
-                    {/* Title */}
-                    <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white group-hover:text-blue-900 dark:group-hover:text-blue-400 transition-colors leading-snug">
-                      {lang === "ne" ? doc.title_ne : (doc.title_en || doc.title_ne)}
-                    </h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 mb-3 font-medium">
-                      {lang === "ne" ? doc.title_en : doc.title_ne}
-                    </p>
+                    {/* Authority & Actions */}
+                    <div className="pt-2 mt-auto border-t border-black/10 dark:border-white/10 flex flex-col gap-1.5">
+                      <div className="flex items-center gap-1 text-[10px] opacity-75 truncate">
+                        <Building2 className="w-3 h-3 shrink-0 opacity-70" />
+                        <span className="truncate">{doc.issuing_authority}</span>
+                      </div>
 
-                    {/* Description preview */}
-                    <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed line-clamp-3 mb-4">
-                      {doc.description_ne}
-                    </p>
-
-                    {/* Authority */}
-                    <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 mb-4 bg-slate-50 dark:bg-slate-800/60 p-2 rounded-lg">
-                      <Building2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                      <span className="truncate">{doc.issuing_authority}</span>
+                      <div className="flex items-center justify-between gap-1 pt-1">
+                        <span className="text-[10px] font-mono font-medium opacity-70">
+                          {doc.file_size || "PDF"}
+                        </span>
+                        <div className="flex items-center gap-1">
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-white/80 dark:bg-slate-800/80 text-[11px] font-bold shadow-2xs group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                            <Eye className="w-3 h-3" />
+                            <span>{lang === "ne" ? "हेर्नुहोस्" : "View"}</span>
+                          </span>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedDoc(doc);
+                            }}
+                            className="p-1 rounded-md bg-white/80 dark:bg-slate-800/80 hover:bg-slate-900 hover:text-white transition-colors cursor-pointer"
+                            title={t.laws.downloadPdf}
+                            aria-label="Download PDF"
+                          >
+                            <Download className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-
-                  {/* Actions Footer */}
-                  <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
-                    <span className="text-[11px] font-medium text-slate-400">
-                      PDF ({doc.file_size})
-                    </span>
-
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setSelectedDoc(doc)}
-                        className="px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300 hover:bg-blue-900 hover:text-white text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                        <span>{t.laws.previewPdf}</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => setSelectedDoc(doc)}
-                        className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
-                        title={t.laws.downloadPdf}
-                        aria-label={`${doc.title_ne} download`}
-                      >
-                        <Download className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                </article>
-              ))}
+                  </article>
+                );
+              })}
             </div>
           )}
         </section>

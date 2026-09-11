@@ -49,7 +49,8 @@ import {
   Download,
   LayoutGrid,
   SlidersHorizontal,
-  Sparkles
+  Sparkles,
+  FileEdit
 } from "lucide-react";
 import { 
   CardColorsPieChart, 
@@ -495,22 +496,29 @@ export default function ReportsPage() {
 
       <main id="main-content" tabIndex={-1} className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 focus:outline-hidden">
         
-        {/* DUAL REPORT NAVIGATION SWITCHER: १. पालिका प्रतिवेदन vs २. समग्र प्रतिवेदन */}
-        <div className="flex items-center justify-center p-1.5 bg-slate-200/90 dark:bg-slate-800 rounded-2xl max-w-2xl mx-auto mb-8 shadow-xs border border-slate-300 dark:border-slate-700">
+        {/* 3-WAY REPORT NAVIGATION SWITCHER: १. प्रतिवेदन प्रविष्टि | २. स्थानीयतहगत प्रतिवेदन | ३. स्थानीय तहको एकीकृत प्रतिवेदन */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center p-1.5 gap-1.5 sm:gap-1 bg-slate-200/90 dark:bg-slate-800 rounded-2xl max-w-3xl mx-auto mb-8 shadow-xs border border-slate-300 dark:border-slate-700">
+          <Link
+            href="/report-entry"
+            className="flex-1 py-3 px-3.5 sm:px-4 min-h-[46px] rounded-xl text-xs sm:text-sm font-black flex items-center justify-center gap-2 text-slate-700 dark:text-slate-300 hover:text-indigo-900 hover:bg-white/60 dark:hover:bg-slate-700 transition-all"
+          >
+            <FileEdit className="w-4 h-4 text-indigo-600 shrink-0" />
+            <span>{lang === 'en' ? '1. Report Entry' : '१. प्रतिवेदन प्रविष्टि'}</span>
+          </Link>
           <Link
             href="/local-reporting"
-            className="flex-1 py-2.5 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-black flex items-center justify-center gap-2 text-slate-700 dark:text-slate-300 hover:text-blue-900 hover:bg-white/60 dark:hover:bg-slate-700 transition-all"
+            className="flex-1 py-3 px-3.5 sm:px-4 min-h-[46px] rounded-xl text-xs sm:text-sm font-black flex items-center justify-center gap-2 text-slate-700 dark:text-slate-300 hover:text-blue-900 hover:bg-white/60 dark:hover:bg-slate-700 transition-all"
           >
             <Building2 className="w-4 h-4 text-blue-600 shrink-0" />
-            <span>{lang === 'en' ? '1. Palika Report (Local Body)' : '१. पालिका प्रतिवेदन (स्थानीय तहगत)'}</span>
+            <span>{lang === 'en' ? '2. Local Body Report' : '२. स्थानीयतहगत प्रतिवेदन'}</span>
           </Link>
           <Link
             href="/reports"
-            className="flex-1 py-2.5 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-black flex items-center justify-center gap-2 bg-emerald-700 text-white shadow-sm transition-all"
+            className="flex-1 py-3 px-3.5 sm:px-4 min-h-[46px] rounded-xl text-xs sm:text-sm font-black flex items-center justify-center gap-2 bg-emerald-700 text-white shadow-sm transition-all"
             aria-current="page"
           >
             <BarChart3 className="w-4 h-4 text-amber-300 shrink-0" />
-            <span>{lang === 'en' ? '2. Comprehensive Report (All 137 Palikas)' : '२. समग्र प्रतिवेदन (सबै १३७ पालिका कम्पाइल)'}</span>
+            <span>{lang === 'en' ? '3. Integrated Report' : '३. स्थानीय तहको एकीकृत प्रतिवेदन'}</span>
           </Link>
         </div>
 
@@ -529,7 +537,7 @@ export default function ReportsPage() {
                 </span>
               </div>
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
-                {lang === 'en' ? 'Disability Comprehensive Report (Koshi Province)' : 'अपाङ्गता सम्बन्धी समग्र प्रतिवेदन (कोशी प्रदेश)'}
+                {lang === 'en' ? 'Disability Integrated Report (Koshi Province)' : 'स्थानीय तहको एकीकृत प्रतिवेदन (कोशी प्रदेश)'}
               </h1>
               <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 mt-2 max-w-3xl leading-relaxed">
                 {lang === 'en'
@@ -671,7 +679,7 @@ export default function ReportsPage() {
                     id="compiled-district-filter"
                     value={selectedDistrictId}
                     onChange={(e) => setSelectedDistrictId(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-emerald-600 cursor-pointer"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 min-h-[46px] text-base sm:text-xs font-semibold text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-emerald-600 cursor-pointer"
                   >
                     <option value="all">
                       {lang === 'en' ? 'Koshi Province Overall (14 Districts - 137 Local Bodies)' : 'कोशी प्रदेश समग्र (१४ वटै जिल्ला - १३७ स्थानीय तह)'}
@@ -693,7 +701,7 @@ export default function ReportsPage() {
                     id="compiled-type-filter"
                     value={compiledTypeFilter}
                     onChange={(e) => setCompiledTypeFilter(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-emerald-600 cursor-pointer"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 min-h-[46px] text-base sm:text-xs font-semibold text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-emerald-600 cursor-pointer"
                   >
                     <option value="all">
                       {lang === 'en' ? 'All Types (Metropolitan, Sub-metro, Urban, Rural)' : 'सबै प्रकार (महानगर, उपमहानगर, नगर, गाउँ)'}
@@ -711,14 +719,14 @@ export default function ReportsPage() {
                     {lang === 'en' ? '3. Search by Palika Name' : '३. पालिकाको नामबाट खोजी'}
                   </label>
                   <div className="relative">
-                    <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                    <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                     <input
                       id="compiled-search-input"
                       type="search"
                       placeholder={lang === 'en' ? 'Search municipality or district name...' : 'पालिका वा जिल्लाको नाम...'}
                       value={compiledPalikaSearch}
                       onChange={(e) => setCompiledPalikaSearch(e.target.value)}
-                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl pl-9 pr-3 py-2 text-xs font-semibold text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-emerald-600"
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl pl-10 pr-3.5 py-2.5 min-h-[46px] text-base sm:text-xs font-semibold text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-emerald-600"
                     />
                   </div>
                 </div>
@@ -1499,8 +1507,14 @@ export default function ReportsPage() {
                 </div>
               </div>
 
+              {/* Mobile Horizontal Scroll Affordance Banner */}
+              <div className="sm:hidden flex items-center justify-between px-3.5 py-2 bg-blue-50 dark:bg-slate-800 text-blue-900 dark:text-blue-200 text-xs font-bold border-b border-slate-200 dark:border-slate-700">
+                <span>👈 दायाँ/बायाँ स्क्रोल गरी तथ्याङ्क हेर्नुहोस् 👉</span>
+                <span className="font-mono text-[11px] bg-blue-100 dark:bg-slate-700 px-2 py-0.5 rounded">१३७ पालिका</span>
+              </div>
+
               {/* TABLE AREA */}
-              <div className="overflow-x-auto max-h-[750px] overflow-y-auto">
+              <div className="overflow-x-auto max-h-[750px] overflow-y-auto table-responsive -webkit-overflow-scrolling-touch">
                 <table className="min-w-full text-xs text-left border-collapse">
                   <thead className="bg-blue-950 text-white font-bold sticky top-0 z-20 shadow-xs">
                     <tr>
