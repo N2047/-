@@ -195,9 +195,9 @@ export default function Header({ lang: propLang, onLanguageChange }: HeaderProps
         </aside>
 
         {/* Main Branding Section (Nepal Gov Logo on Left - DIC in Center - NFD-N Logo & Hamburger on Right) */}
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3.5 flex items-center justify-between gap-2 sm:gap-4">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3.5 flex items-center justify-between gap-2 sm:gap-4 relative">
           {/* Left: Nepal Government Emblem */}
-          <div className="flex items-center shrink-0">
+          <div className="flex items-center shrink-0 w-20 sm:w-36 md:w-44 justify-start z-10">
             <Link href="/" title={t.common.nepalGov} className="block focus:outline-hidden focus:ring-2 focus:ring-red-500 rounded-lg">
               <img
                 src="/images/emblem-nepal.svg"
@@ -208,44 +208,38 @@ export default function Header({ lang: propLang, onLanguageChange }: HeaderProps
             </Link>
           </div>
 
-          {/* Center: DIC Branding Title & Tagline (Fluid & Accessible) */}
-          <Link
-            href="/"
-            className="flex items-center text-left gap-2 sm:gap-3.5 group cursor-pointer flex-1 min-w-0 mx-1.5 sm:mx-4 justify-center sm:justify-start"
-            aria-label={t.app_name}
-          >
-            <div
-              className="w-9 h-9 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-gradient-to-br from-red-700 via-blue-900 to-indigo-950 text-white rounded-xl sm:rounded-2xl flex items-center justify-center font-black text-sm sm:text-xl md:text-2xl shadow-md border-2 border-amber-400 shrink-0 group-hover:scale-105 transition-transform"
-              aria-hidden="true"
+          {/* Center: DIC Branding Title & Tagline (Dead Centered & Cleanly Stacked) */}
+          <div className="flex-1 flex flex-col items-center justify-center text-center min-w-0 px-1 sm:px-4">
+            <Link
+              href="/"
+              className="flex flex-col items-center justify-center text-center group cursor-pointer max-w-2xl"
+              aria-label={t.app_name}
             >
-              DIC
-            </div>
-            <div className="min-w-0">
-              <span className="text-sm sm:text-xl lg:text-2xl xl:text-3xl font-black tracking-tight text-red-600 dark:text-red-400 leading-tight block truncate sm:whitespace-normal">
+              <span className="text-base sm:text-xl md:text-2xl lg:text-3xl font-black tracking-tight text-red-600 dark:text-red-400 leading-tight block text-center">
                 {t.app_name}
               </span>
-              <span className="text-[10px] sm:text-xs lg:text-sm text-slate-700 dark:text-slate-300 font-medium block truncate sm:whitespace-normal leading-tight mt-0.5">
+              <span className="text-[10px] sm:text-xs md:text-sm text-slate-700 dark:text-slate-300 font-medium block leading-tight mt-0.5 text-center">
                 {t.tagline}
               </span>
-              <span className="hidden sm:block text-[11px] lg:text-xs text-blue-900 dark:text-blue-300 font-bold mt-0.5">
+              <span className="text-[11px] sm:text-xs text-blue-900 dark:text-blue-300 font-bold mt-0.5 block text-center">
                 {t.gov_province}
               </span>
-            </div>
-          </Link>
+            </Link>
+          </div>
 
           {/* Right: NFD-N Logo & Mobile Hamburger */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <div className="flex items-center justify-end gap-2 sm:gap-3 shrink-0 w-20 sm:w-36 md:w-44 z-10">
             <a
               href="https://www.nfdn.org.np"
               target="_blank"
               rel="noopener noreferrer"
               title="National Federation of the Disabled Nepal (NFD-N)"
-              className="hidden xs:block focus:outline-hidden focus:ring-2 focus:ring-blue-500 rounded-lg"
+              className="block focus:outline-hidden focus:ring-2 focus:ring-blue-500 rounded-lg"
             >
               <img
                 src="/images/nfdn-logo.png"
-                alt="NFD-N Logo"
-                className="h-9 sm:h-12 md:h-14 w-auto object-contain drop-shadow-xs hover:scale-105 transition-transform"
+                alt="National Federation of the Disabled Nepal (NFD-N)"
+                className="h-10 sm:h-13 md:h-15 w-auto object-contain drop-shadow-xs hover:scale-105 transition-transform"
                 loading="eager"
               />
             </a>

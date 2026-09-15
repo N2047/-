@@ -106,6 +106,7 @@ export default function AdminPage() {
     | "reports_mgmt"
     | "website_mgmt"
     | "footer_mgmt"
+    | "contacts_mgmt"
     | "accessibility"
     | "system_settings"
     | "ai_config"
@@ -974,6 +975,23 @@ export default function AdminPage() {
               <span>{lang === "ne" ? "फुटर व्यवस्थापन (Footer CMS)" : "Footer Management (CMS)"}</span>
             </button>
 
+            {/* 11. Contacts & Directory Management */}
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("contacts_mgmt");
+                setMobileSidebarOpen(false);
+              }}
+              className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${
+                activeTab === "contacts_mgmt"
+                  ? "bg-blue-900 text-white font-bold shadow-xs"
+                  : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+              }`}
+            >
+              <PhoneCall className="w-4 h-4 text-emerald-500" />
+              <span>{lang === "ne" ? "सम्पर्क तथा निर्देशिका व्यवस्थापन" : "Contacts & Directory"}</span>
+            </button>
+
             {/* SYSTEM & SECURITY */}
             <div className="pt-3 pb-1 px-3 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
               {lang === "ne" ? "⚙️ प्रणाली तथा सुरक्षा" : "⚙️ System & Security"}
@@ -1188,7 +1206,7 @@ export default function AdminPage() {
               </div>
 
               {/* Quick Actions & Shortcut Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-2">
                   <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white">
                     <UserCheck className="w-5 h-5 text-emerald-600" />
@@ -1237,6 +1255,23 @@ export default function AdminPage() {
                     className="text-xs text-blue-600 dark:text-blue-400 font-bold hover:underline flex items-center gap-1 cursor-pointer pt-1"
                   >
                     <span>समाचार व्यवस्थापन खोल्नुहोस् →</span>
+                  </button>
+                </div>
+
+                <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-2">
+                  <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white">
+                    <PhoneCall className="w-5 h-5 text-emerald-600" />
+                    <span>सम्पर्क तथा निर्देशिका व्यवस्थापन</span>
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                    मन्त्रालय र महासंघको सम्पर्क व्यक्ति, फोन, इमेल तथा १३७ पालिकाका सम्पर्कहरू अद्यावधिक गर्नुहोस्।
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("contacts_mgmt")}
+                    className="text-xs text-blue-600 dark:text-blue-400 font-bold hover:underline flex items-center gap-1 cursor-pointer pt-1"
+                  >
+                    <span>सम्पर्क व्यवस्थापन खोल्नुहोस् →</span>
                   </button>
                 </div>
               </div>
@@ -1555,6 +1590,11 @@ export default function AdminPage() {
             <div className="space-y-6">
               <AdminFooterManager />
             </div>
+          )}
+
+          {/* TAB: CONTACTS & DIRECTORY CMS */}
+          {activeTab === "contacts_mgmt" && (
+            <AdminContactManager />
           )}
 
           {/* TAB 10: ACCESSIBILITY SETTINGS (Requirement 24 & 25) */}

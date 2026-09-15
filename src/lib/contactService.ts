@@ -20,6 +20,8 @@ export interface LocalGovernmentContact {
   local_government_name_ne: string;
   district_id: string;
   district_name_ne: string;
+  official_phone?: string;
+  official_email?: string;
   disability_facilitator_name: string;
   disability_facilitator_mobile: string;
   women_children_social_branch_name: string;
@@ -126,7 +128,19 @@ export function getProvinceContacts(): ProvinceContact[] {
   if (typeof window === "undefined") return DEFAULT_PROVINCE_CONTACTS;
   try {
     const raw = localStorage.getItem(PROVINCE_STORAGE_KEY);
-    if (!raw) return DEFAULT_PROVINCE_CONTACTS;
+    if (!raw) {
+      // Background fetch from server
+      fetch("/api/contacts/province")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.contacts && Array.isArray(data.contacts)) {
+            localStorage.setItem(PROVINCE_STORAGE_KEY, JSON.stringify(data.contacts));
+            window.dispatchEvent(new Event("dic_contacts_updated"));
+          }
+        })
+        .catch(() => {});
+      return DEFAULT_PROVINCE_CONTACTS;
+    }
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed) || parsed.length === 0) return DEFAULT_PROVINCE_CONTACTS;
     return parsed;
@@ -161,6 +175,15 @@ export function updateProvinceContact(id: "ministry_koshi" | "nfdn_koshi", updat
     return c;
   });
   saveProvinceContacts(updated);
+
+  // Sync to server database asynchronously
+  if (typeof window !== "undefined") {
+    fetch("/api/contacts/province", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, updates }),
+    }).catch((err) => console.error("Could not sync province contact to server:", err));
+  }
 }
 
 // Read Local Government Contacts
@@ -229,18 +252,20 @@ export function getLocalContactByPalikaId(palikaId: string): LocalGovernmentCont
   return all.find((c) => c.local_government_id === palikaId);
 }
 
-// Validate Nepali Mobile Number (e.g. 98XXXXXXXX or 97XXXXXXXX, 10 digits)
+// Validate Nepali Mobile Number (supports Nepali and English digits, e.g. 98XXXXXXXX, ०२१-४६२८००)
 export function validateNepalMobileNumber(mobile: string): { isValid: boolean; message?: string } {
   if (!mobile || !mobile.trim()) return { isValid: true }; // empty is allowed as placeholder
-  const cleaned = mobile.trim().replace(/[-+\s()]/g, "");
   
-  // Standard Nepal 10-digit mobile check (starts with 97 or 98)
-  const isStandardNepalMobile = /^(98|97|96)[0-9]{8}$/.test(cleaned);
-  // Also support landline or international numbers if required
-  const isGeneralValidPhone = /^[0-9]{7,15}$/.test(cleaned);
+  // Convert Nepali numerals to English digits
+  const devanagariDigits: Record<string, string> = {
+    '०': '0', '१': '1', '२': '2', '३': '3', '४': '4',
+    '५': '5', '६': '6', '७': '7', '८': '8', '९': '9'
+  };
+  const normalized = mobile.trim().replace(/[०-९]/g, (d) => devanagariDigits[d] || d);
+  const cleaned = normalized.replace(/[-+\s(),/]/g, "");
 
-  if (!isGeneralValidPhone) {
-    return { isValid: false, message: "मोबाइल नम्बरमा अंक मात्र हुनुपर्छ र ७ देखि १५ अंक बीच हुनुपर्छ।" };
+  if (cleaned.length < 5) {
+    return { isValid: false, message: "कृपया कम्तीमा ५ अंकको मान्य फोन वा मोबाइल नम्बर प्रविष्टि गर्नुहोस्।" };
   }
 
   return { isValid: true };

@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { KOSHI_DISTRICTS, TOTAL_KOSHI_PALIKAS, getAllPalikas, findPalikaById } from "@/lib/koshiGeography";
+import { KOSHI_DISTRICTS, TOTAL_KOSHI_PALIKAS } from "@/lib/koshiGeography";
 import { translations, Language } from "@/lib/translations";
 import { 
   Building2, 
@@ -23,8 +23,6 @@ import {
   BarChart3,
   Calendar,
   Users,
-  Eye,
-  RotateCcw,
   FileEdit
 } from "lucide-react";
 import Link from "next/link";
@@ -37,10 +35,6 @@ export default function LocalReportingPage() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
 
-  // Single Palika focused view state
-  const [selectedSinglePalikaId, setSelectedSinglePalikaId] = useState<string>("");
-  const [viewMode, setViewMode] = useState<"all" | "single">("all");
-
   const { user, isAuthenticated } = useAuth();
   const isSuperAdmin = user?.role === "super_admin" || user?.role === "provincial_admin";
   const isEmployee = user?.role === "employee" || user?.role === "palika_staff";
@@ -51,7 +45,6 @@ export default function LocalReportingPage() {
   const t = translations[lang];
 
   const selectedDistrict = KOSHI_DISTRICTS.find((d) => d.id === selectedDistrictId);
-  const selectedSinglePalikaData = selectedSinglePalikaId ? findPalikaById(selectedSinglePalikaId) : null;
 
   // Filter palikas based on selected district, search query, and type filter
   const filteredPalikas = useMemo(() => {
@@ -150,7 +143,7 @@ export default function LocalReportingPage() {
                 अपाङ्गता सम्बन्धी स्थानीयतहगत प्रतिवेदन (कोशी प्रदेश)
               </h1>
               <p className="text-sm sm:text-base text-slate-600 mt-2 max-w-3xl">
-                कोशी प्रदेशका <strong>१४ जिल्ला</strong> का <strong>१३७ स्थानीय तह</strong> बाट प्रत्येक पालिकाको छुट्टाछुट्टै प्रतिवेदन वा कुनै सेलेक्ट गरिएको पालिकाको प्रतिवेदन मात्र हेर्ने र प्रविष्टि गर्ने प्रणाली।
+                कोशी प्रदेशका <strong>१४ जिल्ला</strong> का <strong>१३७ स्थानीय तह</strong> बाट प्रत्येक पालिकाको वार्षिक कार्यसम्पादन, प्रोफाइल तथा सार्वजनिक तथ्याङ्क प्रतिवेदन हेर्ने र प्रविष्टि गर्ने प्रणाली।
               </p>
             </div>
             
@@ -162,191 +155,6 @@ export default function LocalReportingPage() {
           </div>
         </div>
 
-        {/* 🎯 SINGLE PALIKA SELECTOR & FOCUS MODE: "सेलेक्ट गरिएको पालिकाको प्रतिवेदन मात्र हेर्नुहोस्" */}
-        <section aria-labelledby="single-select-heading" className="p-5 sm:p-6 bg-gradient-to-r from-blue-950 via-indigo-950 to-slate-900 text-white rounded-3xl mb-8 shadow-xl border-2 border-blue-500/40 relative overflow-hidden">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="flex items-start gap-3.5">
-              <div className="w-12 h-12 rounded-2xl bg-amber-400 text-slate-950 flex items-center justify-center shrink-0 font-black shadow-lg text-xl">
-                🎯
-              </div>
-              <div>
-                <h2 id="single-select-heading" className="font-black text-base sm:text-lg text-white flex items-center gap-2">
-                  <span>सेलेक्ट गरिएको पालिकाको प्रतिवेदन मात्र हेर्नुहोस्</span>
-                  <span className="text-[10px] bg-amber-400/20 text-amber-300 px-2.5 py-0.5 rounded-full font-bold border border-amber-400/40">
-                    द्रुत फिल्टर
-                  </span>
-                </h2>
-                <p className="text-xs sm:text-sm text-blue-200 mt-1">
-                  कोशी प्रदेशका १३७ स्थानीय तहमध्ये कुनै एक पालिका छान्नुहोस् र सोही पालिकाको मात्र प्रतिवेदन हेर्नुहोस्:
-                </p>
-              </div>
-            </div>
-
-            {/* View Mode Toggle */}
-            <div className="flex items-center gap-1.5 bg-blue-900/60 p-1 rounded-xl border border-blue-700 shrink-0 w-full sm:w-auto">
-              <button
-                type="button"
-                onClick={() => setViewMode("all")}
-                className={`flex-1 sm:flex-initial px-3.5 py-2 min-h-[40px] rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
-                  viewMode === "all" ? "bg-amber-400 text-slate-950 shadow-xs" : "text-blue-200 hover:text-white"
-                }`}
-              >
-                📋 सबै १३७ पालिका
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  if (!selectedSinglePalikaId) {
-                    setSelectedSinglePalikaId("phidim_mun");
-                  }
-                  setViewMode("single");
-                }}
-                className={`flex-1 sm:flex-initial px-3.5 py-2 min-h-[40px] rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
-                  viewMode === "single" ? "bg-amber-400 text-slate-950 shadow-xs" : "text-blue-200 hover:text-white"
-                }`}
-              >
-                🎯 सेलेक्ट गरिएको पालिका मात्र
-              </button>
-            </div>
-          </div>
-
-          {/* Selector Dropdown */}
-          <div className="mt-5 pt-4 border-t border-blue-800/60 flex flex-col sm:flex-row items-center gap-3">
-            <div className="w-full sm:flex-1">
-              <label htmlFor="single-palika-select" className="sr-only">स्थानीय तह छनौट गर्नुहोस्</label>
-              <select
-                id="single-palika-select"
-                value={selectedSinglePalikaId}
-                onChange={(e) => {
-                  setSelectedSinglePalikaId(e.target.value);
-                  setViewMode("single");
-                }}
-                className="w-full bg-slate-900/95 border-2 border-blue-400/60 text-white text-xs sm:text-sm font-bold rounded-xl px-4 py-3 focus:ring-2 focus:ring-amber-400 focus:outline-hidden cursor-pointer shadow-inner"
-              >
-                <option value="">-- कुनै एक स्थानीय तह छनौट गर्नुहोस् (१४ जिल्लाका १३७ पालिका) --</option>
-                {KOSHI_DISTRICTS.map((d) => (
-                  <optgroup key={d.id} label={`📍 ${d.name_ne} जिल्ला (${d.local_governments.length} स्थानीय तह)`}>
-                    {d.local_governments.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.name_ne} ({p.type}) - {d.name_ne} जिल्ला
-                      </option>
-                    ))}
-                  </optgroup>
-                ))}
-              </select>
-            </div>
-
-            {selectedSinglePalikaId && (
-              <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
-                <Link
-                  href={`/local-reporting/palika/${selectedSinglePalikaId}/profile`}
-                  className="w-full sm:w-auto px-5 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg transition-all transform hover:-translate-y-0.5 cursor-pointer"
-                  title="यो पालिकाको पूर्ण प्रतिवेदन खोल्नुहोस्"
-                >
-                  <FileText className="w-4 h-4" />
-                  <span>📄 यो पालिकाको प्रतिवेदन खोल्नुहोस्</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-                {viewMode === "single" && (
-                  <button
-                    type="button"
-                    onClick={() => setViewMode("all")}
-                    className="p-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold flex items-center gap-1 cursor-pointer border border-slate-700"
-                    title="सबै पालिकाको सूचीमा फर्कनुहोस्"
-                  >
-                    <RotateCcw className="w-4 h-4" />
-                    <span className="hidden md:inline">सबै हेर्नुहोस्</span>
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* FOCUSED SINGLE PALIKA REPORT CARD: Shown when viewMode === 'single' */}
-        {viewMode === "single" && selectedSinglePalikaData && (
-          <section className="bg-gradient-to-br from-white to-blue-50/40 rounded-3xl p-6 sm:p-8 border-2 border-blue-600 shadow-xl mb-8 animate-in fade-in slide-in-from-top-2">
-            <div className="flex flex-wrap items-center justify-between gap-3 mb-6 pb-4 border-b border-blue-200">
-              <div>
-                <span className="text-xs font-black uppercase tracking-wider bg-blue-100 text-blue-950 px-2.5 py-1 rounded-lg border border-blue-300">
-                  🎯 सेलेक्ट गरिएको पालिकाको प्रतिवेदन
-                </span>
-                <h2 className="text-2xl sm:text-3xl font-black text-slate-900 mt-2">
-                  {selectedSinglePalikaData.palika.name_ne}
-                </h2>
-                <p className="text-xs sm:text-sm text-slate-600">
-                  {selectedSinglePalikaData.palika.name_en} | {selectedSinglePalikaData.district.name_ne} जिल्ला, कोशी प्रदेश
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300 flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                  आ.व. २०८२/०८३ वार्षिक विवरण
-                </span>
-              </div>
-            </div>
-
-            {/* Quick Metrics Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6">
-              <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
-                <span className="text-xs font-bold text-slate-500 block">तहको प्रकार</span>
-                <span className="text-sm sm:text-base font-black text-slate-900 mt-1 block">
-                  {selectedSinglePalikaData.palika.type}
-                </span>
-              </div>
-              <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
-                <span className="text-xs font-bold text-slate-500 block">जिल्ला</span>
-                <span className="text-sm sm:text-base font-black text-blue-900 mt-1 block">
-                  {selectedSinglePalikaData.district.name_ne} जिल्ला
-                </span>
-              </div>
-              <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
-                <span className="text-xs font-bold text-slate-500 block">अपाङ्गता सहायता सहजकर्ता</span>
-                <span className="text-sm sm:text-base font-black text-emerald-800 mt-1 block">
-                  तोकिएको (सक्रिय)
-                </span>
-              </div>
-              <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
-                <span className="text-xs font-bold text-slate-500 block">प्रतिवेदन स्थिति</span>
-                <span className="text-sm sm:text-base font-black text-amber-700 mt-1 block">
-                  मस्यौदा / पेश गर्न सकिने
-                </span>
-              </div>
-            </div>
-
-            {/* Direct Action Buttons */}
-            <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-slate-200">
-              <Link
-                href={`/local-reporting/palika/${selectedSinglePalikaData.palika.id}/profile`}
-                className="px-6 py-3 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-black text-sm shadow-md flex items-center gap-2 transition-transform transform hover:-translate-y-0.5 cursor-pointer"
-              >
-                <FileText className="w-4 h-4 text-amber-400" />
-                <span>📄 {selectedSinglePalikaData.palika.name_ne} को पूर्ण प्रतिवेदन हेर्नुहोस्</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-
-              {(!isNormalUser && (isSuperAdmin || (isEmployee && assignedPalikaId === selectedSinglePalikaData.palika.id))) && (
-                <Link
-                  href={`/local-reporting/palika/${selectedSinglePalikaData.palika.id}`}
-                  className="px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm shadow-md flex items-center gap-2 transition-transform transform hover:-translate-y-0.5 cursor-pointer"
-                >
-                  <Edit3 className="w-4 h-4" />
-                  <span>फारम भर्नुहोस् / सम्पादन गर्नुहोस्</span>
-                </Link>
-              )}
-
-              <button
-                type="button"
-                onClick={() => setViewMode("all")}
-                className="px-4 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm border border-slate-300 ml-auto cursor-pointer"
-              >
-                📋 सबै १३७ स्थानीय तह सूचीमा फर्कनुहोस्
-              </button>
-            </div>
-          </section>
-        )}
-
         {/* Dynamic District & Palika Selection Controls */}
         <section aria-labelledby="selection-heading" className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs mb-8">
           <h2 id="selection-heading" className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
@@ -354,7 +162,7 @@ export default function LocalReportingPage() {
             <span>जिल्ला तथा स्थानीय तह छनौट गर्नुहोस्</span>
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* 1. District Selector */}
             <div>
               <label htmlFor="district-select-main" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
@@ -412,33 +220,6 @@ export default function LocalReportingPage() {
                   className="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-xl pl-10 pr-4 py-3 focus:ring-2 focus:ring-blue-600 focus:bg-white focus:outline-hidden"
                 />
               </div>
-            </div>
-          </div>
-
-          {/* Quick District Ribbon Tabs */}
-          <div className="pt-4 border-t border-slate-200">
-            <span className="text-xs font-bold text-slate-500 block mb-2">
-              जिल्ला द्रुत छनौट:
-            </span>
-            <div className="flex flex-wrap gap-2" role="tablist" aria-label="जिल्लाहरूको सूची">
-              {KOSHI_DISTRICTS.map((d, i) => (
-                <button
-                  key={d.id}
-                  role="tab"
-                  aria-selected={selectedDistrictId === d.id}
-                  onClick={() => {
-                    setSelectedDistrictId(d.id);
-                    setSearchQuery("");
-                  }}
-                  className={`px-3.5 py-2.5 min-h-[42px] flex items-center rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                    selectedDistrictId === d.id
-                      ? "bg-blue-900 text-white shadow-xs"
-                      : "bg-slate-100 hover:bg-slate-200 text-slate-700"
-                  }`}
-                >
-                  {i + 1}. {d.name_ne} ({d.local_governments.length})
-                </button>
-              ))}
             </div>
           </div>
         </section>
@@ -594,20 +375,6 @@ export default function LocalReportingPage() {
                             <ArrowRight className="w-4 h-4 ml-auto text-blue-200 shrink-0" />
                           )}
                         </Link>
-
-                        {/* Quick Focus Button to isolate only this palika */}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSelectedSinglePalikaId(palika.id);
-                            setViewMode("single");
-                            window.scrollTo({ top: 120, behavior: "smooth" });
-                          }}
-                          className="p-2.5 rounded-xl bg-slate-100 hover:bg-blue-100 text-slate-700 hover:text-blue-950 border border-slate-200 transition-colors cursor-pointer"
-                          title={`${palika.name_ne} को मात्र प्रतिवेदन हेर्नुहोस् (फोकस मोड)`}
-                        >
-                          <Eye className="w-4 h-4 text-blue-700" />
-                        </button>
                       </div>
                     );
                   })()}

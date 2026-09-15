@@ -49,6 +49,8 @@ export default function AdminContactManager() {
   // Editing State for Local Palika
   const [editingContact, setEditingContact] = useState<LocalGovernmentContact | null>(null);
   const [editForm, setEditForm] = useState({
+    official_phone: "",
+    official_email: "",
     disability_facilitator_name: "",
     disability_facilitator_mobile: "",
     women_children_social_branch_name: "",
@@ -116,6 +118,8 @@ export default function AdminContactManager() {
   const handleOpenEdit = (contact: LocalGovernmentContact) => {
     setEditingContact(contact);
     setEditForm({
+      official_phone: contact.official_phone || "",
+      official_email: contact.official_email || "",
       disability_facilitator_name: contact.disability_facilitator_name || "",
       disability_facilitator_mobile: contact.disability_facilitator_mobile || "",
       women_children_social_branch_name: contact.women_children_social_branch_name || "",
@@ -150,6 +154,21 @@ export default function AdminContactManager() {
     }
 
     updateLocalContact(editingContact.local_government_id, editForm);
+
+    // Sync to server contacts database
+    fetch("/api/admin/contacts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        organization_type: "local_government",
+        organization_name_ne: editingContact.local_government_name_ne,
+        official_email: editForm.official_email.trim() || `${editingContact.local_government_id}@koshi.gov.np`,
+        official_phone: editForm.official_phone.trim() || "उपलब्ध छैन",
+        district_id: editingContact.district_id,
+        local_government_id: editingContact.local_government_id,
+      }),
+    }).catch(() => {});
+
     setEditingContact(null);
     setSaveSuccessMsg(`${editingContact.local_government_name_ne} को सम्पर्क विवरण सुरक्षित भयो।`);
     setTimeout(() => setSaveSuccessMsg(""), 4000);
@@ -700,6 +719,39 @@ export default function AdminContactManager() {
 
             <form onSubmit={handleSaveLocalContact} className="py-5 space-y-5 text-xs">
               
+              {/* Primary Official Contacts (Official Phone/Mobile & Official Email) */}
+              <div className="p-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/60 space-y-3">
+                <span className="font-black text-amber-900 dark:text-amber-300 text-xs uppercase tracking-wide block">
+                  पालिकाको मुख्य आधिकारिक सम्पर्क (फोन/मोबाइल र आधिकारिक इमेल)
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                      पालिकाको आधिकारिक फोन / मोबाइल:
+                    </label>
+                    <input
+                      type="text"
+                      value={editForm.official_phone}
+                      onChange={(e) => setEditForm({ ...editForm, official_phone: e.target.value })}
+                      placeholder="उदा. ०२१-४६२८०० वा ९८५२०XXXXX"
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono focus:ring-2 focus:ring-amber-500 focus:outline-hidden"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                      पालिकाको आधिकारिक इमेल एड्रेस:
+                    </label>
+                    <input
+                      type="email"
+                      value={editForm.official_email}
+                      onChange={(e) => setEditForm({ ...editForm, official_email: e.target.value })}
+                      placeholder="उदा. info@palika.gov.np"
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono focus:ring-2 focus:ring-amber-500 focus:outline-hidden"
+                    />
+                  </div>
+                </div>
+              </div>
+
               {/* Role 1: अपाङ्गता सहायता सहजकर्ता */}
               <div className="p-4 rounded-2xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/60 space-y-3">
                 <span className="font-black text-blue-900 dark:text-blue-300 text-xs uppercase tracking-wide block">

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "ministry_koshi",
+    "organization_name_ne": "सामाजिक विकास मन्त्रालय, कोशी प्रदेश",
+    "organization_name_en": "Ministry of Social Development, Koshi Province",
+    "contact_person_name": "",
+    "contact_person_mobile": "",
+    "office_phone": "०२१-४६२८००, ०२१-४६२८०१",
+    "email": "info.dic@koshi.gov.np",
+    "address_ne": "विराटनगर-१०, मोरङ, कोशी प्रदेश",
+    "is_public": true,
+    "updated_at": "२०८२/०५/०१"
+  },
+  {
+    "id": "nfdn_koshi",
+    "organization_name_ne": "राष्ट्रिय अपाङ्ग महासंघ नेपाल, कोशी प्रदेश",
+    "organization_name_en": "National Federation of the Disabled Nepal (NFDN) Koshi Province",
+    "contact_person_name": "",
+    "contact_person_mobile": "",
+    "office_phone": "०२१-४६२८५०",
+    "email": "koshi@nfdn.org.np",
+    "address_ne": "विराटनगर, मोरङ, कोशी प्रदेश",
+    "is_public": true,
+    "updated_at": "२०८२/०५/०१"
+  }
+]
