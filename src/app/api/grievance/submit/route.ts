@@ -10,7 +10,8 @@ import {
   INITIAL_KOSHI_MINISTRIES
 } from "@/lib/grievanceService";
 import { KOSHI_DISTRICTS } from "@/lib/koshiGeography";
-import { findServerContactByRecipient } from "@/lib/serverContactsStore";
+import { findServerContactByRecipient, getServerProvinceContacts } from "@/lib/serverContactsStore";
+import { sendGrievanceNotificationEmail } from "@/lib/emailService";
 
 interface SubmitRequestBody {
   complaint_type: ComplaintType;
@@ -176,9 +177,14 @@ export async function POST(request: Request) {
     const randomSeq = Math.floor(100000 + Math.random() * 900000);
     const complaintNumber = `DIC-${currentYear}-${randomSeq}`;
 
-    // 6. Resolve Mandatory CC Email
-    const mandatoryCcEmail = process.env.GRIEVANCE_MANDATORY_CC_EMAIL?.trim() || 
-                             DEFAULT_GRIEVANCE_SETTINGS.mandatory_cc_email;
+    // 6. Resolve Automatic CC Emails (Ministry of Social Development + NFDN Koshi Province)
+    // Dynamic lookup from Province Contacts DB so inline edits on /contact immediately reflect!
+    const provinceData = getServerProvinceContacts();
+    const ministryEmail = provinceData.ministryEmail || "info.dic@koshi.gov.np";
+    const nfdnEmail = provinceData.nfdnEmail || "koshi@nfdn.org.np";
+
+    const ccEmailsList = [ministryEmail, nfdnEmail].filter(Boolean);
+    const mandatoryCcEmail = ccEmailsList.join(", ");
 
     // 7. Assemble Server Complaint Record
     const complaintRecord: Complaint = {
@@ -210,24 +216,32 @@ export async function POST(request: Request) {
       })),
       status: "नयाँ",
       admin_remarks: "अनलाइन पोर्टल मार्फत प्राप्त नयाँ गुनासो।",
-      email_status: "sent", // Server records transmission
+      email_status: "sent",
       mandatory_cc_email: mandatoryCcEmail,
       retry_count: 0,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
 
-    // 8. Server-Side Email Dispatch Logic (Safe Execution)
-    // Professional Email Template Generation:
-    const subjectLine = `नयाँ गुनासो दर्ता — [${complaintNumber}] — [${body.subject === "अन्य" ? body.other_subject : body.subject}]`;
-    
-    console.log(`[DIC GRIEVANCE SERVER-SIDE EMAIL DISPATCH]`);
-    console.log(`TO (Primary Recipient): ${officialEmail} (${orgName})`);
-    console.log(`CC (Mandatory CC): ${mandatoryCcEmail} (सामाजिक विकास मन्त्रालय, कोशी प्रदेश)`);
-    console.log(`Subject: ${subjectLine}`);
-    console.log(`Complaint Type: ${body.complaint_type === "identified" ? "पहिचानसहित" : "बेनामी"}`);
-    console.log(`Complainant: ${body.complaint_type === "identified" ? body.full_name : "बेनामी (गोप्य)"}`);
-    console.log(`Attachments Count: ${complaintRecord.attachments.length}`);
+    // 8. Server-Side Email Dispatch with Real SMTP / Simulated Support
+    const emailResult = await sendGrievanceNotificationEmail({
+      complaintNumber,
+      complaintType: body.complaint_type,
+      subject: body.subject === "अन्य" && body.other_subject ? body.other_subject : body.subject,
+      description: body.description.trim(),
+      toEmail: officialEmail,
+      toOrgName: orgName,
+      ccEmails: ccEmailsList,
+      ministryName: provinceData.ministryName,
+      nfdnName: provinceData.nfdnName,
+      complainantName: body.complaint_type === "identified" ? body.full_name : undefined,
+      complainantPhone: body.complaint_type === "identified" ? body.phone : undefined,
+      complainantAddress: body.complaint_type === "identified" ? body.address : undefined,
+      complainantEmail: body.complaint_type === "identified" ? body.email : undefined,
+      attachmentsCount: complaintRecord.attachments.length,
+    });
+
+    complaintRecord.email_status = emailResult.success ? "sent" : "failed";
 
     // Return successful response with full confirmation details
     return NextResponse.json({
@@ -239,7 +253,21 @@ export async function POST(request: Request) {
         to_phone: officialPhone,
         organization_name: orgName,
         mandatory_cc_email: mandatoryCcEmail,
-        email_status: "sent"
+        cc_emails: ccEmailsList,
+        cc_details: [
+          {
+            organization: provinceData.ministryName,
+            email: ministryEmail,
+            role: "प्रदेश मन्त्रालय (Ministry)"
+          },
+          {
+            organization: provinceData.nfdnName,
+            email: nfdnEmail,
+            role: "महासंघ प्रदेश कार्यालय (NFDN)"
+          }
+        ],
+        email_status: complaintRecord.email_status,
+        simulated: emailResult.simulated ?? false
       }
     });
 
@@ -251,3 +279,4 @@ export async function POST(request: Request) {
     );
   }
 }
+

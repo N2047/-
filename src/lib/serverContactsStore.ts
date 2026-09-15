@@ -201,3 +201,57 @@ export function findServerContactByRecipient(
     return found;
   }
 }
+
+const PROVINCE_DB_PATH = path.join(process.cwd(), "src", "lib", "province_contacts_db.json");
+
+export interface ServerProvinceContactsInfo {
+  ministryEmail: string;
+  nfdnEmail: string;
+  ministryName: string;
+  nfdnName: string;
+  contacts: Array<{
+    id: string;
+    organization_name_ne: string;
+    organization_name_en?: string;
+    email?: string;
+    office_phone?: string;
+    contact_person_name?: string;
+    contact_person_mobile?: string;
+    address_ne?: string;
+  }>;
+}
+
+/**
+ * Retrieve current dynamic provincial contacts for Ministry of Social Development & NFDN Koshi Province
+ */
+export function getServerProvinceContacts(): ServerProvinceContactsInfo {
+  let contacts: any[] = [];
+  try {
+    if (fs.existsSync(PROVINCE_DB_PATH)) {
+      const raw = fs.readFileSync(PROVINCE_DB_PATH, "utf-8");
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        contacts = parsed;
+      }
+    }
+  } catch (err) {
+    console.warn("Could not read province_contacts_db.json, using defaults:", err);
+  }
+
+  const ministry = contacts.find((c) => c.id === "ministry_koshi");
+  const nfdn = contacts.find((c) => c.id === "nfdn_koshi");
+
+  const ministryEmail = ministry?.email?.trim() || "info.dic@koshi.gov.np";
+  const nfdnEmail = nfdn?.email?.trim() || "koshi@nfdn.org.np";
+  const ministryName = ministry?.organization_name_ne || "सामाजिक विकास मन्त्रालय, कोशी प्रदेश";
+  const nfdnName = nfdn?.organization_name_ne || "राष्ट्रिय अपाङ्ग महासंघ नेपाल, कोशी प्रदेश";
+
+  return {
+    ministryEmail,
+    nfdnEmail,
+    ministryName,
+    nfdnName,
+    contacts,
+  };
+}
+

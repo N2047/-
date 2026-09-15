@@ -447,7 +447,7 @@ export default function GovernmentGrievanceForm() {
                   तपाईंको गुनासो सफलतापूर्वक दर्ता भएको छ!
                 </h3>
                 <p className="text-xs text-emerald-800 dark:text-emerald-300 max-w-md mx-auto">
-                  सम्बन्धित निकायको आधिकारिक इमेलमा गुनासो सम्प्रेषण गरिएको छ। साथै कोशी प्रदेश सामाजिक विकास मन्त्रालयमा समेत सुरक्षित प्रतिलिपि (Mandatory CC) पठाइएको छ।
+                  सम्बन्धित निकायको आधिकारिक इमेलमा गुनासो सम्प्रेषण गरिएको छ। साथै कोशी प्रदेश सामाजिक विकास मन्त्रालय तथा राष्ट्रिय अपाङ्ग महासंघ नेपालमा समेत सुरक्षित प्रतिलिपि (Automatic CC) पठाइएको छ।
                 </p>
               </div>
 
@@ -484,18 +484,29 @@ export default function GovernmentGrievanceForm() {
                     {submittedComplaint.complaint_type === "identified" ? "पहिचानसहित" : "बेनामी (Anonymous)"}
                   </div>
                   <div className="sm:col-span-2">
-                    <span className="font-semibold text-slate-500">सम्बन्धित निकाय:</span>{" "}
+                    <span className="font-semibold text-slate-500">सम्बन्धित निकाय (TO):</span>{" "}
                     <strong>{submittedComplaint.organization_name}</strong>
                   </div>
                   <div className="sm:col-span-2">
                     <span className="font-semibold text-slate-500">प्रापक आधिकारिक Email:</span>{" "}
                     <span className="font-mono text-blue-600 dark:text-blue-400">{submittedComplaint.official_recipient_email}</span>
                   </div>
-                  <div className="sm:col-span-2">
-                    <span className="font-semibold text-slate-500">सामाजिक विकास मन्त्रालयमा CC:</span>{" "}
-                    <span className="font-mono text-emerald-700 dark:text-emerald-400 font-semibold">
-                      {submittedComplaint.mandatory_cc_email} (सम्प्रेषित)
+                  <div className="sm:col-span-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700">
+                    <span className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                      स्वचालित CC (प्रतिलिपि) पुगेका निकायहरू:
                     </span>
+                    <div className="space-y-1 font-mono text-[11px]">
+                      <div className="flex items-center gap-1.5 text-blue-800 dark:text-blue-300 font-semibold">
+                        <ShieldCheck className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                        <span>१. सामाजिक विकास मन्त्रालय, कोशी प्रदेश:</span>
+                        <span className="underline">{submittedComplaint.mandatory_cc_email.split(",")[0]?.trim() || "info.dic@koshi.gov.np"}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-amber-800 dark:text-amber-300 font-semibold">
+                        <ShieldCheck className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                        <span>२. राष्ट्रिय अपाङ्ग महासंघ नेपाल, कोशी प्रदेश:</span>
+                        <span className="underline">{submittedComplaint.mandatory_cc_email.split(",")[1]?.trim() || "koshi@nfdn.org.np"}</span>
+                      </div>
+                    </div>
                   </div>
                   <div className="sm:col-span-2">
                     <span className="font-semibold text-slate-500">विषय:</span>{" "}
@@ -782,34 +793,49 @@ export default function GovernmentGrievanceForm() {
 
                 {/* Real-time Display of Selected Office's Official Phone & Email */}
                 {activeRecipientContact && (
-                  <div className="p-4 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/80 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs animate-in zoom-in-95">
-                    <div>
-                      <span className="font-bold text-blue-950 dark:text-blue-200 block text-sm">
-                        {activeRecipientContact.organization_name_ne}
-                      </span>
-                      <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                        {activeRecipientContact.office_address}
-                      </span>
+                  <div className="space-y-3">
+                    <div className="p-4 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/80 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs animate-in zoom-in-95">
+                      <div>
+                        <span className="font-bold text-blue-950 dark:text-blue-200 block text-sm">
+                          {activeRecipientContact.organization_name_ne}
+                        </span>
+                        <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                          {activeRecipientContact.office_address}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <a
+                          href={`tel:${activeRecipientContact.official_phone.split(",")[0].trim()}`}
+                          className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-800 text-blue-900 dark:text-blue-200 font-bold flex items-center gap-1.5 shadow-xs hover:bg-blue-100 transition"
+                          title="फोन गर्नुहोस्"
+                        >
+                          <Phone className="w-3.5 h-3.5 text-blue-600" />
+                          <span>{activeRecipientContact.official_phone}</span>
+                        </a>
+
+                        <a
+                          href={`mailto:${activeRecipientContact.official_email}`}
+                          className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-800 text-blue-900 dark:text-blue-200 font-mono text-[11px] flex items-center gap-1.5 shadow-xs hover:bg-blue-100 transition"
+                          title="इमेल पठाउनुहोस्"
+                        >
+                          <Mail className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>{activeRecipientContact.official_email}</span>
+                        </a>
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <a
-                        href={`tel:${activeRecipientContact.official_phone.split(",")[0].trim()}`}
-                        className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-800 text-blue-900 dark:text-blue-200 font-bold flex items-center gap-1.5 shadow-xs hover:bg-blue-100 transition"
-                        title="फोन गर्नुहोस्"
-                      >
-                        <Phone className="w-3.5 h-3.5 text-blue-600" />
-                        <span>{activeRecipientContact.official_phone}</span>
-                      </a>
-
-                      <a
-                        href={`mailto:${activeRecipientContact.official_email}`}
-                        className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-800 text-blue-900 dark:text-blue-200 font-mono text-[11px] flex items-center gap-1.5 shadow-xs hover:bg-blue-100 transition"
-                        title="इमेल पठाउनुहोस्"
-                      >
-                        <Mail className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>{activeRecipientContact.official_email}</span>
-                      </a>
+                    {/* Automatic CC Linkage Notification Banner */}
+                    <div className="p-3.5 rounded-2xl bg-gradient-to-r from-blue-50 via-slate-50 to-amber-50 dark:from-blue-950/40 dark:via-slate-900 dark:to-amber-950/40 border border-blue-200/80 dark:border-blue-800/60 text-xs flex items-start gap-2.5 animate-in zoom-in-95">
+                      <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                      <div className="space-y-1 text-slate-800 dark:text-slate-200 leading-relaxed">
+                        <div className="font-bold flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400">
+                          <span>स्वतः सीसी (Automatic CC) लिंकेज सक्रिय छ</span>
+                        </div>
+                        <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                          तपाईंले यो गुनासो <strong>{activeRecipientContact.organization_name_ne}</strong> लाई दर्ता गर्दा, प्रणालीबाट आधिकारिक रूपमा <strong>सामाजिक विकास मन्त्रालय, कोशी प्रदेश</strong> र <strong>राष्ट्रिय अपाङ्ग महासंघ नेपाल, कोशी प्रदेश</strong> को इमेलमा समेत स्वतः <strong>CC</strong> (प्रतिलिपि) भएर पुग्नेछ।
+                        </p>
+                      </div>
                     </div>
                   </div>
                 )}

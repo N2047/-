@@ -101,6 +101,8 @@ export interface Complaint {
 
 export interface GrievanceSettings {
   mandatory_cc_email: string;
+  ministry_cc_email?: string;
+  nfdn_cc_email?: string;
   is_mandatory_cc_active: boolean;
   allow_anonymous: boolean;
   max_doc_size_mb: number;
@@ -112,7 +114,9 @@ export interface GrievanceSettings {
 
 // Default Settings
 export const DEFAULT_GRIEVANCE_SETTINGS: GrievanceSettings = {
-  mandatory_cc_email: "grievance.mosd@koshi.gov.np",
+  mandatory_cc_email: "info.dic@koshi.gov.np, koshi@nfdn.org.np",
+  ministry_cc_email: "info.dic@koshi.gov.np",
+  nfdn_cc_email: "koshi@nfdn.org.np",
   is_mandatory_cc_active: true,
   allow_anonymous: true,
   max_doc_size_mb: 10,
@@ -120,6 +124,7 @@ export const DEFAULT_GRIEVANCE_SETTINGS: GrievanceSettings = {
   max_video_size_mb: 30,
   allowed_doc_formats: ["pdf", "doc", "docx", "xls", "xlsx", "jpg", "jpeg", "png"],
 };
+
 
 // Seed Koshi Province Ministries
 export const INITIAL_KOSHI_MINISTRIES: GovernmentContact[] = [

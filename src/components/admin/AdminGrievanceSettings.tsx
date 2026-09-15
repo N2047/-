@@ -53,39 +53,71 @@ export default function AdminGrievanceSettings() {
           <div className="flex items-center gap-2 pb-3 border-b border-slate-200 dark:border-slate-800">
             <Mail className="w-5 h-5 text-emerald-600" />
             <h3 className="font-bold text-sm text-slate-900 dark:text-white">
-              सामाजिक विकास मन्त्रालय — अनिवार्य CC इमेल (Mandatory CC Routing)
+              मन्त्रालय तथा महासंघ — स्वचालित CC इमेल (Automatic Dual CC Routing)
             </h3>
           </div>
 
           <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-xs text-amber-800 dark:text-amber-200 leading-relaxed flex items-start gap-2.5">
             <ShieldCheck className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
             <div>
-              <strong>अनिवार्य नीति (Core Business Logic):</strong> नागरिकले जुनसुकै मन्त्रालय वा १३७ स्थानीय तह मध्ये जहाँसुकै गुनासो दर्ता गरे पनि यस इमेलमा स्वचालित रूपमा <strong>CC</strong> पठाइनेछ।
+              <strong>अनिवार्य सीसी नीति (Automatic Dual CC Policy):</strong> नागरिकले जुनसुकै मन्त्रालय वा कोशी प्रदेशका १३७ स्थानीय तह (जस्तै फिदिम नगरपालिका) मध्ये जहाँसुकै गुनासो दर्ता गरे पनि <strong>सामाजिक विकास मन्त्रालय</strong> र <strong>राष्ट्रिय अपाङ्ग महासंघ नेपाल, कोशी प्रदेश</strong> को आधिकारिक इमेलमा प्रणालीबाट स्वतः <strong>CC</strong> पठाइनेछ।
             </div>
           </div>
 
-          <div className="space-y-3 text-xs">
-            <div>
-              <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
-                सामाजिक विकास मन्त्रालय आधिकारिक गुनासो Email (Mandatory CC Email) *
-              </label>
-              <input
-                type="email"
-                required
-                value={settings.mandatory_cc_email}
-                onChange={(e) => setSettings({ ...settings, mandatory_cc_email: e.target.value })}
-                placeholder="उदा. grievance.mosd@koshi.gov.np"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-mono font-semibold focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
-              />
+          <div className="space-y-4 text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  १. सामाजिक विकास मन्त्रालय CC Email *
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={settings.ministry_cc_email || settings.mandatory_cc_email.split(",")[0]?.trim() || "info.dic@koshi.gov.np"}
+                  onChange={(e) => {
+                    const minEmail = e.target.value;
+                    const nfdnEmail = settings.nfdn_cc_email || settings.mandatory_cc_email.split(",")[1]?.trim() || "koshi@nfdn.org.np";
+                    setSettings({
+                      ...settings,
+                      ministry_cc_email: minEmail,
+                      mandatory_cc_email: `${minEmail}, ${nfdnEmail}`,
+                    });
+                  }}
+                  placeholder="उदा. info.dic@koshi.gov.np"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-mono font-semibold focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  २. राष्ट्रिय अपाङ्ग महासंघ नेपाल CC Email *
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={settings.nfdn_cc_email || settings.mandatory_cc_email.split(",")[1]?.trim() || "koshi@nfdn.org.np"}
+                  onChange={(e) => {
+                    const nfdnEmail = e.target.value;
+                    const minEmail = settings.ministry_cc_email || settings.mandatory_cc_email.split(",")[0]?.trim() || "info.dic@koshi.gov.np";
+                    setSettings({
+                      ...settings,
+                      nfdn_cc_email: nfdnEmail,
+                      mandatory_cc_email: `${minEmail}, ${nfdnEmail}`,
+                    });
+                  }}
+                  placeholder="उदा. koshi@nfdn.org.np"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-mono font-semibold focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
+                />
+              </div>
             </div>
 
             <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
               <div>
                 <span className="font-bold text-slate-800 dark:text-slate-200 block">
-                  Mandatory CC सक्रिय राख्नुहोस् (Mandatory CC = ON)
+                  स्वचालित Dual CC सक्रिय राख्नुहोस् (Automatic CC = ON)
                 </span>
                 <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                  यो सक्रिय भएपछि प्रत्येक सफल गुनासोमा सामाजिक विकास मन्त्रालयमा स्वतः CC जानेछ।
+                  यो सक्रिय भएपछि प्रत्येक सफल गुनासोमा मन्त्रालय र महासंघ दुवैमा स्वतः CC जानेछ।
                 </span>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">

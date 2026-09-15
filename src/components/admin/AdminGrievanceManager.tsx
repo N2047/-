@@ -401,9 +401,9 @@ export default function AdminGrievanceManager() {
                   <div>
                     <span className="font-semibold text-slate-500">फोन:</span> {selectedComplaint.official_recipient_phone}
                   </div>
-                  <div>
-                    <span className="font-semibold text-slate-500">Mandatory CC:</span>{" "}
-                    <span className="text-slate-600 dark:text-slate-400 font-mono text-[11px]">
+                  <div className="sm:col-span-2">
+                    <span className="font-semibold text-slate-500">स्वचालित CC (मन्त्रालय र महासंघ):</span>{" "}
+                    <span className="text-slate-700 dark:text-slate-300 font-mono text-[11px] font-medium">
                       {selectedComplaint.mandatory_cc_email}
                     </span>
                   </div>
