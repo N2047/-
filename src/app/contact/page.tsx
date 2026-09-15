@@ -10,6 +10,8 @@ import {
   getProvinceContacts, 
   getLocalGovernmentContacts, 
   updateLocalContact,
+  updateProvinceContact,
+  validateNepalMobileNumber,
   ProvinceContact, 
   LocalGovernmentContact 
 } from "@/lib/contactService";
@@ -69,6 +71,18 @@ export default function ContactPage() {
   });
   const [editSaveStatus, setEditSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [editSaveMessage, setEditSaveMessage] = useState<string>("");
+
+  // Province Contacts Editing State (Section 1 & 2)
+  const [editingProvinceTarget, setEditingProvinceTarget] = useState<"ministry_koshi" | "nfdn_koshi" | null>(null);
+  const [provinceEditForm, setProvinceEditForm] = useState({
+    contact_person_name: "",
+    contact_person_mobile: "",
+    office_phone: "",
+    email: "",
+    address_ne: "",
+  });
+  const [provinceSaveStatus, setProvinceSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [provinceSaveError, setProvinceSaveError] = useState<string>("");
 
   // Province and Local Contacts State
   const [provinceContacts, setProvinceContacts] = useState<ProvinceContact[]>([]);
@@ -304,6 +318,94 @@ export default function ContactPage() {
     }
   };
 
+  // Province Contact Edit Handlers
+  const handleStartEditMinistry = () => {
+    setEditingProvinceTarget("ministry_koshi");
+    setProvinceEditForm({
+      contact_person_name: ministryContact.contact_person_name || "",
+      contact_person_mobile: ministryContact.contact_person_mobile || "",
+      office_phone: ministryContact.office_phone || "",
+      email: ministryContact.email || "",
+      address_ne: ministryContact.address_ne || "",
+    });
+    setProvinceSaveError("");
+    setProvinceSaveStatus("idle");
+  };
+
+  const handleStartEditNfdn = () => {
+    setEditingProvinceTarget("nfdn_koshi");
+    setProvinceEditForm({
+      contact_person_name: nfdnContact.contact_person_name || "",
+      contact_person_mobile: nfdnContact.contact_person_mobile || "",
+      office_phone: nfdnContact.office_phone || "",
+      email: nfdnContact.email || "",
+      address_ne: nfdnContact.address_ne || "",
+    });
+    setProvinceSaveError("");
+    setProvinceSaveStatus("idle");
+  };
+
+  const handleSaveProvinceEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingProvinceTarget) return;
+
+    // Validate mobile number
+    const v = validateNepalMobileNumber(provinceEditForm.contact_person_mobile);
+    if (!v.isValid) {
+      setProvinceSaveError(`मोबाइल नम्बर अमान्य: ${v.message}`);
+      return;
+    }
+
+    setProvinceSaveStatus("saving");
+    setProvinceSaveError("");
+
+    try {
+      // 1. Update in local storage
+      updateProvinceContact(editingProvinceTarget, {
+        contact_person_name: provinceEditForm.contact_person_name.trim(),
+        contact_person_mobile: provinceEditForm.contact_person_mobile.trim(),
+        office_phone: provinceEditForm.office_phone.trim(),
+        email: provinceEditForm.email.trim(),
+        address_ne: provinceEditForm.address_ne.trim(),
+      });
+
+      // 2. Sync to server DB
+      const res = await fetch("/api/contacts/province", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: editingProvinceTarget,
+          updates: {
+            contact_person_name: provinceEditForm.contact_person_name.trim(),
+            contact_person_mobile: provinceEditForm.contact_person_mobile.trim(),
+            office_phone: provinceEditForm.office_phone.trim(),
+            email: provinceEditForm.email.trim(),
+            address_ne: provinceEditForm.address_ne.trim(),
+          },
+        }),
+      });
+      const data = await res.json();
+      if (data.contacts && Array.isArray(data.contacts)) {
+        setProvinceContacts(data.contacts);
+      } else {
+        setProvinceContacts(getProvinceContacts());
+      }
+
+      setProvinceSaveStatus("saved");
+      announceLive("प्रदेश सम्पर्क विवरण सफलतापूर्वक अद्यावधिक गरियो।");
+      if (audioPin) speakText("सम्पर्क विवरण सुरक्षित गरियो।");
+
+      setTimeout(() => {
+        setEditingProvinceTarget(null);
+        setProvinceSaveStatus("idle");
+      }, 1500);
+    } catch (err) {
+      console.error("Save province contact error:", err);
+      setProvinceSaveStatus("error");
+      setProvinceSaveError("विवरण सुरक्षित गर्दा त्रुटि भयो। कृपया पुन: प्रयास गर्नुहोस्।");
+    }
+  };
+
   // Search Results across all 137 Palikas
   const searchResults = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -375,15 +477,18 @@ export default function ContactPage() {
         {/* ============================================================= */}
         {/* SECTION 1 & 2: PROVINCE-LEVEL CONTACTS (MINISTRY & NFDN) */}
         {/* ============================================================= */}
+        {/* ============================================================= */}
+        {/* SECTION 1 & 2: PROVINCE-LEVEL CONTACTS (MINISTRY & NFDN) */}
+        {/* ============================================================= */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
           
           {/* SECTION 1: सामाजिक विकास मन्त्रालय, कोशी प्रदेश */}
           <section 
             aria-labelledby="ministry-contact-heading"
-            className="a11y-card bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between transition-all"
+            className="a11y-card bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-7 border-2 border-slate-200 dark:border-slate-800 hover:border-blue-500/50 shadow-sm flex flex-col justify-between transition-all"
             tabIndex={0}
             onFocus={() => {
-              if (audioPin) speakText(lang === "ne" ? "सामाजिक विकास मन्त्रालय, कोशी प्रदेश सम्पर्क विवरण।" : "Ministry of Social Development, Koshi Province contact details.");
+              if (audioPin && !editingProvinceTarget) speakText(lang === "ne" ? "सामाजिक विकास मन्त्रालय, कोशी प्रदेश सम्पर्क विवरण।" : "Ministry of Social Development, Koshi Province contact details.");
             }}
           >
             <div>
@@ -391,70 +496,204 @@ export default function ContactPage() {
                 <div className="w-12 h-12 rounded-2xl bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-400 flex items-center justify-center font-black text-xl shadow-xs">
                   <Building2 className="w-6 h-6" />
                 </div>
-                <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-900">
-                  {lang === "ne" ? "खण्ड १: प्रदेश मन्त्रालय" : "Section 1: Provincial Ministry"}
-                </span>
-              </div>
-
-              <h2 id="ministry-contact-heading" className="text-lg sm:text-xl font-black text-slate-900 dark:text-white leading-snug">
-                {lang === "ne" ? ministryContact.organization_name_ne : (ministryContact.organization_name_en || ministryContact.organization_name_ne)}
-              </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                {lang === "ne" ? "अपाङ्गता सूचना तथा तथ्यांक व्यवस्थापन केन्द्र (DIC) मुख्य प्रशासनिक निकाय" : "Disability Information Center (DIC) Core Administrative Agency"}
-              </p>
-
-              {/* Fields */}
-              <div className="mt-5 space-y-3 text-xs">
-                <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60">
-                  <span className="font-bold text-slate-500 dark:text-slate-400 block mb-0.5">
-                    {lang === "ne" ? "सम्पर्क व्यक्ति:" : "Contact Person:"}
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-900">
+                    {lang === "ne" ? "खण्ड १: प्रदेश मन्त्रालय" : "Section 1: Provincial Ministry"}
                   </span>
-                  <div className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5">
-                    <User className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                    <span>{ministryContact.contact_person_name ? ministryContact.contact_person_name : (lang === "ne" ? "[सम्पर्क व्यक्तिको नाम उपलब्ध हुन बाँकी]" : "[Name to be updated]")}</span>
-                  </div>
-                </div>
-
-                <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60">
-                  <span className="font-bold text-slate-500 dark:text-slate-400 block mb-0.5">
-                    {lang === "ne" ? "सम्पर्क व्यक्तिको मोबाइल नं.:" : "Mobile Number:"}
-                  </span>
-                  {ministryContact.contact_person_mobile ? (
-                    <div className="flex items-center justify-between mt-1">
-                      <a 
-                        href={`tel:${ministryContact.contact_person_mobile}`}
-                        className="font-bold text-base text-blue-700 dark:text-blue-400 hover:underline flex items-center gap-1.5 font-mono"
-                        aria-label={`Call mobile ${ministryContact.contact_person_mobile}`}
-                      >
-                        <Phone className="w-4 h-4 text-emerald-600" />
-                        <span>{ministryContact.contact_person_mobile}</span>
-                      </a>
-                      <a
-                        href={`tel:${ministryContact.contact_person_mobile}`}
-                        className="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1 shadow-xs"
-                      >
-                        <PhoneCall className="w-3.5 h-3.5" />
-                        <span>{lang === "ne" ? "कल गर्नुहोस्" : "Call"}</span>
-                      </a>
-                    </div>
-                  ) : (
-                    <div className="text-slate-400 dark:text-slate-500 font-medium">
-                      {lang === "ne" ? "[मोबाइल नम्बर उपलब्ध हुन बाँकी]" : "[Mobile number to be updated]"}
-                    </div>
+                  {editingProvinceTarget !== "ministry_koshi" && (
+                    <button
+                      type="button"
+                      onClick={handleStartEditMinistry}
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-600 hover:bg-blue-500 text-white text-xs font-black shadow-xs cursor-pointer transition-all active:scale-95"
+                      title="मन्त्रालय सम्पर्क विवरण सम्पादन गर्नुहोस्"
+                    >
+                      <Edit3 className="w-3 h-3" />
+                      <span>सम्पादन गर्नुहोस्</span>
+                    </button>
                   )}
                 </div>
+              </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
-                  <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
-                    <PhoneCall className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span>{lang === "ne" ? `फोन: ${ministryContact.office_phone || "०२१-४६२८००"}` : `Phone: ${ministryContact.office_phone || "021-462800"}`}</span>
+              {/* EDITING FORM FOR MINISTRY */}
+              {editingProvinceTarget === "ministry_koshi" ? (
+                <form onSubmit={handleSaveProvinceEdit} className="space-y-4 pt-1">
+                  <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-900 text-xs text-blue-900 dark:text-blue-300 font-black flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Edit3 className="w-4 h-4 text-blue-600 shrink-0" />
+                      <span>मन्त्रालय सम्पर्क सम्पादन मोड (Edit Mode)</span>
+                    </div>
+                    <span className="text-[10px] px-2 py-0.5 rounded bg-blue-200 dark:bg-blue-900 font-bold">
+                      सक्रिय
+                    </span>
                   </div>
-                  <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
-                    <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span className="truncate">{ministryContact.email || "info.dic@koshi.gov.np"}</span>
+
+                  {provinceSaveError && (
+                    <div className="p-3 rounded-xl bg-rose-100 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-800 text-xs text-rose-800 dark:text-rose-300 font-bold flex items-center gap-1.5">
+                      <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                      <span>{provinceSaveError}</span>
+                    </div>
+                  )}
+
+                  {provinceSaveStatus === "saved" && (
+                    <div className="p-3 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 text-xs text-emerald-800 dark:text-emerald-300 font-bold flex items-center gap-1.5">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span>सम्पर्क विवरण सफलतापूर्वक सुरक्षित भयो!</span>
+                    </div>
+                  )}
+
+                  <div className="space-y-3 text-xs">
+                    <div>
+                      <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                        सम्पर्क व्यक्तिको नाम:
+                      </label>
+                      <input
+                        type="text"
+                        value={provinceEditForm.contact_person_name}
+                        onChange={(e) => setProvinceEditForm((prev) => ({ ...prev, contact_person_name: e.target.value }))}
+                        placeholder="सम्पर्क व्यक्तिको नाम..."
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-medium text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                        सम्पर्क व्यक्तिको मोबाइल नं.:
+                      </label>
+                      <input
+                        type="tel"
+                        value={provinceEditForm.contact_person_mobile}
+                        onChange={(e) => setProvinceEditForm((prev) => ({ ...prev, contact_person_mobile: e.target.value }))}
+                        placeholder="९८XXXXXXXX वा 98XXXXXXXX"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                          कार्यालय फोन:
+                        </label>
+                        <input
+                          type="text"
+                          value={provinceEditForm.office_phone}
+                          onChange={(e) => setProvinceEditForm((prev) => ({ ...prev, office_phone: e.target.value }))}
+                          placeholder="०२१-४६२८००, ०२१-४६२८०१"
+                          className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                          आधिकारिक इमेल:
+                        </label>
+                        <input
+                          type="email"
+                          value={provinceEditForm.email}
+                          onChange={(e) => setProvinceEditForm((prev) => ({ ...prev, email: e.target.value }))}
+                          placeholder="info.dic@koshi.gov.np"
+                          className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                        कार्यालय ठेगाना:
+                      </label>
+                      <input
+                        type="text"
+                        value={provinceEditForm.address_ne}
+                        onChange={(e) => setProvinceEditForm((prev) => ({ ...prev, address_ne: e.target.value }))}
+                        placeholder="विराटनगर-१०, मोरङ, कोशी प्रदेश"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-medium text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
+                    <button
+                      type="button"
+                      onClick={() => setEditingProvinceTarget(null)}
+                      className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all cursor-pointer"
+                    >
+                      रद्द गर्नुहोस् (Cancel)
+                    </button>
+
+                    <button
+                      type="submit"
+                      disabled={provinceSaveStatus === "saving"}
+                      className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+                    >
+                      <Save className="w-3.5 h-3.5" />
+                      <span>{provinceSaveStatus === "saving" ? "सेभ हुँदैछ..." : "सुरक्षित गर्नुहोस् (Save)"}</span>
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                /* NORMAL DISPLAY FOR MINISTRY */
+                <div>
+                  <h2 id="ministry-contact-heading" className="text-lg sm:text-xl font-black text-slate-900 dark:text-white leading-snug">
+                    {lang === "ne" ? ministryContact.organization_name_ne : (ministryContact.organization_name_en || ministryContact.organization_name_ne)}
+                  </h2>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    {lang === "ne" ? "अपाङ्गता सूचना तथा तथ्यांक व्यवस्थापन केन्द्र (DIC) मुख्य प्रशासनिक निकाय" : "Disability Information Center (DIC) Core Administrative Agency"}
+                  </p>
+
+                  {/* Fields */}
+                  <div className="mt-5 space-y-3 text-xs">
+                    <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60">
+                      <span className="font-bold text-slate-500 dark:text-slate-400 block mb-0.5">
+                        {lang === "ne" ? "सम्पर्क व्यक्ति:" : "Contact Person:"}
+                      </span>
+                      <div className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5">
+                        <User className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                        <span>{ministryContact.contact_person_name ? ministryContact.contact_person_name : (lang === "ne" ? "[सम्पर्क व्यक्तिको नाम उपलब्ध हुन बाँकी]" : "[Name to be updated]")}</span>
+                      </div>
+                    </div>
+
+                    <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60">
+                      <span className="font-bold text-slate-500 dark:text-slate-400 block mb-0.5">
+                        {lang === "ne" ? "सम्पर्क व्यक्तिको मोबाइल नं.:" : "Mobile Number:"}
+                      </span>
+                      {ministryContact.contact_person_mobile ? (
+                        <div className="flex items-center justify-between mt-1">
+                          <a 
+                            href={`tel:${ministryContact.contact_person_mobile}`}
+                            className="font-bold text-base text-blue-700 dark:text-blue-400 hover:underline flex items-center gap-1.5 font-mono"
+                            aria-label={`Call mobile ${ministryContact.contact_person_mobile}`}
+                          >
+                            <Phone className="w-4 h-4 text-emerald-600" />
+                            <span>{ministryContact.contact_person_mobile}</span>
+                          </a>
+                          <a
+                            href={`tel:${ministryContact.contact_person_mobile}`}
+                            className="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1 shadow-xs"
+                          >
+                            <PhoneCall className="w-3.5 h-3.5" />
+                            <span>{lang === "ne" ? "कल गर्नुहोस्" : "Call"}</span>
+                          </a>
+                        </div>
+                      ) : (
+                        <div className="text-slate-400 dark:text-slate-500 font-medium">
+                          {lang === "ne" ? "[मोबाइल नम्बर उपलब्ध हुन बाँकी]" : "[Mobile number to be updated]"}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                      <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                        <PhoneCall className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <span>{lang === "ne" ? `फोन: ${ministryContact.office_phone || "०२१-४६२८००"}` : `Phone: ${ministryContact.office_phone || "021-462800"}`}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                        <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <span className="truncate">{ministryContact.email || "info.dic@koshi.gov.np"}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
 
             <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
@@ -469,10 +708,10 @@ export default function ContactPage() {
           {/* SECTION 2: राष्ट्रिय अपाङ्ग महासंघ नेपाल, कोशी प्रदेश */}
           <section 
             aria-labelledby="nfdn-contact-heading"
-            className="a11y-card bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between transition-all"
+            className="a11y-card bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-7 border-2 border-slate-200 dark:border-slate-800 hover:border-amber-500/50 shadow-sm flex flex-col justify-between transition-all"
             tabIndex={0}
             onFocus={() => {
-              if (audioPin) speakText(lang === "ne" ? "राष्ट्रिय अपाङ्ग महासंघ नेपाल, कोशी प्रदेश सम्पर्क विवरण।" : "National Federation of the Disabled Nepal, Koshi Province contact details.");
+              if (audioPin && !editingProvinceTarget) speakText(lang === "ne" ? "राष्ट्रिय अपाङ्ग महासंघ नेपाल, कोशी प्रदेश सम्पर्क विवरण।" : "National Federation of the Disabled Nepal, Koshi Province contact details.");
             }}
           >
             <div>
@@ -480,70 +719,204 @@ export default function ContactPage() {
                 <div className="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-400 flex items-center justify-center font-black text-xl shadow-xs">
                   <ShieldCheck className="w-6 h-6" />
                 </div>
-                <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-900">
-                  {lang === "ne" ? "खण्ड २: महासंघ प्रदेश कार्यालय" : "Section 2: Federation (NFDN)"}
-                </span>
-              </div>
-
-              <h2 id="nfdn-contact-heading" className="text-lg sm:text-xl font-black text-slate-900 dark:text-white leading-snug">
-                {lang === "ne" ? nfdnContact.organization_name_ne : (nfdnContact.organization_name_en || nfdnContact.organization_name_ne)}
-              </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                {lang === "ne" ? "अपाङ्गता अधिकार, पैरवी तथा नागरिक सरोकार प्रदेश समन्वय समिति" : "Disability Rights, Advocacy & Coordination Committee"}
-              </p>
-
-              {/* Fields */}
-              <div className="mt-5 space-y-3 text-xs">
-                <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60">
-                  <span className="font-bold text-slate-500 dark:text-slate-400 block mb-0.5">
-                    सम्पर्क व्यक्ति:
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-900">
+                    {lang === "ne" ? "खण्ड २: महासंघ प्रदेश कार्यालय" : "Section 2: Federation (NFDN)"}
                   </span>
-                  <div className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5">
-                    <User className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                    <span>{nfdnContact.contact_person_name ? nfdnContact.contact_person_name : "[सम्पर्क व्यक्तिको नाम उपलब्ध हुन बाँकी]"}</span>
-                  </div>
-                </div>
-
-                <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60">
-                  <span className="font-bold text-slate-500 dark:text-slate-400 block mb-0.5">
-                    सम्पर्क व्यक्तिको मोबाइल नम्बर:
-                  </span>
-                  {nfdnContact.contact_person_mobile ? (
-                    <div className="flex items-center justify-between mt-1">
-                      <a 
-                        href={`tel:${nfdnContact.contact_person_mobile}`}
-                        className="font-bold text-base text-blue-700 dark:text-blue-400 hover:underline flex items-center gap-1.5 font-mono"
-                        aria-label={`महासंघ सम्पर्क व्यक्तिको मोबाइल ${nfdnContact.contact_person_mobile} मा कल गर्नुहोस्`}
-                      >
-                        <Phone className="w-4 h-4 text-emerald-600" />
-                        <span>{nfdnContact.contact_person_mobile}</span>
-                      </a>
-                      <a
-                        href={`tel:${nfdnContact.contact_person_mobile}`}
-                        className="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1 shadow-xs"
-                      >
-                        <PhoneCall className="w-3.5 h-3.5" />
-                        <span>कल गर्नुहोस्</span>
-                      </a>
-                    </div>
-                  ) : (
-                    <div className="text-slate-400 dark:text-slate-500 font-medium">
-                      [मोबाइल नम्बर उपलब्ध हुन बाँकी]
-                    </div>
+                  {editingProvinceTarget !== "nfdn_koshi" && (
+                    <button
+                      type="button"
+                      onClick={handleStartEditNfdn}
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black shadow-xs cursor-pointer transition-all active:scale-95"
+                      title="महासंघ सम्पर्क विवरण सम्पादन गर्नुहोस्"
+                    >
+                      <Edit3 className="w-3 h-3" />
+                      <span>सम्पादन गर्नुहोस्</span>
+                    </button>
                   )}
                 </div>
+              </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
-                  <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
-                    <PhoneCall className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span>कार्यालय फोन: {nfdnContact.office_phone || "०२१-XXXXXX"}</span>
+              {/* EDITING FORM FOR NFDN */}
+              {editingProvinceTarget === "nfdn_koshi" ? (
+                <form onSubmit={handleSaveProvinceEdit} className="space-y-4 pt-1">
+                  <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-900 text-xs text-amber-900 dark:text-amber-300 font-black flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Edit3 className="w-4 h-4 text-amber-600 shrink-0" />
+                      <span>महासंघ सम्पर्क सम्पादन मोड (Edit Mode)</span>
+                    </div>
+                    <span className="text-[10px] px-2 py-0.5 rounded bg-amber-200 dark:bg-amber-900 font-bold">
+                      सक्रिय
+                    </span>
                   </div>
-                  <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
-                    <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span className="truncate">{nfdnContact.email || "koshi@nfdn.org.np"}</span>
+
+                  {provinceSaveError && (
+                    <div className="p-3 rounded-xl bg-rose-100 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-800 text-xs text-rose-800 dark:text-rose-300 font-bold flex items-center gap-1.5">
+                      <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                      <span>{provinceSaveError}</span>
+                    </div>
+                  )}
+
+                  {provinceSaveStatus === "saved" && (
+                    <div className="p-3 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 text-xs text-emerald-800 dark:text-emerald-300 font-bold flex items-center gap-1.5">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span>सम्पर्क विवरण सफलतापूर्वक सुरक्षित भयो!</span>
+                    </div>
+                  )}
+
+                  <div className="space-y-3 text-xs">
+                    <div>
+                      <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                        सम्पर्क व्यक्तिको नाम:
+                      </label>
+                      <input
+                        type="text"
+                        value={provinceEditForm.contact_person_name}
+                        onChange={(e) => setProvinceEditForm((prev) => ({ ...prev, contact_person_name: e.target.value }))}
+                        placeholder="सम्पर्क व्यक्तिको नाम..."
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-medium text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:outline-hidden"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                        सम्पर्क व्यक्तिको मोबाइल नं.:
+                      </label>
+                      <input
+                        type="tel"
+                        value={provinceEditForm.contact_person_mobile}
+                        onChange={(e) => setProvinceEditForm((prev) => ({ ...prev, contact_person_mobile: e.target.value }))}
+                        placeholder="९८XXXXXXXX वा 98XXXXXXXX"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:outline-hidden"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                          कार्यालय फोन:
+                        </label>
+                        <input
+                          type="text"
+                          value={provinceEditForm.office_phone}
+                          onChange={(e) => setProvinceEditForm((prev) => ({ ...prev, office_phone: e.target.value }))}
+                          placeholder="०२१-४६२८५०"
+                          className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:outline-hidden"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                          आधिकारिक इमेल:
+                        </label>
+                        <input
+                          type="email"
+                          value={provinceEditForm.email}
+                          onChange={(e) => setProvinceEditForm((prev) => ({ ...prev, email: e.target.value }))}
+                          placeholder="koshi@nfdn.org.np"
+                          className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:outline-hidden"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                        कार्यालय ठेगाना:
+                      </label>
+                      <input
+                        type="text"
+                        value={provinceEditForm.address_ne}
+                        onChange={(e) => setProvinceEditForm((prev) => ({ ...prev, address_ne: e.target.value }))}
+                        placeholder="विराटनगर, मोरङ, कोशी प्रदेश"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-medium text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:outline-hidden"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
+                    <button
+                      type="button"
+                      onClick={() => setEditingProvinceTarget(null)}
+                      className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all cursor-pointer"
+                    >
+                      रद्द गर्नुहोस् (Cancel)
+                    </button>
+
+                    <button
+                      type="submit"
+                      disabled={provinceSaveStatus === "saving"}
+                      className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black shadow-xs flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+                    >
+                      <Save className="w-3.5 h-3.5" />
+                      <span>{provinceSaveStatus === "saving" ? "सेभ हुँदैछ..." : "सुरक्षित गर्नुहोस् (Save)"}</span>
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                /* NORMAL DISPLAY FOR NFDN */
+                <div>
+                  <h2 id="nfdn-contact-heading" className="text-lg sm:text-xl font-black text-slate-900 dark:text-white leading-snug">
+                    {lang === "ne" ? nfdnContact.organization_name_ne : (nfdnContact.organization_name_en || nfdnContact.organization_name_ne)}
+                  </h2>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    {lang === "ne" ? "अपाङ्गता अधिकार, पैरवी तथा नागरिक सरोकार प्रदेश समन्वय समिति" : "Disability Rights, Advocacy & Coordination Committee"}
+                  </p>
+
+                  {/* Fields */}
+                  <div className="mt-5 space-y-3 text-xs">
+                    <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60">
+                      <span className="font-bold text-slate-500 dark:text-slate-400 block mb-0.5">
+                        सम्पर्क व्यक्ति:
+                      </span>
+                      <div className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5">
+                        <User className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                        <span>{nfdnContact.contact_person_name ? nfdnContact.contact_person_name : "[सम्पर्क व्यक्तिको नाम उपलब्ध हुन बाँकी]"}</span>
+                      </div>
+                    </div>
+
+                    <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60">
+                      <span className="font-bold text-slate-500 dark:text-slate-400 block mb-0.5">
+                        सम्पर्क व्यक्तिको मोबाइल नम्बर:
+                      </span>
+                      {nfdnContact.contact_person_mobile ? (
+                        <div className="flex items-center justify-between mt-1">
+                          <a 
+                            href={`tel:${nfdnContact.contact_person_mobile}`}
+                            className="font-bold text-base text-blue-700 dark:text-blue-400 hover:underline flex items-center gap-1.5 font-mono"
+                            aria-label={`महासंघ सम्पर्क व्यक्तिको मोबाइल ${nfdnContact.contact_person_mobile} मा कल गर्नुहोस्`}
+                          >
+                            <Phone className="w-4 h-4 text-emerald-600" />
+                            <span>{nfdnContact.contact_person_mobile}</span>
+                          </a>
+                          <a
+                            href={`tel:${nfdnContact.contact_person_mobile}`}
+                            className="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1 shadow-xs"
+                          >
+                            <PhoneCall className="w-3.5 h-3.5" />
+                            <span>कल गर्नुहोस्</span>
+                          </a>
+                        </div>
+                      ) : (
+                        <div className="text-slate-400 dark:text-slate-500 font-medium">
+                          [मोबाइल नम्बर उपलब्ध हुन बाँकी]
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                      <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                        <PhoneCall className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <span>कार्यालय फोन: {nfdnContact.office_phone || "०२१-XXXXXX"}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                        <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <span className="truncate">{nfdnContact.email || "koshi@nfdn.org.np"}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
 
             <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
