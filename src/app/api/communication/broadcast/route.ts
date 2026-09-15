@@ -4,8 +4,10 @@ import path from "path";
 import { getServerContacts } from "@/lib/serverContactsStore";
 import { addAuditLog } from "@/lib/authStore";
 import nodemailer from "nodemailer";
+import { Resend } from "resend";
 
 const BROADCASTS_DB_PATH = path.join(process.cwd(), "src", "lib", "unified_broadcasts_db.json");
+
 
 export interface BroadcastRecipient {
   id: string;
@@ -170,33 +172,20 @@ export async function POST(request: Request) {
       };
     });
 
-    // 5. Attempt Nodemailer dispatch if SMTP keys configured
-    const user = process.env.GMAIL_USER || process.env.SMTP_USER;
-    const pass = process.env.GMAIL_APP_PASSWORD || process.env.SMTP_PASS;
+    // 5. Attempt Email dispatch via Resend API or Nodemailer SMTP
+    let emailDispatched = false;
+    const resendApiKey = process.env.RESEND_API_KEY;
+    const resendFrom = process.env.RESEND_FROM_EMAIL || "Koshi DIC <onboarding@resend.dev>";
+    const validRecipients = recipients.map((r) => r.email).filter(Boolean);
 
-    if (user && pass) {
+    // 5.1 Try Resend API first if configured
+    if (resendApiKey && resendApiKey.startsWith("re_")) {
       try {
-        const transporter = nodemailer.createTransport({
-          service: "gmail",
-          auth: { user, pass },
-        });
-
-        const mailAttachments: { filename: string; content?: string; encoding?: string }[] = [];
-        if (attachment?.base64 && attachment?.name) {
-          const cleanBase64 = attachment.base64.includes(",") 
-            ? attachment.base64.split(",")[1] 
-            : attachment.base64;
-          mailAttachments.push({
-            filename: attachment.name,
-            content: cleanBase64,
-            encoding: "base64",
-          });
-        }
-
-        // Send notification email to ministry address & sample recipient
-        await transporter.sendMail({
-          from: `"${senderMinistry}" <${user}>`,
-          to: user,
+        const resend = new Resend(resendApiKey);
+        await resend.emails.send({
+          from: resendFrom,
+          to: [senderEmail],
+          bcc: validRecipients,
           subject: `[DIC एकीकृत संचार - चलानी नं: ${dispatchNumber}] ${subject}`,
           html: `
             <div style="font-family: Arial, sans-serif; padding: 20px; color: #1e293b; background: #f8fafc;">
@@ -208,7 +197,7 @@ export async function POST(request: Request) {
                 </div>
                 <div style="padding: 24px;">
                   <p style="font-size: 13px; color: #64748b;"><strong>विषय:</strong> ${subject}</p>
-                  <p style="font-size: 13px; color: #64748b;"><strong>प्रापक:</strong> कोशी प्रदेशका सम्पूर्ण १३७ वटै स्थानीय तहहरू</p>
+                  <p style="font-size: 13px; color: #64748b;"><strong>प्रापक:</strong> कोशी प्रदेशका १३७ स्थानीय तहहरू (${validRecipients.length} पालिका)</p>
                   <div style="margin-top: 16px; padding: 16px; background: #f1f5f9; border-radius: 8px; line-height: 1.6; font-size: 14px;">
                     ${message.replace(/\n/g, "<br />")}
                   </div>
@@ -219,11 +208,71 @@ export async function POST(request: Request) {
                 </div>
               </div>
             </div>
-          `,
-          attachments: mailAttachments,
+          `
         });
-      } catch (mailErr) {
-        console.warn("Nodemailer SMTP dispatch failed, fallback to local persistent log:", mailErr);
+        emailDispatched = true;
+      } catch (resendErr) {
+        console.warn("Resend group mail dispatch failed, falling back to Nodemailer:", resendErr);
+      }
+    }
+
+    // 5.2 Nodemailer fallback
+    if (!emailDispatched) {
+      const user = process.env.GMAIL_USER || process.env.SMTP_USER;
+      const pass = process.env.GMAIL_APP_PASSWORD || process.env.SMTP_PASS;
+
+      if (user && pass) {
+        try {
+          const transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: { user, pass },
+          });
+
+          const mailAttachments: { filename: string; content?: string; encoding?: string }[] = [];
+          if (attachment?.base64 && attachment?.name) {
+            const cleanBase64 = attachment.base64.includes(",") 
+              ? attachment.base64.split(",")[1] 
+              : attachment.base64;
+            mailAttachments.push({
+              filename: attachment.name,
+              content: cleanBase64,
+              encoding: "base64",
+            });
+          }
+
+          // Send notification email to ministry address & Bcc all local governments
+          await transporter.sendMail({
+            from: `"${senderMinistry}" <${user}>`,
+            to: user,
+            bcc: validRecipients,
+            subject: `[DIC एकीकृत संचार - चलानी नं: ${dispatchNumber}] ${subject}`,
+            html: `
+              <div style="font-family: Arial, sans-serif; padding: 20px; color: #1e293b; background: #f8fafc;">
+                <div style="max-width: 650px; margin: 0 auto; background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden;">
+                  <div style="background: #1e3a8a; color: white; padding: 20px; text-align: center;">
+                    <h2 style="margin: 0; font-size: 18px;">नेपाल सरकार / कोशी प्रदेश सरकार</h2>
+                    <h3 style="margin: 6px 0 0 0; font-size: 16px;">${senderMinistry}</h3>
+                    <p style="margin: 4px 0 0 0; font-size: 12px; opacity: 0.9;">चलानी / प्रेषण नं: ${dispatchNumber}</p>
+                  </div>
+                  <div style="padding: 24px;">
+                    <p style="font-size: 13px; color: #64748b;"><strong>विषय:</strong> ${subject}</p>
+                    <p style="font-size: 13px; color: #64748b;"><strong>प्रापक:</strong> कोशी प्रदेशका सम्पूर्ण १३७ वटै स्थानीय तहहरू</p>
+                    <div style="margin-top: 16px; padding: 16px; background: #f1f5f9; border-radius: 8px; line-height: 1.6; font-size: 14px;">
+                      ${message.replace(/\n/g, "<br />")}
+                    </div>
+                    ${attachment?.name ? `<p style="margin-top: 16px; font-size: 12px; color: #2563eb;">📎 संलग्न फाइल: ${attachment.name} (${Math.round((attachment.size || 0) / 1024)} KB)</p>` : ""}
+                  </div>
+                  <div style="background: #f8fafc; padding: 14px; text-align: center; font-size: 11px; color: #94a3b8; border-top: 1px solid #e2e8f0;">
+                    अपाङ्गता सूचना केन्द्र (DIC) — एकीकृत संचार ग्रुप प्रेषण प्रणाली
+                  </div>
+                </div>
+              </div>
+            `,
+            attachments: mailAttachments,
+          });
+        } catch (mailErr) {
+          console.warn("Nodemailer SMTP dispatch failed, fallback to local persistent log:", mailErr);
+        }
       }
     }
 
